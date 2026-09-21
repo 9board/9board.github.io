@@ -1372,8 +1372,11 @@ function renderNotes(){
 }
 function nearestBall(x,y){
   const r=cloth.getBoundingClientRect();let best=null,bestPx=Infinity;
-  state.balls.filter(b=>!b.ghost).forEach(b=>{const d=Math.hypot((b.x-x)*r.width,(b.y-y)*r.height);if(d<bestPx){best=b;bestPx=d}});
-  return bestPx<=18*state.zoom?best:null;
+  state.balls.filter(b=>!b.ghost).forEach(b=>{
+    const d=Math.hypot((b.x-x)*r.width,(b.y-y)*r.height);
+    if(d<bestPx){best=b;bestPx=d}
+  });
+  return bestPx<=24*state.zoom?best:null;
 }
 function syncLineAttachments(l){
   const a=state.balls.find(b=>b.id===l.startBallId),b=state.balls.find(b=>b.id===l.endBallId);
@@ -1386,6 +1389,7 @@ function attachLine(l){
 }
 function renderLines(){
   svg.querySelectorAll(".draw-line,.line-hit,.line-end-hit").forEach(e=>e.remove());
+
   state.lines.forEach(l=>{
     syncLineAttachments(l);
 
@@ -1396,17 +1400,23 @@ function renderLines(){
 
     function getDisplayCoords(){
       let x1=l.x1,y1=l.y1,x2=l.x2,y2=l.y2;
-      if(l.type==="arrow"){
-        const startAttached=state.balls.some(b=>b.id===l.startBallId);
-        const endAttached=state.balls.some(b=>b.id===l.endBallId);
-        if(startAttached||endAttached){
-          const r=cloth.getBoundingClientRect();
-          const dx=(x2-x1)*r.width,dy=(y2-y1)*r.height;
-          const len=Math.hypot(dx,dy);
-          if(len>0){
-            const radius=11,ux=dx/len,uy=dy/len;
-            if(startAttached){x1+=ux*(radius/r.width);y1+=uy*(radius/r.height)}
-            if(endAttached){x2-=ux*(radius/r.width);y2-=uy*(radius/r.height)}
+      const startAttached=state.balls.some(b=>b.id===l.startBallId);
+      const endAttached=state.balls.some(b=>b.id===l.endBallId);
+
+      if(startAttached||endAttached){
+        const r=cloth.getBoundingClientRect();
+        const dx=(x2-x1)*r.width,dy=(y2-y1)*r.height;
+        const len=Math.hypot(dx,dy);
+        if(len>0){
+          const radius=7.5*state.zoom;
+          const ux=dx/len,uy=dy/len;
+          if(startAttached){
+            x1+=ux*(radius/r.width);
+            y1+=uy*(radius/r.height);
+          }
+          if(endAttached){
+            x2-=ux*(radius/r.width);
+            y2-=uy*(radius/r.height);
           }
         }
       }
@@ -1415,50 +1425,68 @@ function renderLines(){
 
     function setCoords(){
       const c=getDisplayCoords();
-      hit.setAttribute("x1",c.x1*100+"%");hit.setAttribute("y1",c.y1*100+"%");
-      hit.setAttribute("x2",c.x2*100+"%");hit.setAttribute("y2",c.y2*100+"%");
-      ln.setAttribute("x1",c.x1*100+"%");ln.setAttribute("y1",c.y1*100+"%");
-      ln.setAttribute("x2",c.x2*100+"%");ln.setAttribute("y2",c.y2*100+"%");
-      h1.setAttribute("cx",l.x1*100+"%");h1.setAttribute("cy",l.y1*100+"%");
-      h2.setAttribute("cx",l.x2*100+"%");h2.setAttribute("cy",l.y2*100+"%");
+      for(const el of [hit,ln]){
+        el.setAttribute("x1",c.x1*100+"%");
+        el.setAttribute("y1",c.y1*100+"%");
+        el.setAttribute("x2",c.x2*100+"%");
+        el.setAttribute("y2",c.y2*100+"%");
+      }
+      // Put resize hit areas on the visible ends so attached ends are still grabbable.
+      h1.setAttribute("cx",c.x1*100+"%");
+      h1.setAttribute("cy",c.y1*100+"%");
+      h2.setAttribute("cx",c.x2*100+"%");
+      h2.setAttribute("cy",c.y2*100+"%");
     }
 
     hit.setAttribute("stroke","rgba(0,0,0,0.001)");
     hit.setAttribute("stroke-width",Math.max(18,l.width+14));
     hit.setAttribute("stroke-linecap","round");
-    hit.classList.add("line-hit");hit.dataset.id=l.id;hit.style.pointerEvents="stroke";
+    hit.classList.add("line-hit");
+    hit.dataset.id=l.id;
+    hit.style.pointerEvents="stroke";
 
     ln.setAttribute("stroke",l.color);
     ln.setAttribute("stroke-width",l.width);
     ln.setAttribute("stroke-linecap","round");
     if(l.type==="arrow")ln.setAttribute("marker-end","url(#arrowHead)");
-    ln.classList.add("draw-line");ln.dataset.id=l.id;ln.style.pointerEvents="none";
+    ln.classList.add("draw-line");
+    ln.dataset.id=l.id;
+    ln.style.pointerEvents="none";
 
     [h1,h2].forEach(h=>{
-      h.setAttribute("r","13");
+      h.setAttribute("r","11");
       h.setAttribute("fill","rgba(0,0,0,0.001)");
+      h.setAttribute("stroke","rgba(0,0,0,0.001)");
+      h.setAttribute("stroke-width","6");
       h.classList.add("line-end-hit");
       h.style.pointerEvents=state.tool==="move"?"all":"none";
-      h.style.cursor="grab";
+      h.style.cursor="ew-resize";
     });
+
     setCoords();
 
     function removeThisLine(e){
       e?.preventDefault();e?.stopPropagation();
-      snap();state.lines=state.lines.filter(x=>x.id!==l.id);renderLines();
+      snap();
+      state.lines=state.lines.filter(x=>x.id!==l.id);
+      renderLines();
     }
 
     hit.addEventListener("dblclick",removeThisLine);
     hit.addEventListener("pointerdown",e=>{
       if(state.tool==="erase"){removeThisLine(e);return}
       if(state.tool!=="move")return;
+
       snap();
-      delete l.startBallId;delete l.endBallId;
+      delete l.startBallId;
+      delete l.endBallId;
+
       const r=cloth.getBoundingClientRect();
       pointerAction={type:"lineMove",id:l.id,sx:e.clientX,sy:e.clientY,orig:{...l},r};
       try{hit.setPointerCapture(e.pointerId)}catch(_){}
       e.preventDefault();e.stopPropagation();
     });
+
     hit.addEventListener("pointermove",e=>{
       if(!pointerAction||pointerAction.type!=="lineMove"||pointerAction.id!==l.id)return;
       const rawDx=(e.clientX-pointerAction.sx)/pointerAction.r.width;
@@ -1468,13 +1496,15 @@ function renderLines(){
       const minY=Math.min(o.y1,o.y2),maxY=Math.max(o.y1,o.y2);
       const dx=Math.max(-minX,Math.min(1-maxX,rawDx));
       const dy=Math.max(-minY,Math.min(1-maxY,rawDy));
-      l.x1=o.x1+dx;l.x2=o.x2+dx;l.y1=o.y1+dy;l.y2=o.y2+dy;
+      l.x1=o.x1+dx;l.x2=o.x2+dx;
+      l.y1=o.y1+dy;l.y2=o.y2+dy;
       setCoords();
     });
 
     function finishMove(e){
       if(!pointerAction||pointerAction.type!=="lineMove"||pointerAction.id!==l.id)return;
-      attachLine(l);pointerAction=null;
+      attachLine(l);
+      pointerAction=null;
       try{hit.releasePointerCapture(e.pointerId)}catch(_){}
       renderLines();
     }
@@ -1484,20 +1514,30 @@ function renderLines(){
     function startResize(which,h,e){
       if(state.tool!=="move")return;
       snap();
-      if(which==="start")delete l.startBallId; else delete l.endBallId;
+
+      // Only detach the end being dragged. The other end keeps following its ball.
+      if(which==="start") delete l.startBallId;
+      else delete l.endBallId;
+
       pointerAction={type:"lineResize",id:l.id,which};
       try{h.setPointerCapture(e.pointerId)}catch(_){}
       e.preventDefault();e.stopPropagation();
     }
+
     function resize(which,e){
       if(!pointerAction||pointerAction.type!=="lineResize"||pointerAction.id!==l.id||pointerAction.which!==which)return;
       const p=normPoint(e);
-      if(which==="start"){l.x1=p.x;l.y1=p.y}else{l.x2=p.x;l.y2=p.y}
+      if(which==="start"){l.x1=p.x;l.y1=p.y}
+      else{l.x2=p.x;l.y2=p.y}
+      // Keep the untouched attached end synced while changing length.
+      syncLineAttachments(l);
       setCoords();
     }
+
     function finishResize(which,h,e){
       if(!pointerAction||pointerAction.type!=="lineResize"||pointerAction.id!==l.id||pointerAction.which!==which)return;
-      attachLine(l);pointerAction=null;
+      attachLine(l);
+      pointerAction=null;
       try{h.releasePointerCapture(e.pointerId)}catch(_){}
       renderLines();
     }
@@ -1512,9 +1552,32 @@ function renderLines(){
     h2.addEventListener("pointerup",e=>finishResize("end",h2,e));
     h2.addEventListener("pointercancel",e=>finishResize("end",h2,e));
 
-    svg.appendChild(hit);svg.appendChild(ln);svg.appendChild(h1);svg.appendChild(h2);
+    svg.appendChild(hit);
+    svg.appendChild(ln);
+    svg.appendChild(h1);
+    svg.appendChild(h2);
   });
 }
+function clearCurrentLayout(){
+  pointerAction=null;
+  panAction=null;
+  hideAim();
+
+  document.querySelectorAll(".palette-drag-preview").forEach(e=>e.remove());
+  cloth.querySelectorAll(".ball,.note").forEach(e=>e.remove());
+  svg.querySelectorAll(".draw-line,.line-hit,.line-end-hit").forEach(e=>e.remove());
+
+  state.balls=[];
+  state.lines=[];
+  state.notes=[];
+  state.tip={x:.5,y:.5};
+  state.nextId=1;
+  panX=0;
+  panY=0;
+
+  renderAll();
+}
+
 function renderAll(){
   table.classList.toggle("landscape",state.orientation==="landscape");
   $("#portraitBtn").classList.toggle("active",state.orientation==="portrait");
@@ -1610,14 +1673,8 @@ $("#memoOk").addEventListener("click",()=>{
 
 $("#brandLogo").addEventListener("click",()=>{
   snap();
-  state.balls=[];
-  state.lines=[];
-  state.notes=[];
-  state.tip={x:.5,y:.5};
   state.zoom=1;
-  panX=0;
-  panY=0;
-  renderAll();
+  clearCurrentLayout();
 });
 
 $("#portraitBtn").onclick=()=>setOrientation("portrait");
@@ -1627,7 +1684,12 @@ $("#undoBtn").onclick=undo;$("#redoBtn").onclick=redo;
 $("#zoomInBtn").onclick=()=>{state.zoom=Math.min(1.45,state.zoom+.1);renderAll()};
 $("#zoomOutBtn").onclick=()=>{state.zoom=Math.max(.65,state.zoom-.1);renderAll()};
 $("#zoomResetBtn").onclick=()=>{state.zoom=1;panX=0;panY=0;renderAll()};
-$("#resetBtn").onclick=()=>{if(confirm("配置をすべてリセットしますか？")){snap();state.balls=[];state.lines=[];state.notes=[];state.tip={x:.5,y:.5};renderAll()}};
+$("#resetBtn").onclick=()=>{
+  if(confirm("配置をすべてリセットしますか？")){
+    snap();
+    clearCurrentLayout();
+  }
+};
 
 $("#typeArrow").onclick=()=>{state.lineType="arrow";setTool("arrow");};
 $("#typeLine").onclick=()=>{state.lineType="line";setTool("line");};
