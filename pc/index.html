@@ -1186,11 +1186,15 @@ function showAim(e){
 }
 function hideAim(){aimGuide.classList.remove("visible")}
 function clampBall(x,y){
-  const r=cloth.getBoundingClientRect(),radius=7.5*state.zoom+1;
-  return {x:Math.max(radius/r.width,Math.min(1-radius/r.width,x)),y:Math.max(radius/r.height,Math.min(1-radius/r.height,y))};
+  const r=cloth.getBoundingClientRect();
+  const radius=7.5*state.zoom;
+  return {
+    x:Math.max(radius/r.width,Math.min(1-radius/r.width,x)),
+    y:Math.max(radius/r.height,Math.min(1-radius/r.height,y))
+  };
 }
 function groupBounds(balls,lines,notes){
-  const r=cloth.getBoundingClientRect(),mx=(7.5*state.zoom+1)/r.width,my=(7.5*state.zoom+1)/r.height;
+  const r=cloth.getBoundingClientRect(),mx=(7.5*state.zoom)/r.width,my=(7.5*state.zoom)/r.height;
   const xs=[],ys=[];
   balls.forEach(b=>{xs.push(b.x-mx,b.x+mx);ys.push(b.y-my,b.y+my)});
   lines.forEach(l=>{xs.push(l.x1,l.x2);ys.push(l.y1,l.y2)});
@@ -1399,28 +1403,7 @@ function renderLines(){
     const h2=document.createElementNS("http://www.w3.org/2000/svg","circle");
 
     function getDisplayCoords(){
-      let x1=l.x1,y1=l.y1,x2=l.x2,y2=l.y2;
-      const startAttached=state.balls.some(b=>b.id===l.startBallId);
-      const endAttached=state.balls.some(b=>b.id===l.endBallId);
-
-      if(startAttached||endAttached){
-        const r=cloth.getBoundingClientRect();
-        const dx=(x2-x1)*r.width,dy=(y2-y1)*r.height;
-        const len=Math.hypot(dx,dy);
-        if(len>0){
-          const radius=7.5*state.zoom;
-          const ux=dx/len,uy=dy/len;
-          if(startAttached){
-            x1+=ux*(radius/r.width);
-            y1+=uy*(radius/r.height);
-          }
-          if(endAttached){
-            x2-=ux*(radius/r.width);
-            y2-=uy*(radius/r.height);
-          }
-        }
-      }
-      return {x1,y1,x2,y2};
+      return {x1:l.x1,y1:l.y1,x2:l.x2,y2:l.y2};
     }
 
     function setCoords(){
