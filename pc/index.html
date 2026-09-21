@@ -1352,7 +1352,6 @@ function renderBalls(){
       if(completedLine)setTool("move");
     });
     el.addEventListener("pointercancel",()=>{clearTimeout(longTimer);pointerAction=null;hideAim()});
-    el.addEventListener("dblclick",e=>{e.preventDefault();e.stopPropagation();removeBall(b.id)});
     el.addEventListener("contextmenu",e=>{e.preventDefault();removeBall(b.id)});
     cloth.appendChild(el);
   });
@@ -1402,23 +1401,47 @@ function renderLines(){
     const h1=document.createElementNS("http://www.w3.org/2000/svg","circle");
     const h2=document.createElementNS("http://www.w3.org/2000/svg","circle");
 
-    function getDisplayCoords(){
-      return {x1:l.x1,y1:l.y1,x2:l.x2,y2:l.y2};
+    function getHandleCoords(){
+      let hx1=l.x1,hy1=l.y1,hx2=l.x2,hy2=l.y2;
+      const startAttached=state.balls.some(b=>b.id===l.startBallId);
+      const endAttached=state.balls.some(b=>b.id===l.endBallId);
+
+      if(startAttached||endAttached){
+        const r=cloth.getBoundingClientRect();
+        const dx=(l.x2-l.x1)*r.width;
+        const dy=(l.y2-l.y1)*r.height;
+        const len=Math.hypot(dx,dy);
+        if(len>0){
+          const ux=dx/len,uy=dy/len;
+          const handleOffset=10*state.zoom;
+          if(startAttached){
+            hx1=l.x1+ux*(handleOffset/r.width);
+            hy1=l.y1+uy*(handleOffset/r.height);
+          }
+          if(endAttached){
+            hx2=l.x2-ux*(handleOffset/r.width);
+            hy2=l.y2-uy*(handleOffset/r.height);
+          }
+        }
+      }
+      return {hx1,hy1,hx2,hy2};
     }
 
     function setCoords(){
-      const c=getDisplayCoords();
+      // Actual line stays locked to the exact ball center.
       for(const el of [hit,ln]){
-        el.setAttribute("x1",c.x1*100+"%");
-        el.setAttribute("y1",c.y1*100+"%");
-        el.setAttribute("x2",c.x2*100+"%");
-        el.setAttribute("y2",c.y2*100+"%");
+        el.setAttribute("x1",l.x1*100+"%");
+        el.setAttribute("y1",l.y1*100+"%");
+        el.setAttribute("x2",l.x2*100+"%");
+        el.setAttribute("y2",l.y2*100+"%");
       }
-      // Put resize hit areas on the visible ends so attached ends are still grabbable.
-      h1.setAttribute("cx",c.x1*100+"%");
-      h1.setAttribute("cy",c.y1*100+"%");
-      h2.setAttribute("cx",c.x2*100+"%");
-      h2.setAttribute("cy",c.y2*100+"%");
+
+      // Resize hit areas sit just outside an attached ball so the ball does not cover them.
+      const h=getHandleCoords();
+      h1.setAttribute("cx",h.hx1*100+"%");
+      h1.setAttribute("cy",h.hy1*100+"%");
+      h2.setAttribute("cx",h.hx2*100+"%");
+      h2.setAttribute("cy",h.hy2*100+"%");
     }
 
     hit.setAttribute("stroke","rgba(0,0,0,0.001)");
@@ -1437,13 +1460,13 @@ function renderLines(){
     ln.style.pointerEvents="none";
 
     [h1,h2].forEach(h=>{
-      h.setAttribute("r","11");
+      h.setAttribute("r","12");
       h.setAttribute("fill","rgba(0,0,0,0.001)");
       h.setAttribute("stroke","rgba(0,0,0,0.001)");
       h.setAttribute("stroke-width","6");
       h.classList.add("line-end-hit");
       h.style.pointerEvents=state.tool==="move"?"all":"none";
-      h.style.cursor="ew-resize";
+      h.style.cursor="grab";
     });
 
     setCoords();
@@ -1455,72 +1478,102 @@ function renderLines(){
       renderLines();
     }
 
-    hit.addEventListener("dblclick",removeThisLine);
     hit.addEventListener("pointerdown",e=>{
-      if(state.tool==="erase"){removeThisLine(e);return}
+      if(state.tool==="erase"){
+        removeThisLine(e);
+        return;
+      }
       if(state.tool!=="move")return;
 
       snap();
+
+      // Moving the whole object is independent, so detach both ends while dragging.
       delete l.startBallId;
       delete l.endBallId;
 
       const r=cloth.getBoundingClientRect();
       pointerAction={type:"lineMove",id:l.id,sx:e.clientX,sy:e.clientY,orig:{...l},r};
       try{hit.setPointerCapture(e.pointerId)}catch(_){}
-      e.preventDefault();e.stopPropagation();
+      e.preventDefault();
+      e.stopPropagation();
     });
 
     hit.addEventListener("pointermove",e=>{
       if(!pointerAction||pointerAction.type!=="lineMove"||pointerAction.id!==l.id)return;
+
       const rawDx=(e.clientX-pointerAction.sx)/pointerAction.r.width;
       const rawDy=(e.clientY-pointerAction.sy)/pointerAction.r.height;
       const o=pointerAction.orig;
+
       const minX=Math.min(o.x1,o.x2),maxX=Math.max(o.x1,o.x2);
       const minY=Math.min(o.y1,o.y2),maxY=Math.max(o.y1,o.y2);
+
       const dx=Math.max(-minX,Math.min(1-maxX,rawDx));
       const dy=Math.max(-minY,Math.min(1-maxY,rawDy));
-      l.x1=o.x1+dx;l.x2=o.x2+dx;
-      l.y1=o.y1+dy;l.y2=o.y2+dy;
+
+      l.x1=o.x1+dx;
+      l.x2=o.x2+dx;
+      l.y1=o.y1+dy;
+      l.y2=o.y2+dy;
+
       setCoords();
     });
 
     function finishMove(e){
       if(!pointerAction||pointerAction.type!=="lineMove"||pointerAction.id!==l.id)return;
+
+      // Reattach if either end is dropped on a ball.
       attachLine(l);
       pointerAction=null;
+
       try{hit.releasePointerCapture(e.pointerId)}catch(_){}
       renderLines();
     }
+
     hit.addEventListener("pointerup",finishMove);
     hit.addEventListener("pointercancel",finishMove);
 
     function startResize(which,h,e){
       if(state.tool!=="move")return;
+
       snap();
 
-      // Only detach the end being dragged. The other end keeps following its ball.
+      // Detach only the end being resized. The opposite end keeps following its ball.
       if(which==="start") delete l.startBallId;
       else delete l.endBallId;
 
       pointerAction={type:"lineResize",id:l.id,which};
+
       try{h.setPointerCapture(e.pointerId)}catch(_){}
-      e.preventDefault();e.stopPropagation();
+      e.preventDefault();
+      e.stopPropagation();
     }
 
     function resize(which,e){
       if(!pointerAction||pointerAction.type!=="lineResize"||pointerAction.id!==l.id||pointerAction.which!==which)return;
+
       const p=normPoint(e);
-      if(which==="start"){l.x1=p.x;l.y1=p.y}
-      else{l.x2=p.x;l.y2=p.y}
-      // Keep the untouched attached end synced while changing length.
+
+      if(which==="start"){
+        l.x1=p.x;
+        l.y1=p.y;
+      }else{
+        l.x2=p.x;
+        l.y2=p.y;
+      }
+
+      // If the other end is attached, keep it locked while length changes.
       syncLineAttachments(l);
       setCoords();
     }
 
     function finishResize(which,h,e){
       if(!pointerAction||pointerAction.type!=="lineResize"||pointerAction.id!==l.id||pointerAction.which!==which)return;
+
+      // Reattach resized end if released on a ball.
       attachLine(l);
       pointerAction=null;
+
       try{h.releasePointerCapture(e.pointerId)}catch(_){}
       renderLines();
     }
@@ -1541,26 +1594,6 @@ function renderLines(){
     svg.appendChild(h2);
   });
 }
-function clearCurrentLayout(){
-  pointerAction=null;
-  panAction=null;
-  hideAim();
-
-  document.querySelectorAll(".palette-drag-preview").forEach(e=>e.remove());
-  cloth.querySelectorAll(".ball,.note").forEach(e=>e.remove());
-  svg.querySelectorAll(".draw-line,.line-hit,.line-end-hit").forEach(e=>e.remove());
-
-  state.balls=[];
-  state.lines=[];
-  state.notes=[];
-  state.tip={x:.5,y:.5};
-  state.nextId=1;
-  panX=0;
-  panY=0;
-
-  renderAll();
-}
-
 function renderAll(){
   table.classList.toggle("landscape",state.orientation==="landscape");
   $("#portraitBtn").classList.toggle("active",state.orientation==="portrait");
