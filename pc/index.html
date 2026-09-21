@@ -4,6 +4,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Billiards - Layout</title>
 <style>
 :root{
@@ -1731,13 +1734,13 @@ $("#guideCenter").onclick=openGuide;
 
 function saveLayout(){
   const title=prompt("配置タイトル","今日の配置"); if(!title)return;
-  const items=JSON.parse(localStorage.getItem("billiardsLayoutsV2")||"[]");
+  const items=JSON.parse(localStorage.getItem("9board_billiardsLayoutsV2")||"[]");
   items.unshift({id:Date.now(),title,date:new Date().toLocaleString("ja-JP"),state:deep()});
-  localStorage.setItem("billiardsLayoutsV2",JSON.stringify(items.slice(0,40)));
+  localStorage.setItem("9board_billiardsLayoutsV2",JSON.stringify(items.slice(0,40)));
   $("#petBubble").innerHTML="保存できた！<br>あとで見返せるよ";
 }
 function renderSaved(){
-  const items=JSON.parse(localStorage.getItem("billiardsLayoutsV2")||"[]"); const box=$("#savedList");box.innerHTML="";
+  const items=JSON.parse(localStorage.getItem("9board_billiardsLayoutsV2")||"[]"); const box=$("#savedList");box.innerHTML="";
   if(!items.length){box.innerHTML="<p>まだ保存した配置はありません。</p>";return}
   items.forEach(it=>{
     const row=document.createElement("div");row.className="saved-item";
@@ -1745,7 +1748,7 @@ function renderSaved(){
     const acts=row.lastElementChild,op=document.createElement("button"),jpg=document.createElement("button"),del=document.createElement("button");
     op.className="open-btn";op.textContent="開く";op.onclick=()=>{snap();restore(it.state);savedDialog.close()};
     jpg.className="open-btn";jpg.textContent="JPEG";jpg.onclick=()=>exportImage(it.state,"jpeg",it.title);
-    del.className="delete-btn";del.textContent="削除";del.onclick=()=>{localStorage.setItem("billiardsLayoutsV2",JSON.stringify(items.filter(x=>x.id!==it.id)));renderSaved()};
+    del.className="delete-btn";del.textContent="削除";del.onclick=()=>{localStorage.setItem("9board_billiardsLayoutsV2",JSON.stringify(items.filter(x=>x.id!==it.id)));renderSaved()};
     acts.append(op,jpg,del);box.appendChild(row);
   })
 }
