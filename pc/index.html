@@ -499,17 +499,186 @@ dialog::backdrop{background:rgba(11,39,31,.34);backdrop-filter:blur(3px)}
   .brand-logo{width:230px!important;max-width:230px!important;max-height:58px!important}
 }
 
+
+/* ===== compact left controls ===== */
+.layout{grid-template-columns:186px minmax(520px,1fr) 290px!important}
+.left-panel{width:186px!important;padding:8px!important}
+.orientation{gap:6px!important;margin-bottom:10px!important}
+.orientation button{min-height:50px!important;padding:6px 4px!important;font-size:13px!important}
+.tool-list{gap:7px!important}
+.tool{
+  width:100%!important;
+  min-height:50px!important;
+  display:grid!important;
+  grid-template-columns:28px minmax(0,1fr) 28px!important;
+  column-gap:2px!important;
+  align-items:center!important;
+  padding:7px 5px!important;
+  box-sizing:border-box!important;
+  text-align:center!important;
+}
+.tool .ico{
+  position:static!important;
+  grid-column:1!important;
+  width:28px!important;
+  height:28px!important;
+  font-size:17px!important;
+}
+.tool .text{
+  grid-column:2!important;
+  width:100%!important;
+  text-align:center!important;
+  white-space:nowrap!important;
+  font-size:12px!important;
+  line-height:1.15!important;
+}
+.tool[data-tool="group"] .text{font-size:11.5px!important}
+@media(max-width:1100px){
+  .layout{grid-template-columns:176px minmax(430px,1fr) 250px!important}
+  .left-panel{width:176px!important}
+  .tool .text{font-size:11.5px!important}
+  .tool[data-tool="group"] .text{font-size:11px!important}
+}
+
+/* ===== top-peeking mascot, cropped from the exact same 9BOARD logo art ===== */
+.right-panel{
+  padding:0!important;
+  overflow:visible!important;
+  position:sticky!important;
+}
+.right-scroll{
+  padding:15px!important;
+  max-height:calc(100vh - 138px)!important;
+  overflow:auto!important;
+  border-radius:24px!important;
+}
+.panel-bird{
+  position:absolute;
+  top:-34px;
+  right:18px;
+  width:112px;
+  height:58px;
+  z-index:8;
+  pointer-events:none;
+  background-image:url("./assets/9board-logo-actual.webp?v=12");
+  background-repeat:no-repeat;
+  background-size:300px auto;
+  background-position:left center;
+  overflow:hidden;
+}
+
+/* ===== fixed-count ghost ball ring: same dash count in palette and on table ===== */
+.mini-ball.ghost-pick,
+#diagram .ball.ghost{
+  position:relative!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  overflow:visible!important;
+}
+.mini-ball.ghost-pick::before,
+#diagram .ball.ghost::before{
+  content:""!important;
+  display:block!important;
+  position:absolute!important;
+  inset:1px!important;
+  border-radius:50%!important;
+  background:repeating-conic-gradient(#e53333 0 12deg,transparent 12deg 30deg)!important;
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 2px))!important;
+  mask:radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 2px))!important;
+  z-index:4!important;
+}
+.mini-ball.ghost-pick::after,
+#diagram .ball.ghost::after{display:none!important;content:none!important}
+
+/* ===== triangular-label billiard ball look ===== */
+.mini-ball,
+#diagram .ball{
+  overflow:visible!important;
+  border:1px solid rgba(255,255,255,.98)!important;
+  box-shadow:0 2px 7px rgba(0,0,0,.26),inset -3px -4px 6px rgba(0,0,0,.18),inset 3px 3px 5px rgba(255,255,255,.30)!important;
+}
+.mini-ball.solid,
+#diagram .ball.solid{
+  background:
+    radial-gradient(ellipse at 28% 22%,rgba(255,255,255,.98) 0 6%,rgba(255,255,255,.22) 14%,transparent 24%),
+    radial-gradient(circle at 45% 42%,var(--ball-color) 0 58%,color-mix(in srgb,var(--ball-color) 70%,black) 100%)!important;
+}
+.mini-ball.stripe,
+#diagram .ball.stripe{
+  background:
+    radial-gradient(ellipse at 28% 22%,rgba(255,255,255,.98) 0 6%,rgba(255,255,255,.20) 14%,transparent 24%),
+    radial-gradient(circle at 45% 42%,#fffef7 0 64%,#e6e1d6 100%)!important;
+}
+.mini-ball.stripe::after,
+#diagram .ball.stripe::after{
+  content:""!important;
+  display:block!important;
+  position:absolute!important;
+  left:-6%!important;
+  right:-6%!important;
+  top:28%!important;
+  height:44%!important;
+  border-radius:999px!important;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--ball-color) 92%,white),var(--ball-color) 42%,color-mix(in srgb,var(--ball-color) 76%,black))!important;
+  z-index:1!important;
+}
+.mini-ball span,
+#diagram .ball span{
+  position:relative!important;
+  z-index:5!important;
+  display:grid!important;
+  place-items:center!important;
+  background:#fffdf0!important;
+  color:#111!important;
+  border-radius:28% 28% 38% 38%!important;
+  clip-path:polygon(50% 0,94% 78%,82% 100%,18% 100%,6% 78%)!important;
+  filter:drop-shadow(0 0 1px #111)!important;
+  box-shadow:none!important;
+  font-weight:900!important;
+}
+.mini-ball span{
+  width:20px!important;
+  height:19px!important;
+  font-size:9px!important;
+}
+#diagram .ball span{
+  min-width:9px!important;
+  width:9px!important;
+  height:9px!important;
+  font-size:5px!important;
+}
+.mini-ball.cue,
+#diagram .ball.cue{
+  background:
+    radial-gradient(ellipse at 28% 22%,#fff 0 8%,rgba(255,255,255,.5) 16%,transparent 27%),
+    radial-gradient(circle at 45% 42%,#fffef8 0 58%,#e4dfd2 82%,#ccc6b7 100%)!important;
+}
+.mini-ball.cue::after,
+#diagram .ball.cue::after{
+  content:""!important;
+  display:block!important;
+  position:absolute!important;
+  left:50%!important;
+  top:50%!important;
+  transform:translate(-50%,-50%)!important;
+  background:#171717!important;
+  clip-path:polygon(50% 0,64% 33%,100% 48%,68% 64%,52% 100%,36% 66%,0 50%,33% 34%)!important;
+  z-index:5!important;
+}
+.mini-ball.cue::after{width:8px!important;height:8px!important}
+#diagram .ball.cue::after{width:4px!important;height:4px!important}
+
 </style>
 </head>
 <body>
 <header class="app-header">
   <div class="brand">
-    <img class="brand-logo" src="./assets/9board-logo-actual.webp?v=12" alt="9BOARD">
+    <img id="brandLogo" class="brand-logo" src="./assets/9board-logo-actual.webp?v=12" alt="9BOARD" title="配置をクリア">
   </div>
   <nav class="topnav">
     <button class="active">⌂ 配置図</button><button type="button" onclick="openCounterPage()">▣ カウンター</button><button type="button" onclick="window.open('../Billiardsmatch-records/','_blank')">▣ 対戦記録</button>
   </nav>
-  <div class="header-actions"><button id="savedTop">▣ 保存一覧</button></div>
 </header>
 
 <main id="diagram" class="layout">
@@ -544,6 +713,7 @@ dialog::backdrop{background:rgba(11,39,31,.34);backdrop-filter:blur(3px)}
       <div><strong>配置編集</strong><div class="status" id="status">縦向き・移動モード</div></div>
       <div class="center-actions">
         <button id="guideCenter">? 使い方</button>
+        <button id="savedTop">保存一覧</button>
         <button id="savedCenter">保存した配置</button>
         <button id="saveCenter" class="primary">配置を保存</button>
       </div>
@@ -591,6 +761,8 @@ dialog::backdrop{background:rgba(11,39,31,.34);backdrop-filter:blur(3px)}
   </section>
 
   <aside class="panel right-panel">
+    <div class="panel-bird" aria-hidden="true"></div>
+    <div class="right-scroll">
     <section class="section">
       <div class="section-title">🎱 ボール</div>
       <div class="ball-palette" id="ballPalette"></div>
@@ -630,6 +802,7 @@ dialog::backdrop{background:rgba(11,39,31,.34);backdrop-filter:blur(3px)}
         <div class="row"><span>鳥を動かす</span><button class="switch on" id="petSwitch"><i></i></button></div>
       </div>
     </section>
+    </div>
   </aside>
 </main>
 
@@ -1104,6 +1277,19 @@ cloth.addEventListener("pointerup",()=>{
 $("#memoOk").addEventListener("click",()=>{
   const text=$("#memoText").value.trim(); if(text&&pendingMemoPos){snap();state.notes.push({id:state.nextId++,text,...pendingMemoPos});renderNotes()}
   pendingMemoPos=null;memoDialog.close();
+});
+
+
+$("#brandLogo").addEventListener("click",()=>{
+  snap();
+  state.balls=[];
+  state.lines=[];
+  state.notes=[];
+  state.tip={x:.5,y:.5};
+  state.zoom=1;
+  panX=0;
+  panY=0;
+  renderAll();
 });
 
 $("#portraitBtn").onclick=()=>setOrientation("portrait");
