@@ -19,10 +19,12 @@ body{overflow-x:hidden}
 
 .app-header{
   height:96px;background:#fff;border-bottom:1px solid var(--line);
-  display:flex;align-items:center;justify-content:space-between;padding:0 26px;
+  display:flex;align-items:center;justify-content:flex-start;gap:12px;
+  padding-left:max(16px,calc((100vw - 1536px)/2 + 16px));
+  padding-right:max(16px,calc((100vw - 1536px)/2 + 16px));
   position:sticky;top:0;z-index:50
 }
-.brand{display:flex;align-items:center;min-width:450px}
+.brand{display:flex;align-items:center;min-width:0;flex:0 1 440px}
 .brand-ball{
   width:46px;height:46px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#417b68,#12352d 70%);
   color:white;display:grid;place-items:center;font-weight:900;font-size:20px;border:2px solid #0a3229;
@@ -30,12 +32,12 @@ body{overflow-x:hidden}
 }
 .brand small{display:block;letter-spacing:.14em;color:#0b8e67;font-weight:800;font-size:10px}
 .brand h1{margin:2px 0 0;font-size:23px;letter-spacing:.02em}
-.topnav{display:flex;align-items:center;gap:8px}
+.topnav{display:flex;align-items:center;gap:8px;margin-left:auto;justify-content:flex-end;flex-shrink:0}
 .topnav button{
   border:0;background:#f5f8f6;color:#274a41;border-radius:999px;padding:11px 15px;font-weight:800
 }
 .topnav button.active{background:var(--green);color:white}
-.header-actions{display:flex;gap:8px}
+.header-actions{display:flex;gap:8px;flex-shrink:0}
 .header-actions button{
   border:1px solid var(--line);background:white;border-radius:12px;padding:10px 12px;font-weight:800;color:#24443b
 }
@@ -98,7 +100,7 @@ body{overflow-x:hidden}
 .stage{
   position:relative;flex:1;min-height:680px;display:grid;place-items:center;padding:26px 180px 48px 36px
 }
-.table-shell{position:relative;transform-origin:center;transition:transform .15s ease}
+.table-shell{position:relative;transform-origin:center top;transition:transform .15s ease}
 .table{
   width:360px;height:600px;border-radius:24px;padding:18px;position:relative;
   background:linear-gradient(90deg,#7b421f,#b66a34 13%,#8a451d 28%,#c37a40 55%,#7b421f 100%);
@@ -345,7 +347,7 @@ dialog::backdrop{background:rgba(11,39,31,.34);backdrop-filter:blur(3px)}
 #diagram .table.landscape .cloth-edge-cover{display:none!important}
 #diagram .table:not(.landscape) .cloth-edge-cover{display:none}
 /* The frame artwork remains the original image; only its display size changes. */
-.stage{padding:20px 22px 48px;min-width:0}
+.stage{padding:20px 22px 48px;min-width:0;place-items:start center;overflow:hidden}
 .table-shell{width:100%;display:flex;justify-content:center}
 #diagram .table.landscape{width:100%;height:auto;aspect-ratio:650/365;max-width:none;background-position:26% 52%;border-radius:28px;overflow:hidden}
 #diagram .table.landscape .cloth-edge-cover{left:16%;top:10.7%;width:3.85%;height:1.92%}
@@ -368,6 +370,7 @@ dialog::backdrop{background:rgba(11,39,31,.34);backdrop-filter:blur(3px)}
 .right-panel{min-width:0;scrollbar-gutter:stable}
 .row input[type="range"]{flex:1 1 auto;min-width:0;max-width:130px;touch-action:none}
 .row #widthValue{min-width:1.5em;text-align:right;flex:none}
+@media(max-width:1200px){.header-actions{display:none}.topnav button{padding:10px 12px}}
 @media(max-width:860px){.stage{padding:16px 10px 48px}#diagram .table.landscape{width:100%}.brand{min-width:0}.brand-logo{width:310px;height:66px}}
 .brand-logo{display:block;width:440px;height:86px;object-fit:contain;object-position:left center;flex:none}
 .brand h1{display:flex;align-items:center;gap:6px}
@@ -393,7 +396,7 @@ dialog::backdrop{background:rgba(11,39,31,.34);backdrop-filter:blur(3px)}
 <body>
 <header class="app-header">
   <div class="brand">
-    <img class="brand-logo" src="assets/brand-logo.webp" alt="9BOARD">
+    <img class="brand-logo" src="assets/brand-logo-header.webp" alt="9BOARD">
   </div>
   <nav class="topnav">
     <button class="active">⌂ 配置図</button><button type="button" onclick="openCounterPage()">▣ カウンター</button><button type="button" onclick="window.open('../Billiardsmatch-records/','_blank')">▣ 対戦記録</button><button id="guideTop">? 使い方</button>
@@ -599,7 +602,7 @@ stage.addEventListener("pointerdown",e=>{
 },true);
 stage.addEventListener("pointermove",e=>{
   if(!panAction)return;
-  panX=panAction.startX+e.clientX-panAction.x;panY=panAction.startY+e.clientY-panAction.y;
+  panX=panAction.startX+e.clientX-panAction.x;panY=Math.max(0,panAction.startY+e.clientY-panAction.y);
   shell.style.transform=`translate(${panX}px,${panY}px) scale(${state.zoom})`;
 });
 function stopPan(){panAction=null;stage.classList.remove("is-panning")}
@@ -614,6 +617,7 @@ stage.addEventListener("wheel",e=>{
   const localX=e.clientX-(r.left+r.width/2)-panX,localY=e.clientY-(r.top+r.height/2)-panY;
   const ratio=next/oldZoom;
   panX-=localX*(ratio-1);panY-=localY*(ratio-1);
+  panY=Math.max(0,panY);
   state.zoom=next;renderAll();
 },{passive:false});
 
