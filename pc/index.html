@@ -391,17 +391,36 @@ dialog::backdrop{background:rgba(11,39,31,.34);backdrop-filter:blur(3px)}
 #diagram .table:not(.landscape) .cloth{position:absolute;left:12.4%;top:6.7%;width:75.2%;height:86.4%;border:0;border-radius:0;box-shadow:none;clip-path:polygon(10px 0,calc(100% - 10px) 0,100% 10px,100% calc(100% - 10px),calc(100% - 10px) 100%,10px 100%,0 calc(100% - 10px),0 10px)}
 #diagram .table:not(.landscape) .cloth.grid{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 700' preserveAspectRatio='none'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='.33' stroke-width='.8' stroke-dasharray='1.5 2.5'%3E%3Cpath d='M75 0V700M150 0V700M225 0V700M0 100H300M0 200H300M0 300H300M0 400H300M0 500H300M0 600H300'/%3E%3C/g%3E%3C/svg%3E"),linear-gradient(#149fa2,#149fa2);background-size:100% 100%,100% 100%}
 #diagram .table:not(.landscape) .cloth:not(.grid){background:#149fa2}
+
+/* ===== Ghost ball: match palette dashed-ring appearance ===== */
+.mini-ball.ghost-pick,
+#diagram .ball.ghost{
+  background:transparent!important;
+  border:2px dashed #e53333!important;
+  box-shadow:none!important;
+  border-radius:50%!important;
+}
+.mini-ball.ghost-pick::before,
+.mini-ball.ghost-pick::after,
+#diagram .ball.ghost::before,
+#diagram .ball.ghost::after{
+  display:none!important;
+  content:none!important;
+}
+#diagram .ball.ghost span{display:none!important}
+.brand-logo{visibility:visible!important;opacity:1!important}
+
 </style>
 </head>
 <body>
 <header class="app-header">
   <div class="brand">
-    <img class="brand-logo" src="assets/brand-logo-header.webp" alt="9BOARD">
+    <img class="brand-logo" src="/pc/assets/brand-logo-final.png?v=3" alt="9BOARD">
   </div>
   <nav class="topnav">
-    <button class="active">⌂ 配置図</button><button type="button" onclick="openCounterPage()">▣ カウンター</button><button type="button" onclick="window.open('../Billiardsmatch-records/','_blank')">▣ 対戦記録</button><button id="guideTop">? 使い方</button>
+    <button class="active">⌂ 配置図</button><button type="button" onclick="openCounterPage()">▣ カウンター</button><button type="button" onclick="window.open('../Billiardsmatch-records/','_blank')">▣ 対戦記録</button>
   </nav>
-  <div class="header-actions"><button id="savedTop">▣ 保存一覧</button><button id="guideTop2">⚙ 設定</button></div>
+  <div class="header-actions"><button id="savedTop">▣ 保存一覧</button></div>
 </header>
 
 <main id="diagram" class="layout">
@@ -728,7 +747,16 @@ function renderBalls(){
       el.style.left=b.x*100+"%";el.style.top=b.y*100+"%";
       renderLines();
     });
-    el.addEventListener("pointerup",()=>{clearTimeout(longTimer);if(pointerAction?.type==="draw"){const line=state.lines.find(l=>l.id===pointerAction.id);if(line){attachLine(line);addGhostOppositeArrow(line)}}pointerAction=null;hideAim();renderLines()});
+    el.addEventListener("pointerup",()=>{
+      clearTimeout(longTimer);
+      let completedLine=null;
+      if(pointerAction?.type==="draw"){
+        const line=state.lines.find(l=>l.id===pointerAction.id);
+        if(line){attachLine(line);addGhostOppositeArrow(line);completedLine=line}
+      }
+      pointerAction=null;hideAim();renderLines();
+      if(completedLine?.type==="arrow")setTool("move");
+    });
     el.addEventListener("pointercancel",()=>{clearTimeout(longTimer);pointerAction=null;hideAim()});
     el.addEventListener("dblclick",e=>{e.preventDefault();e.stopPropagation();removeBall(b.id)});
     el.addEventListener("contextmenu",e=>{e.preventDefault();removeBall(b.id)});
@@ -767,25 +795,86 @@ function attachLine(l){
   if(b){l.endBallId=b.id;l.x2=b.x;l.y2=b.y}else delete l.endBallId;
 }
 function renderLines(){
-  svg.querySelectorAll(".draw-line").forEach(e=>e.remove());
+  svg.querySelectorAll(".draw-line,.line-hit").forEach(e=>e.remove());
   state.lines.forEach(l=>{
     syncLineAttachments(l);
+
+    const hit=document.createElementNS("http://www.w3.org/2000/svg","line");
     const ln=document.createElementNS("http://www.w3.org/2000/svg","line");
-    ln.setAttribute("x1",l.x1*100+"%");ln.setAttribute("y1",l.y1*100+"%");ln.setAttribute("x2",l.x2*100+"%");ln.setAttribute("y2",l.y2*100+"%");
-    ln.setAttribute("stroke",l.color);ln.setAttribute("stroke-width",l.width);ln.setAttribute("stroke-linecap","round");
+
+    function setCoords(el){
+      el.setAttribute("x1",l.x1*100+"%");
+      el.setAttribute("y1",l.y1*100+"%");
+      el.setAttribute("x2",l.x2*100+"%");
+      el.setAttribute("y2",l.y2*100+"%");
+    }
+    setCoords(hit);setCoords(ln);
+
+    hit.setAttribute("stroke","rgba(0,0,0,0.001)");
+    hit.setAttribute("stroke-width",Math.max(18,l.width+14));
+    hit.setAttribute("stroke-linecap","round");
+    hit.classList.add("line-hit");
+    hit.dataset.id=l.id;
+    hit.style.pointerEvents="stroke";
+
+    ln.setAttribute("stroke",l.color);
+    ln.setAttribute("stroke-width",l.width);
+    ln.setAttribute("stroke-linecap","round");
     if(l.type==="arrow") ln.setAttribute("marker-end","url(#arrowHead)");
-    ln.classList.add("draw-line");ln.dataset.id=l.id;ln.style.pointerEvents="stroke";
-    ln.addEventListener("dblclick",e=>{e.preventDefault();e.stopPropagation();snap();state.lines=state.lines.filter(x=>x.id!==l.id);renderLines()});
-    ln.addEventListener("pointerdown",e=>{
-      if(state.tool==="erase"){ snap();state.lines=state.lines.filter(x=>x.id!==l.id);renderLines();e.stopPropagation();return; }
-      snap();delete l.startBallId;delete l.endBallId; const r=cloth.getBoundingClientRect(); pointerAction={type:"lineMove",id:l.id,sx:e.clientX,sy:e.clientY,orig:{...l},r}; e.stopPropagation();
+    ln.classList.add("draw-line");
+    ln.dataset.id=l.id;
+    ln.style.pointerEvents="none";
+
+    function removeThisLine(e){
+      e?.preventDefault();e?.stopPropagation();
+      snap();
+      state.lines=state.lines.filter(x=>x.id!==l.id);
+      renderLines();
+    }
+
+    hit.addEventListener("dblclick",removeThisLine);
+    hit.addEventListener("pointerdown",e=>{
+      if(state.tool==="erase"){
+        removeThisLine(e);
+        return;
+      }
+      if(state.tool!=="move") return;
+
+      snap();
+      delete l.startBallId;
+      delete l.endBallId;
+      const r=cloth.getBoundingClientRect();
+      pointerAction={type:"lineMove",id:l.id,sx:e.clientX,sy:e.clientY,orig:{...l},r};
+      try{hit.setPointerCapture(e.pointerId)}catch(_){}
+      e.preventDefault();
+      e.stopPropagation();
     });
-    ln.addEventListener("pointermove",e=>{
+
+    hit.addEventListener("pointermove",e=>{
       if(!pointerAction||pointerAction.type!=="lineMove"||pointerAction.id!==l.id)return;
-      const dx=(e.clientX-pointerAction.sx)/pointerAction.r.width,dy=(e.clientY-pointerAction.sy)/pointerAction.r.height;
-      l.x1=pointerAction.orig.x1+dx;l.x2=pointerAction.orig.x2+dx;l.y1=pointerAction.orig.y1+dy;l.y2=pointerAction.orig.y2+dy;renderLines();
+      const rawDx=(e.clientX-pointerAction.sx)/pointerAction.r.width;
+      const rawDy=(e.clientY-pointerAction.sy)/pointerAction.r.height;
+      const o=pointerAction.orig;
+      const minX=Math.min(o.x1,o.x2),maxX=Math.max(o.x1,o.x2);
+      const minY=Math.min(o.y1,o.y2),maxY=Math.max(o.y1,o.y2);
+      const dx=Math.max(-minX,Math.min(1-maxX,rawDx));
+      const dy=Math.max(-minY,Math.min(1-maxY,rawDy));
+      l.x1=o.x1+dx;l.x2=o.x2+dx;
+      l.y1=o.y1+dy;l.y2=o.y2+dy;
+      setCoords(hit);setCoords(ln);
     });
-    ln.addEventListener("pointerup",()=>{attachLine(l);pointerAction=null;renderLines()});
+
+    function finishLineMove(e){
+      if(!pointerAction||pointerAction.type!=="lineMove"||pointerAction.id!==l.id)return;
+      attachLine(l);
+      pointerAction=null;
+      try{hit.releasePointerCapture(e.pointerId)}catch(_){}
+      renderLines();
+    }
+    hit.addEventListener("pointerup",finishLineMove);
+    hit.addEventListener("pointercancel",finishLineMove);
+
+    svg.appendChild(hit);
     svg.appendChild(ln);
   });
 }
@@ -867,11 +956,13 @@ function addGhostOppositeArrow(line){
   renderBalls();
 }
 cloth.addEventListener("pointerup",()=>{
+  let completedLine=null;
   if(pointerAction?.type==="draw"){
     const line=state.lines.find(l=>l.id===pointerAction.id);
-    if(line){attachLine(line);addGhostOppositeArrow(line)}
+    if(line){attachLine(line);addGhostOppositeArrow(line);completedLine=line}
   }
   pointerAction=null;
+  if(completedLine?.type==="arrow")setTool("move");
 });
 
 $("#memoOk").addEventListener("click",()=>{
@@ -908,7 +999,7 @@ function moveTip(e){const r=cue.getBoundingClientRect();let x=(e.clientX-r.left)
 $("#tipClearBtn").onclick=()=>{snap();state.tip={x:.5,y:.5};renderAll()};
 
 function openGuide(){guideDialog.showModal()}
-$("#guideTop").onclick=openGuide;$("#guideTop2").onclick=openGuide;$("#guideCenter").onclick=openGuide;
+$("#guideCenter").onclick=openGuide;
 
 function saveLayout(){
   const title=prompt("配置タイトル","今日の配置"); if(!title)return;
