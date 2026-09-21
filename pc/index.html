@@ -396,7 +396,7 @@ dialog::backdrop{background:rgba(11,39,31,.34);backdrop-filter:blur(3px)}
     <img class="brand-logo" src="assets/brand-logo.png" alt="Billiards 9 Layout">
   </div>
   <nav class="topnav">
-    <button class="active">⌂ 配置図</button><button type="button" onclick="openCounterPage()">▣ カウンター</button><button type="button" onclick="window.open('../match-records/','_blank')">▣ 対戦記録</button><button id="guideTop">? 使い方</button>
+    <button class="active">⌂ 配置図</button><button type="button" onclick="openCounterPage()">▣ カウンター</button><button type="button" onclick="window.open('../Billiardsmatch-records/','_blank')">▣ 対戦記録</button><button id="guideTop">? 使い方</button>
   </nav>
   <div class="header-actions"><button id="savedTop">▣ 保存一覧</button><button id="guideTop2">⚙ 設定</button></div>
 </header>
@@ -549,9 +549,9 @@ dialog::backdrop{background:rgba(11,39,31,.34);backdrop-filter:blur(3px)}
 
 <script>
 function openCounterPage(){
-  fetch('../counter/',{cache:'reload'})
+  fetch('../Billiards_counter/',{cache:'reload'})
     .catch(()=>{})
-    .finally(()=>{ window.location.href='../counter/'; });
+    .finally(()=>{ window.location.href='../Billiards_counter/'; });
 }
 (() => {
 const colors = {

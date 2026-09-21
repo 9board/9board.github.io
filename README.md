@@ -3,8 +3,8 @@
 Billiards web tools.
 
 - / — TOP
-- /layout/ — 配置図入口
+- /Billiards_layout/ — 配置図入口
 - /pc/ — PC版
-- /mobile/ — スマホ版
-- /counter/ — カウンター
-- /match-records/ — 対戦記録
+- /Billiards_layout_mobile/ — スマホ版
+- /Billiards_counter/ — カウンター
+- /Billiardsmatch-records/ — 対戦記録
