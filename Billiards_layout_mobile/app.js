@@ -633,15 +633,15 @@ function showSaveToast(message){
   saveToastTimer=setTimeout(()=>{toast.hidden=true},2200);
 }
 document.querySelector('#saveBtn').onclick=()=>{
-  const saved=JSON.parse(localStorage.getItem('poolNotes')||'[]'),now=new Date().toISOString(),data={title:currentTitle||'名称なし',state:structuredClone(state),lines:structuredClone(lines),notes:structuredClone(notes),tip:tip?{...tip}:null,orientation,updatedAt:now};let label='新規保存済み';
+  const saved=JSON.parse(localStorage.getItem('9boardMobilePoolNotesV1')||'[]'),now=new Date().toISOString(),data={title:currentTitle||'名称なし',state:structuredClone(state),lines:structuredClone(lines),notes:structuredClone(notes),tip:tip?{...tip}:null,orientation,updatedAt:now};let label='新規保存済み';
   const index=currentSaveId===null?-1:saved.findIndex(s=>String(s.id)===String(currentSaveId));
   if(index>=0){saved[index]={...saved[index],...data,createdAt:saved[index].createdAt||saved[index].date||now};label='上書き保存済み'}
   else{currentSaveId=Date.now();saved.unshift({id:currentSaveId,...data,createdAt:now,date:new Date().toLocaleDateString('ja-JP')})}
-  try{localStorage.setItem('poolNotes',JSON.stringify(saved.slice(0,30)))}catch(error){showSaveToast('保存できませんでした。空き容量やブラウザの設定をご確認ください');return}showSaveToast('配置を保存しました');document.querySelector('#saveState').textContent=label;const help=document.querySelector('#saveHelp');help.textContent='保存済み';setTimeout(()=>help.textContent='配置を保存',1400);
+  try{localStorage.setItem('9boardMobilePoolNotesV1',JSON.stringify(saved.slice(0,30)))}catch(error){showSaveToast('保存できませんでした。空き容量やブラウザの設定をご確認ください');return}showSaveToast('配置を保存しました');document.querySelector('#saveState').textContent=label;const help=document.querySelector('#saveHelp');help.textContent='保存済み';setTimeout(()=>help.textContent='配置を保存',1400);
 };
 function savedTimestamp(s){const time=Date.parse(s.updatedAt||s.createdAt||s.date||'');return Number.isNaN(time)?Number(s.id)||0:time}
-function readSaved(){return JSON.parse(localStorage.getItem('poolNotes')||'[]')}
-function writeSaved(items){localStorage.setItem('poolNotes',JSON.stringify(items.slice(0,30)))}
+function readSaved(){return JSON.parse(localStorage.getItem('9boardMobilePoolNotesV1')||'[]')}
+function writeSaved(items){localStorage.setItem('9boardMobilePoolNotesV1',JSON.stringify(items.slice(0,30)))}
 function downloadSavedImage(item){const backup={state,lines,notes,tip,orientation,title:currentTitle};state=structuredClone(item.state||{});lines=structuredClone(item.lines||[]);notes=structuredClone(item.notes||[]);tip=item.tip?{...item.tip}:null;setOrientation(item.orientation||'portrait',false,false);currentTitle=item.title||'ビリヤード配置';render();downloadImage();state=backup.state;lines=backup.lines;notes=backup.notes;tip=backup.tip;setOrientation(backup.orientation,false,false);currentTitle=backup.title;render()}
 function renderSavedDialog(){
   const list=document.querySelector('#savedList'),items=readSaved().sort((a,b)=>savedSortOrder==='newest'?savedTimestamp(b)-savedTimestamp(a):savedTimestamp(a)-savedTimestamp(b));list.innerHTML='';list.className=savedView==='list'?'saved-list list-view':'saved-list card-view';document.querySelector('#savedCardView').classList.toggle('active',savedView==='cards');document.querySelector('#savedListView').classList.toggle('active',savedView==='list');document.querySelector('#savedSort').value=savedSortOrder;
