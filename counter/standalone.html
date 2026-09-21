@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<title>Billiards 9 Counter｜対戦記録</title>
+<style>
+:root{
+  --green:#0ba577;--green2:#07845f;--deep:#123d35;--mint:#edf9f4;
+  --line:#dbe8e2;--paper:#fff;--soft:#f8fbf9;--yellow:#ffc928;
+  --shadow:0 12px 34px rgba(24,77,62,.10);--muted:#6b837a;--danger:#b04b43;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+html,body{margin:0;min-height:100%;font-family:Inter,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;color:#163a32;background:#f5faf7}
+body{overflow-x:hidden}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+a{color:inherit}
+.app-header{
+  height:96px;background:#fff;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;padding:0 26px;
+  position:sticky;top:0;z-index:50
+}
+.brand{display:flex;align-items:center;min-width:455px}
+.brand-logo-counter{position:relative;width:455px;height:86px;overflow:hidden;flex:none}
+.brand-logo-counter .base-logo{position:absolute;left:0;top:0;width:383px;height:86px;object-fit:contain;object-position:left center}
+.brand-logo-counter .small-mask{position:absolute;left:118px;top:2px;width:176px;height:20px;background:#fff}
+.brand-logo-counter .big-mask{position:absolute;left:286px;top:24px;width:168px;height:58px;background:#fff}
+.brand-logo-counter .small-counter{
+  position:absolute;left:125px;top:7px;font-size:9px;letter-spacing:.13em;
+  font-weight:900;color:#168b68;white-space:nowrap
+}
+.counter-word{
+  position:absolute;left:287px;top:31px;display:flex;align-items:center;gap:0;
+  font-size:24px;line-height:1;font-weight:1000;letter-spacing:-1px;
+  -webkit-text-stroke:1px rgba(14,69,58,.20);
+  text-shadow:0 1px 0 #fff,0 2px 2px rgba(21,67,57,.16)
+}
+.counter-word span:nth-child(1){color:#08a879}
+.counter-word span:nth-child(2){color:#f2a71d}
+.counter-word span:nth-child(3){color:#e9523f}
+.counter-word span:nth-child(4){color:#3f73cf}
+.counter-word span:nth-child(5){color:#8457b5}
+.counter-word span:nth-child(6){color:#0ba577}
+.counter-word span:nth-child(7){color:#f07b31}
+.topnav{display:flex;align-items:center;gap:8px}
+.topnav button{
+  border:0;background:#f5f8f6;color:#274a41;border-radius:999px;padding:11px 15px;font-weight:800
+}
+.topnav button.active{background:var(--green);color:#fff}
+.header-actions{display:flex;gap:8px}
+.header-actions button{
+  border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 12px;font-weight:800;color:#24443b
+}
+.counter-layout{
+  display:grid;grid-template-columns:220px minmax(540px,1fr) 320px;
+  gap:14px;padding:16px;max-width:1536px;margin:0 auto;align-items:start
+}
+.panel{background:#fff;border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow)}
+.left-panel,.right-panel{
+  padding:14px;max-height:calc(100vh - 128px);overflow:auto;position:sticky;top:112px;align-self:start
+}
+.left-panel::-webkit-scrollbar,.right-panel::-webkit-scrollbar{width:7px}
+.left-panel::-webkit-scrollbar-thumb,.right-panel::-webkit-scrollbar-thumb{background:#cdded6;border-radius:9px}
+.panel-title{padding:4px 2px 12px}
+.panel-title strong{display:block;font-size:15px;color:#173f35}
+.panel-title small{display:block;color:var(--muted);margin-top:3px}
+.tool-list{display:grid;gap:8px}
+.tool{
+  width:100%;display:flex;align-items:center;gap:12px;min-height:54px;border:1px solid var(--line);
+  border-radius:14px;background:#fff;color:#23463d;padding:9px 12px;font-weight:800;text-align:left
+}
+.tool .ico{
+  width:30px;height:30px;border-radius:9px;background:#eef7f3;display:grid;place-items:center;
+  font-size:18px;color:#0b6f56;flex:0 0 auto
+}
+.tool .text{white-space:nowrap}
+.tool.active{background:linear-gradient(135deg,#0a9c72,#08b080);color:#fff;border-color:transparent}
+.tool.active .ico{background:rgba(255,255,255,.18);color:#fff}
+.tool.danger{color:#8a3a35}.tool.danger .ico{color:#b04b43;background:#fff1ef}
+.divider{height:1px;background:var(--line);margin:10px 0}
+.tip-box{margin-top:12px;background:#eaf8f2;border-radius:14px;padding:11px 12px;color:#527168;font-size:11px;line-height:1.65}
+.tip-box b{color:#07865f}
+.center-panel{
+  min-height:760px;overflow:hidden;background:
+  radial-gradient(circle at 30% 20%,rgba(13,170,123,.08),transparent 32%),
+  linear-gradient(#fcfffd,#f3fbf7);
+  display:flex;flex-direction:column
+}
+.center-top{
+  display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line);
+  background:rgba(255,255,255,.82)
+}
+.center-top strong{font-size:15px}
+.status{font-size:12px;color:var(--muted);margin-top:3px}
+.center-actions{display:flex;gap:8px;align-items:center}
+.center-actions button{
+  border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 13px;font-weight:900;color:#2d5148
+}
+.center-actions .primary{background:var(--green);color:#fff;border-color:var(--green)}
+.counter-stage{padding:20px 22px 18px;display:grid;gap:16px}
+.match-timer{
+  display:flex;align-items:center;justify-content:center;gap:10px;background:#fff;border:1px solid var(--line);
+  border-radius:18px;padding:14px 16px;box-shadow:0 6px 20px rgba(24,77,62,.06)
+}
+.match-timer .label{font-size:12px;font-weight:900;color:#688077}
+.time{font-size:clamp(34px,4vw,56px);font-weight:1000;letter-spacing:.03em;font-variant-numeric:tabular-nums;color:#163f35}
+.score-card{
+  padding:24px 22px;border:1px solid var(--line);border-radius:22px;background:#fff;
+  box-shadow:0 8px 24px rgba(24,77,62,.06)
+}
+.names,.score-row,.score-buttons{
+  display:grid;grid-template-columns:minmax(0,1fr) 54px minmax(0,1fr);gap:18px;text-align:center;align-items:center
+}
+.name{
+  min-width:0;background:#f8fbf9;border:1px solid var(--line);border-radius:14px;color:#173e35;
+  text-align:center;font-size:clamp(24px,3vw,38px);font-weight:1000;padding:11px 8px;outline:0
+}
+.name:focus{border-color:#7bcdb2;box-shadow:0 0 0 3px rgba(11,165,119,.10)}
+.score-row{margin-top:18px}
+.num{font-size:clamp(76px,9vw,142px);line-height:.92;font-weight:1000;letter-spacing:.02em;color:#123d35;font-variant-numeric:tabular-nums}
+.dash{font-size:clamp(42px,5vw,76px);font-weight:900;color:#8aa096}
+.score-buttons{margin-top:18px}
+.score-controls{display:flex;align-items:center;justify-content:center;gap:14px}
+.score-btn{
+  border:0;border-radius:50%;width:68px;height:68px;min-width:68px;min-height:68px;
+  font-size:38px;font-weight:900;line-height:1;display:grid;place-items:center;
+  box-shadow:0 7px 16px rgba(24,77,62,.14);touch-action:manipulation
+}
+.plus{background:linear-gradient(135deg,#10b37e,#07845f);color:#fff}
+.minus{background:#eef3f0;color:#35564d;border:1px solid var(--line)}
+.clock{
+  border:1px solid var(--line);border-radius:22px;background:#fff;padding:18px;
+  box-shadow:0 8px 24px rgba(24,77,62,.06)
+}
+.clock-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:14px}
+.clock-head h2{margin:0;font-size:22px;color:#153f35}
+.clock-head span{color:var(--muted);font-size:12px;font-weight:800}
+.presets,.faces{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.preset label{display:block;font-size:12px;font-weight:900;color:#557168;margin-bottom:6px}
+.preset select{
+  width:100%;border:1px solid var(--line);border-radius:12px;background:#f8fbf9;color:#24443b;
+  padding:11px 12px;font-weight:900;outline:0
+}
+.faces{margin-top:10px}
+.face{
+  border:1px solid var(--line);border-radius:18px;padding:16px 8px;text-align:center;background:#f8fbf9;color:#173e35
+}
+.face.active{background:linear-gradient(135deg,#0ba577,#07845f);color:#fff;border-color:transparent;box-shadow:0 8px 22px rgba(11,165,119,.22)}
+.face b{display:block;font-size:18px;margin-bottom:5px}
+.face strong{font-size:clamp(42px,5vw,66px);line-height:1;font-weight:1000;font-variant-numeric:tabular-nums}
+.stop{
+  width:100%;border:1px solid var(--line);border-radius:14px;background:#fff;color:#31554b;
+  margin-top:12px;min-height:52px;font-size:16px;font-weight:900
+}
+.guide-foot{margin:0 22px 20px;background:#eaf8f2;border-radius:16px;padding:12px 14px;font-size:11px;color:#49685e;line-height:1.7}
+.guide-foot b{color:#07865f}
+.section{padding:4px 0 16px}
+.section+.section{border-top:1px solid var(--line);padding-top:16px}
+.section-title{display:flex;align-items:center;gap:8px;font-weight:950;color:#0b7557;margin-bottom:12px}
+.field{
+  background:#f8fbf9;border:1px solid var(--line);border-radius:14px;padding:10px 11px;display:block;margin-bottom:9px
+}
+.field .label{display:block;color:#6b837a;font-size:11px;font-weight:900;margin-bottom:5px}
+input,select,textarea{font:inherit}
+.field input,.field select,.field textarea,.layout-box select{
+  width:100%;border:0;outline:0;background:transparent;color:#173e35;font-weight:800;min-width:0
+}
+.field textarea{min-height:84px;resize:vertical;line-height:1.55;font-weight:600}
+.free{display:none;margin-top:8px;border-top:1px solid var(--line)!important;padding-top:8px}
+.layout-box{background:#f8fbf9;border:1px solid var(--line);border-radius:14px;padding:11px;margin-bottom:9px}
+.layout-title{font-size:13px;font-weight:950;color:#0b7557;margin:0 0 8px}
+.layout-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+.btn{
+  border:1px solid var(--line);border-radius:11px;background:#fff;color:#0a513d;padding:9px 10px;
+  font-weight:900;text-decoration:none;text-align:center
+}
+.primary{width:100%;background:linear-gradient(135deg,#0ba577,#07845f);color:#fff;border:0;padding:13px}
+.layout-meta{display:block;margin-top:7px;color:var(--muted);font-size:10px;font-weight:700;line-height:1.5}
+.records-panel{grid-column:1/-1;overflow:hidden}
+.records-head{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 18px;border-bottom:1px solid var(--line)
+}
+.records-head h2{margin:0;font-size:18px}.records-head span{font-size:12px;color:var(--muted)}
+.table-wrap{overflow:auto}
+.records-table{width:100%;border-collapse:collapse;background:#fff;min-width:980px}
+.records-table th,.records-table td{border-bottom:1px solid #e8efeb;padding:10px 8px;text-align:left;font-size:12px;vertical-align:top}
+.records-table th{background:#f8fbf9;color:#668078;font-weight:950;position:sticky;top:0}
+.badge{display:inline-block;padding:4px 8px;border-radius:999px;font-weight:950}
+.win{background:#dff7ea;color:#087040}.lose{background:#ffe7e4;color:#bb3a31}.draw{background:#edf1ef;color:#4e625b}
+.actions{display:flex;gap:6px;flex-wrap:wrap}
+.actions button{border:0;border-radius:999px;background:#eef7f3;color:#07543d;padding:7px 10px;font-weight:900}
+.actions .danger{background:#fff0ee;color:#b62222}
+.toast{
+  position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(18px);
+  background:#173e35;color:#fff;border-radius:999px;padding:12px 18px;opacity:0;transition:.22s;z-index:80;white-space:nowrap;
+  box-shadow:0 10px 28px rgba(0,0,0,.18)
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(max-width:1180px){
+  .counter-layout{grid-template-columns:190px minmax(460px,1fr) 280px}
+  .brand{min-width:390px}.brand-logo-counter{transform:scale(.88);transform-origin:left center;width:400px}
+}
+@media(max-width:900px){
+  .app-header{height:auto;min-height:76px;padding:8px 12px;gap:8px;flex-wrap:wrap}
+  .brand{min-width:0;flex:1}.brand-logo-counter{transform:scale(.72);transform-origin:left center;width:330px;height:64px;margin-right:-80px}
+  .header-actions{display:none}.topnav{overflow:auto;max-width:100%;padding-bottom:2px}.topnav button{white-space:nowrap;padding:9px 12px}
+  .counter-layout{grid-template-columns:92px minmax(0,1fr);gap:8px;padding:8px}
+  .left-panel{padding:8px;top:86px}.left-panel .panel-title,.left-panel .tip-box{display:none}
+  .left-panel .tool{padding:7px;justify-content:center}.left-panel .tool .text{display:none}.left-panel .tool .ico{width:40px;height:40px}
+  .center-panel{min-height:auto}.right-panel{grid-column:1/-1;position:relative;top:auto;max-height:none}
+  .records-panel{grid-column:1/-1}
+  .counter-stage{padding:14px 12px}.guide-foot{margin:0 12px 14px}
+}
+@media(max-width:620px){
+  .app-header{align-items:center}.brand-logo-counter{transform:scale(.62);width:290px;margin-right:-95px}
+  .topnav{width:100%}
+  .counter-layout{display:block;padding:7px}
+  .center-panel{margin-bottom:8px}.left-panel,.right-panel{position:relative;top:auto;max-height:none;margin-bottom:8px}
+  .left-panel{padding:10px}.left-panel .panel-title{display:block}.left-panel .tool-list{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+  .left-panel .tool{min-height:58px;justify-content:center;padding:7px}.left-panel .tool .text{display:none}.left-panel .tool .ico{width:38px;height:38px}
+  .left-panel .divider{display:none}.left-panel .tip-box{display:block;grid-column:1/-1}
+  .center-top{padding:11px 12px}.center-actions{gap:5px}.center-actions button{font-size:12px;padding:8px 9px}
+  .counter-stage{padding:10px;gap:10px}.match-timer{padding:10px}.match-timer .label{display:none}.time{font-size:34px}
+  .score-card{padding:14px 8px}.names,.score-row,.score-buttons{grid-template-columns:minmax(0,1fr) 22px minmax(0,1fr);gap:6px}
+  .name{font-size:22px;padding:9px 4px}.num{font-size:64px}.dash{font-size:36px}
+  .score-controls{gap:7px}.score-btn{width:50px;height:50px;min-width:50px;min-height:50px;font-size:29px}
+  .clock{padding:13px 10px}.clock-head{align-items:flex-start;flex-direction:column;gap:3px}.clock-head h2{font-size:20px}
+  .presets,.faces{gap:7px}.face{padding:12px 4px}.face b{font-size:16px}.face strong{font-size:34px}
+  .right-panel{padding:11px}.toast{max-width:calc(100vw - 24px);white-space:normal;text-align:center;border-radius:14px}
+}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="brand" aria-label="Billiards 9 Counter">
+    <div class="brand-logo-counter">
+      <img class="base-logo" src="assets/brand-logo.png" alt="">
+      <span class="small-mask" aria-hidden="true"></span>
+      <span class="big-mask" aria-hidden="true"></span>
+      <span class="small-counter">BILLIARDS COUNTER</span>
+      <span class="counter-word" aria-hidden="true"><span>C</span><span>o</span><span>u</span><span>n</span><span>t</span><span>e</span><span>r</span></span>
+    </div>
+  </div>
+  <nav class="topnav">
+    <button type="button" onclick="location.href='../layout/'">⌂ 配置図</button>
+    <button class="active" type="button">▣ カウンター</button>
+    <button type="button" onclick="document.getElementById('recordsPanel').scrollIntoView({behavior:'smooth'})">▣ 対戦記録</button>
+    <button type="button" onclick="document.getElementById('counterHelp').scrollIntoView({behavior:'smooth'})">? 使い方</button>
+  </nav>
+  <div class="header-actions">
+    <button type="button" onclick="location.href='../layout/'">配置図へ戻る</button>
+    <button type="button" onclick="document.getElementById('recordsPanel').scrollIntoView({behavior:'smooth'})">記録一覧</button>
+  </div>
+</header>
+
+<main class="counter-layout">
+  <aside class="panel left-panel">
+    <div class="panel-title"><strong>カウンター操作</strong><small>試合中に使う操作をまとめています</small></div>
+    <div class="tool-list">
+      <button id="recordOn" class="tool active" type="button"><span class="ico">✓</span><span class="text">記録する</span></button>
+      <button id="recordOff" class="tool" type="button"><span class="ico">−</span><span class="text">記録しない</span></button>
+      <div class="divider"></div>
+      <button id="timeStart" class="tool" type="button"><span class="ico">▶</span><span class="text">タイマー開始</span></button>
+      <button id="timeStop" class="tool" type="button"><span class="ico">■</span><span class="text">タイマー停止</span></button>
+      <button id="toggleTime" class="tool" type="button"><span class="ico">◉</span><span class="text">タイマー非表示</span></button>
+      <div class="divider"></div>
+      <button id="resetAll" class="tool danger" type="button"><span class="ico">↺</span><span class="text">すべてリセット</span></button>
+    </div>
+    <div class="tip-box" id="counterHelp"><b>使い方のヒント</b><br>＋ / −でスコアを変更。チェスクロックは自分・相手の枠をタップすると切り替わります。入力内容は自動保存されます。</div>
+  </aside>
+
+  <section class="panel center-panel">
+    <div class="center-top">
+      <div><strong>カウンター</strong><div class="status">スコア・試合時間・チェスクロック</div></div>
+      <div class="center-actions">
+        <button type="button" onclick="document.getElementById('counterHelp').scrollIntoView({behavior:'smooth'})">? 使い方</button>
+        <button class="primary" type="button" onclick="document.getElementById('recordPanel').scrollIntoView({behavior:'smooth'})">記録内容</button>
+      </div>
+    </div>
+
+    <div class="counter-stage">
+      <section class="match-timer">
+        <span class="label">試合時間</span>
+        <div id="matchTime" class="time">00:00:00</div>
+      </section>
+
+      <section class="score-card">
+        <div class="names">
+          <input id="leftName" class="name" value="自分" aria-label="自分の名前">
+          <span></span>
+          <input id="rightName" class="name" value="相手" aria-label="相手の名前">
+        </div>
+        <div class="score-row">
+          <div id="leftScore" class="num">00</div><div class="dash">-</div><div id="rightScore" class="num">00</div>
+        </div>
+        <div class="score-buttons">
+          <div class="score-controls">
+            <button class="score-btn plus" data-score="left" data-delta="1" type="button">＋</button>
+            <button class="score-btn minus" data-score="left" data-delta="-1" type="button">−</button>
+          </div>
+          <span></span>
+          <div class="score-controls">
+            <button class="score-btn plus" data-score="right" data-delta="1" type="button">＋</button>
+            <button class="score-btn minus" data-score="right" data-delta="-1" type="button">−</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="clock">
+        <div class="clock-head"><h2>チェスクロック</h2><span>左右の枠をタップして開始・切り替え</span></div>
+        <div class="presets">
+          <div class="preset"><label>自分の持ち時間</label><select id="leftClockSelect"></select></div>
+          <div class="preset"><label>相手の持ち時間</label><select id="rightClockSelect"></select></div>
+        </div>
+        <div class="faces">
+          <button id="leftClockFace" class="face" type="button"><b>自分</b><strong id="leftClock">10:00</strong></button>
+          <button id="rightClockFace" class="face" type="button"><b>相手</b><strong id="rightClock">10:00</strong></button>
+        </div>
+        <button id="clockStopReset" class="stop" type="button">停止 / リセット</button>
+      </section>
+    </div>
+
+    <div class="guide-foot">💡 <b>使い方のヒント</b>　途中で配置図へ戻っても、スコア・時間・入力内容はブラウザ内に自動保存されます。</div>
+  </section>
+
+  <aside class="panel right-panel" id="recordPanel">
+    <section class="section">
+      <div class="section-title">▣ 記録内容</div>
+      <label class="field"><span class="label">日付</span><input id="date" type="date"></label>
+      <label class="field"><span class="label">店舗名</span><input id="shop" placeholder="店舗名を入力"></label>
+      <label class="field"><span class="label">相手</span><input id="opponent" placeholder="相手名"></label>
+      <label class="field"><span class="label">種目</span>
+        <select id="game"><option value=""></option><option>9ボール</option><option>10ボール</option><option>エイトボール</option><option>ローテーション</option><option>自由入力</option></select>
+        <input id="gameFree" class="free" placeholder="種目を自由入力">
+      </label>
+      <label class="field"><span class="label">形式</span>
+        <select id="type"><option value=""></option><option>平場</option><option>セットマッチ</option><option>大会</option><option>練習</option><option>自由入力</option></select>
+        <input id="typeFree" class="free" placeholder="形式を自由入力">
+      </label>
+      <label class="field"><span class="label">先取</span>
+        <select id="race"><option value=""></option><option>3先</option><option>4先</option><option>5先</option><option>7先</option><option>自由入力</option></select>
+        <input id="raceFree" class="free" placeholder="例：点数制・10点">
+      </label>
+    </section>
+
+    <section class="section">
+      <div class="section-title">⌑ 配置図メーカー</div>
+      <div class="layout-box">
+        <p class="layout-title">この試合に紐づける配置図</p>
+        <select id="layoutSelect"></select>
+        <div class="layout-actions">
+          <button id="layoutRefresh" class="btn" type="button">配置図リストを更新</button>
+          <a class="btn" href="../layout/">配置図を開く</a>
+        </div>
+        <small id="layoutMeta" class="layout-meta"></small>
+      </div>
+      <label class="field"><span class="label">メモ</span><textarea id="memo" placeholder="例：9番前の出しが薄くなった。次は厚めに残す。"></textarea></label>
+      <button id="saveMatch" class="btn primary" type="button">✓ 試合終了して保存</button>
+    </section>
+  </aside>
+
+  <section class="panel records-panel" id="recordsPanel">
+    <div class="records-head"><div><h2>対戦記録一覧表</h2><span>編集・削除・詳細確認</span></div></div>
+    <div class="table-wrap">
+      <table class="records-table">
+        <thead><tr><th>日付</th><th>店舗</th><th>自分</th><th>相手</th><th>スコア</th><th>結果</th><th>試合時間</th><th>チェスクロック</th><th>種目/形式/先取</th><th>配置図/メモ</th><th>操作</th></tr></thead>
+        <tbody id="recordsBody"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+<div id="toast" class="toast"></div>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s),store={draft:'poolMatchDraft',matches:'poolMatchRecords',layouts:'poolNotes'};
+let left=0,right=0,recording=true,editingId=null,matchSec=0,timer=null,timeVisible=true,clockRun=null,last=0,clockLeft=600,clockRight=600,clockUsed=false,lastStopTap=0,savePause=false;
+function pad(n){return String(Math.max(0,Math.floor(Number(n)||0))).padStart(2,'0')}
+function fmtSec(s){s=Math.max(0,Math.floor(Number(s)||0));return pad(s/3600|0)+':'+pad((s%3600)/60|0)+':'+pad(s%60)}
+function fmtMin(s){s=Math.max(0,Math.floor(Number(s)||0));return pad(s/60|0)+':'+pad(s%60)}
+function load(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}}
+function save(k,v){localStorage.setItem(k,JSON.stringify(v))}
+function clone(v){return v==null?v:JSON.parse(JSON.stringify(v))}
+function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function toast(t){$('#toast').textContent=t;$('#toast').classList.add('show');setTimeout(()=>$('#toast').classList.remove('show'),1500)}
+function formatSavedTime(value){if(!value)return'';if(/^\d{4}\/\d{1,2}\/\d{1,2}$/.test(String(value)))return value+'（時刻記録なし）';const d=new Date(value);return Number.isNaN(d.getTime())?String(value):d.toLocaleString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}
+function savedTimestamp(s){const t=Date.parse(s?.updatedAt||s?.createdAt||s?.date||'');return Number.isNaN(t)?Number(s?.id)||0:t}
+function readLayouts(){const list=load(store.layouts,[]);return Array.isArray(list)?list.filter(Boolean).sort((a,b)=>savedTimestamp(b)-savedTimestamp(a)):[]}
+function layoutLabel(item){const title=item?.title||'名称なし',time=formatSavedTime(item?.updatedAt||item?.createdAt||item?.date);return time?`${title}｜${time}`:title}
+function refreshLayouts(keep=true){const sel=$('#layoutSelect'),current=keep?sel.value:'';const layouts=readLayouts();sel.innerHTML='';sel.add(new Option('配置図なし',''));layouts.forEach(item=>sel.add(new Option(layoutLabel(item),String(item.id))));if(current&&layouts.some(item=>String(item.id)===String(current)))sel.value=current;updateLayoutMeta()}
+function selectedLayout(){const id=$('#layoutSelect').value;return id?readLayouts().find(item=>String(item.id)===String(id))||null:null}
+function updateLayoutMeta(){const meta=$('#layoutMeta'),item=selectedLayout();if(!item){meta.textContent='配置図メーカーで保存した配置を、同じ保存データから選べます。';return}const updated=formatSavedTime(item.updatedAt||item.createdAt||item.date)||'日時不明';meta.textContent=`選択中：${item.title||'名称なし'} / 更新：${updated} / 球${Object.keys(item.state||{}).length}・線${(item.lines||[]).length}・メモ${(item.notes||[]).length}`}
+for(let m=10;m<=120;m+=5){$('#leftClockSelect').add(new Option(m+'分',m));$('#rightClockSelect').add(new Option(m+'分',m))}
+function updateScore(){$('#leftScore').textContent=pad(left);$('#rightScore').textContent=pad(right);autoSave()}
+$$('[data-score]').forEach(b=>b.onclick=()=>{const d=Number(b.dataset.delta);if(b.dataset.score==='left')left=Math.max(0,left+d);else right=Math.max(0,right+d);updateScore()});
+function updateClock(){$('#matchTime').textContent=fmtSec(matchSec);$('#leftClock').textContent=fmtMin(clockLeft);$('#rightClock').textContent=fmtMin(clockRight);$('#leftClockFace').classList.toggle('active',clockRun==='left');$('#rightClockFace').classList.toggle('active',clockRun==='right');$('#leftClockFace b').textContent=$('#leftName').value.trim()||'自分';$('#rightClockFace b').textContent=$('#rightName').value.trim()||'相手'}
+function tick(){const now=Date.now(),d=(now-last)/1000;last=now;matchSec+=d;if(clockRun==='left')clockLeft=Math.max(0,clockLeft-d);if(clockRun==='right')clockRight=Math.max(0,clockRight-d);updateClock();autoSave()}
+function startTimer(){if(timer)return;last=Date.now();timer=setInterval(tick,250)}
+function stopTimer(){clearInterval(timer);timer=null;clockRun=null;updateClock();autoSave()}
+$('#timeStart').onclick=()=>startTimer();$('#timeStop').onclick=()=>stopTimer();$('#toggleTime').onclick=()=>{timeVisible=!timeVisible;$('#matchTime').style.display=timeVisible?'block':'none';$('#toggleTime').textContent=timeVisible?'非表示':'表示';autoSave()};
+$('#leftClockFace').onclick=()=>{clockUsed=true;clockRun='left';last=Date.now();startTimer();updateClock();autoSave()};$('#rightClockFace').onclick=()=>{clockUsed=true;clockRun='right';last=Date.now();startTimer();updateClock();autoSave()};
+$('#clockStopReset').onclick=()=>{const now=Date.now();if(now-lastStopTap<650){clockLeft=Number($('#leftClockSelect').value)*60;clockRight=Number($('#rightClockSelect').value)*60;clockRun=null;toast('チェスクロックをリセット')}else{clockRun=null;toast('停止')}lastStopTap=now;updateClock();autoSave()};
+['leftClockSelect','rightClockSelect'].forEach(id=>$('#'+id).onchange=e=>{if(id==='leftClockSelect')clockLeft=Number(e.target.value)*60;else clockRight=Number(e.target.value)*60;updateClock();autoSave()});
+function valueWithFree(id){const sel=$('#'+id),free=$('#'+id+'Free');return sel.value==='自由入力'?free.value.trim():sel.value.trim()}
+function setSelectWithFree(id,value,selValue){const sel=$('#'+id),free=$('#'+id+'Free'),options=[...sel.options].map(o=>o.value);const v=norm(value),sv=norm(selValue);if(sv&&options.includes(sv)){sel.value=sv;free.value=v&&v!==sv?v:''}else if(options.includes(v)){sel.value=v;free.value=''}else if(v){sel.value='自由入力';free.value=v}else{sel.value='';free.value=''}free.style.display=sel.value==='自由入力'?'block':'none'}
+['game','type','race'].forEach(id=>$('#'+id).addEventListener('change',()=>{$('#'+id+'Free').style.display=$('#'+id).value==='自由入力'?'block':'none';autoSave()}));
+function norm(v){v=String(v??'').trim();return v==='自由入力'?'':v}
+function formObj(){const item=selectedLayout();return{id:editingId||Date.now(),date:$('#date').value,shop:$('#shop').value.trim(),opponent:$('#opponent').value.trim(),leftName:$('#leftName').value.trim()||'自分',rightName:$('#rightName').value.trim()||'相手',game:valueWithFree('game'),gameSel:$('#game').value,gameFree:$('#gameFree').value,type:valueWithFree('type'),typeSel:$('#type').value,typeFree:$('#typeFree').value,race:valueWithFree('race'),raceSel:$('#race').value,raceFree:$('#raceFree').value,left,right,result:left>right?'勝ち':left<right?'負け':'引き分け',matchSec:Math.floor(matchSec),clockLeftStart:Number($('#leftClockSelect').value)*60,clockRightStart:Number($('#rightClockSelect').value)*60,clockLeft:Math.floor(clockLeft),clockRight:Math.floor(clockRight),clockUsed,layoutId:$('#layoutSelect').value,layoutTitle:item?(item.title||'名称なし'):'配置図なし',layoutUpdatedAt:item?(item.updatedAt||item.createdAt||item.date||''):'',layoutSnapshot:item?clone(item):null,memo:$('#memo').value,createdAt:new Date().toISOString()}}
+function draftObj(){return{...formObj(),recording,timeVisible,clockRun:null,editingId}}
+function autoSave(){if(!savePause)save(store.draft,draftObj())}
+function apply(obj){savePause=true;const o=obj||{},exists=o.id&&load(store.matches,[]).some(r=>String(r.id)===String(o.id));editingId=exists?o.id:(o.editingId||null);$('#date').value=o.date||new Date().toISOString().slice(0,10);$('#shop').value=o.shop||'';$('#opponent').value=o.opponent||'';$('#leftName').value=o.leftName||'自分';$('#rightName').value=o.rightName||'相手';left=Number(o.left||0);right=Number(o.right||0);matchSec=Number(o.matchSec||0);timeVisible=o.timeVisible!==false;$('#matchTime').style.display=timeVisible?'block':'none';$('#toggleTime').textContent=timeVisible?'非表示':'表示';$('#leftClockSelect').value=String(o.clockLeftStart?o.clockLeftStart/60:10);$('#rightClockSelect').value=String(o.clockRightStart?o.clockRightStart/60:10);clockLeft=o.clockLeft??Number($('#leftClockSelect').value)*60;clockRight=o.clockRight??Number($('#rightClockSelect').value)*60;clockUsed=!!o.clockUsed;refreshLayouts(false);if(o.layoutId)$('#layoutSelect').value=String(o.layoutId);updateLayoutMeta();$('#memo').value=o.memo||'';setSelectWithFree('game',o.game,o.gameSel);setSelectWithFree('type',o.type,o.typeSel);setSelectWithFree('race',o.race,o.raceSel);recording=o.recording!==false;$('#recordOn').classList.toggle('active',recording);$('#recordOff').classList.toggle('active',!recording);savePause=false;updateScore();updateClock()}
+function resetDraft(){localStorage.removeItem(store.draft);stopTimer();clockUsed=false;apply({date:new Date().toISOString().slice(0,10),leftName:'自分',rightName:'相手'})}
+$('#recordOn').onclick=()=>{recording=true;$('#recordOn').classList.add('active');$('#recordOff').classList.remove('active');autoSave()};$('#recordOff').onclick=()=>{recording=false;$('#recordOff').classList.add('active');$('#recordOn').classList.remove('active');autoSave()};$('#resetAll').onclick=()=>{if(confirm('入力中の内容をリセットしますか？'))resetDraft()};
+function resultClass(r){return r==='勝ち'?'win':r==='負け'?'lose':'draw'}
+function displayMeta(r){return[norm(r.game),norm(r.type),norm(r.race)].filter(Boolean).map(esc).join('<br>')}
+function clockRecordText(r){if(!r.clockUsed)return'';const ln=norm(r.leftName)||'自分',rn=norm(r.rightName)||'相手';return `${esc(ln)} ${fmtMin(r.clockLeft??0)} / ${esc(rn)} ${fmtMin(r.clockRight??0)}`}
+function renderRecords(){const rows=load(store.matches,[]);$('#recordsBody').innerHTML=rows.length?rows.map(r=>`<tr><td>${esc(r.date)}</td><td>${esc(r.shop)}</td><td>${esc(r.leftName||'自分')}</td><td>${esc(r.rightName||'相手')}</td><td>${pad(r.left)}-${pad(r.right)}</td><td><span class="badge ${resultClass(r.result)}">${esc(r.result)}</span></td><td>${fmtSec(r.matchSec||0)}</td><td>${clockRecordText(r)}</td><td>${displayMeta(r)}</td><td>${esc(r.layoutTitle||'配置図なし')}${r.layoutUpdatedAt?`<br><small>配置更新：${esc(formatSavedTime(r.layoutUpdatedAt))}</small>`:''}<br><small>${esc(r.memo)}</small></td><td><div class="actions"><button type="button" onclick="editRecord('${r.id}')">編集</button><button type="button" class="danger" onclick="deleteRecord('${r.id}')">削除</button></div></td></tr>`).join(''):'<tr><td colspan="11">記録はまだありません。</td></tr>'}
+window.editRecord=id=>{const r=load(store.matches,[]).find(x=>String(x.id)===String(id));if(!r)return;apply(r);editingId=r.id;scrollTo({top:0,behavior:'smooth'});toast('編集画面に読み込みました')};
+window.deleteRecord=id=>{if(!confirm('この記録を削除しますか？'))return;save(store.matches,load(store.matches,[]).filter(x=>String(x.id)!==String(id)));renderRecords()};
+$('#saveMatch').onclick=()=>{if(!recording){toast('記録しない設定です');return}const record=formObj(),arr=load(store.matches,[]),i=arr.findIndex(x=>String(x.id)===String(editingId));if(i>=0)arr[i]=record;else arr.unshift(record);save(store.matches,arr);save(store.draft,draftObj());editingId=null;renderRecords();toast('保存しました')};
+document.addEventListener('input',e=>{if(e.target.matches('input,textarea,select')){if(e.target.id==='leftName'||e.target.id==='rightName')updateClock();autoSave()}});$('#layoutSelect').addEventListener('change',()=>{updateLayoutMeta();autoSave()});$('#layoutRefresh').onclick=()=>{refreshLayouts(true);toast('配置図リストを更新しました')};['pointerdown','focus','click'].forEach(t=>$('#layoutSelect').addEventListener(t,()=>refreshLayouts(true)));window.addEventListener('pageshow',()=>refreshLayouts(true));document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshLayouts(true)});window.addEventListener('storage',e=>{if(e.key===store.layouts)refreshLayouts(true)});
+refreshLayouts(false);apply(load(store.draft,null)||{date:new Date().toISOString().slice(0,10),leftName:'自分',rightName:'相手'});renderRecords();
+</script>
+</body>
+</html>

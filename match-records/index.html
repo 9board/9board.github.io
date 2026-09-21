@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>Billiards Match Records</title>
+<style>
+:root{--green:#0ba577;--green2:#07845f;--deep:#123d35;--line:#dbe8e2;--muted:#6b837a;--shadow:0 12px 34px rgba(24,77,62,.10)}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;color:#163a32;background:#f5faf7}
+button,input,select,textarea{font:inherit}button{cursor:pointer}a{color:inherit}
+.app-header{height:100px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center}
+.header-inner{width:100%;max-width:1460px;height:100%;margin:auto;padding:0 20px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.header-brand{flex:0 0 auto;height:82px;display:flex;align-items:center}
+.counter-logo{position:relative;width:380px;height:82px;overflow:hidden;background:#fff}
+.counter-logo img{position:absolute;left:0;top:0;width:360px;height:81px;object-fit:contain;object-position:left center}
+.logo-top-mask{position:absolute;left:86px;top:0;width:190px;height:23px;background:#fff;z-index:2}
+.logo-word-mask{position:absolute;left:244px;top:23px;width:126px;height:58px;background:#fff;z-index:2}
+.counter-logo-word{position:absolute;left:247px;top:42px;z-index:3;display:flex;font-size:29px;line-height:1;font-weight:1000;letter-spacing:-1.2px;white-space:nowrap}
+.counter-logo-word i{font-style:normal}.counter-logo-word i:nth-child(1){color:#08a879}.counter-logo-word i:nth-child(2){color:#f2a71d}.counter-logo-word i:nth-child(3){color:#e9523f}.counter-logo-word i:nth-child(4){color:#3f73cf}.counter-logo-word i:nth-child(5){color:#8457b5}.counter-logo-word i:nth-child(6){color:#0ba577}.counter-logo-word i:nth-child(7){color:#f07b31}
+.topnav{display:flex;gap:8px;align-items:center;flex-wrap:nowrap;overflow:auto}.topnav button{border:0;background:#f5f8f6;color:#274a41;border-radius:999px;padding:11px 15px;font-weight:800;white-space:nowrap}.topnav .active{background:var(--green);color:#fff}
+.wrap{max-width:1460px;margin:0 auto;padding:18px}
+.page-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px}.page-head h1{margin:0;font-size:28px}.page-head p{margin:5px 0 0;color:var(--muted);font-size:13px}
+.page-actions{display:flex;gap:8px;flex-wrap:wrap}.btn{border:1px solid var(--line);border-radius:12px;background:#fff;color:#0a513d;padding:10px 14px;font-weight:900;text-decoration:none}.btn.primary{background:linear-gradient(135deg,var(--green),var(--green2));color:#fff;border:0}
+.panel{background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);overflow:hidden}
+.entry-panel{padding:18px;margin-bottom:16px}.entry-panel[hidden],.calendar-panel[hidden]{display:none!important}.entry-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}.entry-head h2{margin:0;font-size:20px}.entry-head span{font-size:12px;color:var(--muted)}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.field,.layout-box{background:#f8fbf9;border:1px solid var(--line);border-radius:14px;padding:10px 11px;min-width:0}.field .label{display:block;color:#6b837a;font-size:11px;font-weight:900;margin-bottom:5px}.field input,.field select,.field textarea,.layout-box select{width:100%;border:0;outline:0;background:transparent;color:#173e35;font-weight:800;min-width:0}.field textarea{min-height:100px;resize:vertical;line-height:1.55;font-weight:600}.free{display:none;margin-top:8px;border-top:1px solid var(--line)!important;padding-top:8px}.full{grid-column:1/-1}
+.layout-title{font-size:13px;font-weight:950;color:#0b7557;margin:0 0 8px}.layout-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}.layout-meta{display:block;margin-top:7px;color:var(--muted);font-size:10px;font-weight:700;line-height:1.5}
+.entry-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+.calendar-panel{padding:18px;margin-bottom:16px}.calendar-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.calendar-head h2{margin:0;font-size:20px}.calendar-controls{display:flex;align-items:center;gap:8px}.month-label{font-weight:900}.month-count{margin-left:8px;color:var(--green2);font-weight:900}
+.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}.cal-dow,.cal-day{border:1px solid var(--line);border-radius:12px;background:#fff;min-width:0}.cal-dow{padding:8px;text-align:center;background:#f8fbf9;font-size:12px;font-weight:900;color:#678078}.cal-day{min-height:108px;padding:8px}.cal-day.muted{opacity:.35}.cal-num{font-size:12px;font-weight:900;margin-bottom:5px}.cal-event{display:block;background:#e9f8f2;border-radius:8px;padding:5px 6px;margin-top:4px;font-size:11px;line-height:1.35;color:#17483a}.cal-event b{display:block;font-size:11px}.cal-event small{display:block;color:#667e75}
+.records-details{margin-top:16px}.records-details>summary{list-style:none;cursor:pointer;padding:17px 18px;font-size:20px;font-weight:900;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.records-details>summary::-webkit-details-marker{display:none}.records-details>summary::after{content:"▾";font-size:18px}.records-details:not([open])>summary::after{content:"▸"}.summary-sub{font-size:12px;color:var(--muted);font-weight:700;margin-left:auto;margin-right:10px}
+.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:980px}th,td{padding:14px 12px;border-bottom:1px solid #e8efeb;text-align:left;vertical-align:top;font-size:14px;line-height:1.55}th{background:#f8fbf9;color:#668078;font-size:13px;white-space:nowrap}small{font-size:12px;color:var(--muted)}
+.badge{display:inline-block;padding:4px 8px;border-radius:999px;font-weight:900}.win{background:#dff7ea;color:#087040}.lose{background:#ffe7e4;color:#bb3a31}.draw{background:#edf1ef;color:#4e625b}.pending{background:#fff5d8;color:#8b6b00}
+.actions{display:flex;gap:6px;flex-wrap:nowrap}.actions button{border:0;border-radius:999px;background:#eef7f3;color:#07543d;padding:7px 10px;font-weight:900;white-space:nowrap}.actions .danger{background:#fff0ee;color:#b62222}.empty{padding:34px;text-align:center;color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(18px);background:#173e35;color:#fff;border-radius:999px;padding:12px 18px;opacity:0;transition:.22s;z-index:80;white-space:nowrap;box-shadow:0 10px 28px rgba(0,0,0,.18)}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.card-panel{margin-bottom:16px}
+.card-panel[hidden],.records-details[hidden]{display:none!important}
+.card-panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line)}
+.card-panel-head h2{margin:0;font-size:22px}
+.card-panel-head span{font-size:12px;color:var(--muted)}
+.card-count{font-weight:900;color:var(--green2);white-space:nowrap}
+.card-list{display:grid;gap:10px;padding:14px}
+.match-card{border:1px solid var(--line);border-radius:16px;background:#fff;overflow:hidden}
+.match-card-toggle{width:100%;border:0;background:#fff;padding:14px 16px;display:grid;grid-template-columns:130px minmax(0,1fr) auto;gap:14px;align-items:center;text-align:left;color:inherit}
+.match-card-toggle:hover{background:#fbfdfc}
+.match-card-date{font-weight:900;color:#557168;font-size:13px}
+.match-card-main{min-width:0}
+.match-card-title{font-size:16px;font-weight:1000;color:#173f35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.match-card-sub{display:flex;gap:8px;flex-wrap:wrap;margin-top:5px;font-size:12px;color:#6b837a}
+.match-card-score{display:flex;align-items:center;gap:10px;justify-content:flex-end}
+.match-card-score strong{font-size:20px;color:#123d35;white-space:nowrap}
+.match-card-arrow{font-size:18px;transition:.2s}
+.match-card.open .match-card-arrow{transform:rotate(180deg)}
+.match-card-detail{display:none;border-top:1px solid var(--line);background:#f8fbf9;padding:14px 16px}
+.match-card.open .match-card-detail{display:block}
+.match-detail-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 16px}
+.match-detail-item{min-width:0}
+.match-detail-item .k{display:block;font-size:10px;font-weight:900;color:#748b83;margin-bottom:3px}
+.match-detail-item .v{font-size:13px;font-weight:800;color:#274a41;word-break:break-word}
+.match-detail-wide{grid-column:1/-1}
+.match-card-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+.match-card-actions button{border:0;border-radius:999px;background:#eef7f3;color:#07543d;padding:8px 12px;font-weight:900}
+.match-card-actions .danger{background:#fff0ee;color:#b62222}
+.active-view{background:#e4f6ef!important;border-color:#8fd7be!important;color:#076448!important}
+.card-empty{padding:34px;text-align:center;color:var(--muted)}
+
+@media(max-width:900px){.app-header{height:auto;min-height:82px}.header-inner{padding:8px 10px;gap:8px}.counter-logo{width:270px;height:62px}.counter-logo img{width:258px;height:58px}.logo-top-mask{left:62px;width:136px;height:17px}.logo-word-mask{left:175px;top:17px;width:90px;height:42px}.counter-logo-word{left:177px;top:30px;font-size:21px}.calendar-grid{grid-template-columns:repeat(7,minmax(85px,1fr));overflow:auto}.calendar-panel{overflow:auto}}
+@media(max-width:620px){
+.match-card-toggle{grid-template-columns:1fr auto;gap:8px}.match-card-date{grid-column:1/-1}.match-card-score{align-self:start}.match-detail-grid{grid-template-columns:1fr 1fr}.header-inner{flex-wrap:wrap}.header-brand{height:62px}.topnav{width:100%;justify-content:flex-start}.wrap{padding:10px}.page-head{align-items:flex-start;flex-direction:column}.page-actions{width:100%}.page-actions .btn{flex:1}.form-grid{grid-template-columns:1fr}.full{grid-column:auto}.calendar-grid{grid-template-columns:repeat(7,92px)}th,td{font-size:13px;padding:11px 9px}.entry-actions{flex-direction:column}.entry-actions .btn{width:100%}}
+
+/* ===== DEFAULT MATCH LIST / BUTTON FIX ===== */
+.match-card-toggle.title-only{
+  grid-template-columns:minmax(0,1fr) auto!important;
+  padding:15px 16px!important;
+  align-items:center!important;
+}
+.match-card-toggle.title-only .match-card-title{
+  font-size:16px!important;
+  font-weight:1000!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+.match-card-toggle.title-only .match-card-arrow{
+  justify-self:end!important;
+}
+#entryPanel[hidden]{display:none!important}
+
+</style>
+</head>
+<body>
+<header class="app-header"><div class="header-inner">
+  <div class="header-brand"><div class="counter-logo">
+    <img src="assets/brand-logo.png" alt="Billiards 9 Counter">
+    <span class="logo-top-mask"></span><span class="logo-word-mask"></span>
+    <span class="counter-logo-word"><i>C</i><i>o</i><i>u</i><i>n</i><i>t</i><i>e</i><i>r</i></span>
+  </div></div>
+  <nav class="topnav"><button onclick="location.href='../layout/'">⌂ 配置図</button><button onclick="location.href='../counter/'">▣ カウンター</button><button class="active">▣ 対戦記録</button></nav>
+</div></header>
+
+<main class="wrap">
+  <div class="page-head">
+    <div><h1>Billiards Match Records</h1><p>対戦記録の新規登録・カレンダー・一覧</p></div>
+    <div class="page-actions">
+      <button id="newEntryBtn" class="btn primary" type="button">＋ 新規登録</button>
+      <button id="cardBtn" class="btn view-btn active-view" type="button">対戦一覧</button>
+      <button id="calendarBtn" class="btn view-btn" type="button">カレンダー形式で見る</button>
+      <button id="tableBtn" class="btn view-btn" type="button">表形式で見る</button>
+      <button id="csvBtn" class="btn" type="button">CSVで抽出</button>
+    </div>
+  </div>
+
+  <section class="panel entry-panel" id="entryPanel" hidden style="display:none">
+    <div class="entry-head"><h2 id="formTitle">対戦記録を新規登録</h2><span>カウンターを使わない試合もここから登録できます</span></div>
+    <div class="form-grid">
+      <label class="field"><span class="label">日付</span><input id="date" type="date"></label>
+      <label class="field"><span class="label">試合名</span><input id="matchName" placeholder="例：月例会・B級戦"></label>
+      <label class="field"><span class="label">試合会場 / 店舗名</span><input id="shop" placeholder="店舗名を入力"></label>
+      <label class="field"><span class="label">対戦相手</span><input id="opponent" placeholder="相手名"></label>
+      <label class="field"><span class="label">対戦相手の所属店舗</span><input id="opponentShop" placeholder="所属店舗を入力"></label>
+      <label class="field"><span class="label">種目</span><select id="game"><option value=""></option><option>9ボール</option><option>10ボール</option><option>8ボール</option><option>ローテーション</option><option>自由入力</option></select><input id="gameFree" class="free" placeholder="種目を自由入力"></label>
+      <label class="field"><span class="label">形式</span><select id="type"><option value=""></option><option>平場</option><option>セットマッチ</option><option>大会</option><option>練習</option><option>自由入力</option></select><input id="typeFree" class="free" placeholder="形式を自由入力"></label>
+      <label class="field"><span class="label">何先</span><select id="race"><option value=""></option><option>2先</option><option>3先</option><option>4先</option><option>5先</option><option>6先</option><option>自由入力</option></select><input id="raceFree" class="free" placeholder="例：7先・点数制など"></label>
+      <label class="field"><span class="label">エントリーフィー</span><input id="entryFee" inputmode="numeric" placeholder="例：3000円"></label>
+      <label class="field"><span class="label">対戦結果</span><select id="matchResult"><option value=""></option><option>勝ち</option><option>負け</option><option>引き分け</option></select></label>
+      <label class="field"><span class="label">自分のスコア（任意）</span><input id="leftScoreInput" type="number" min="0" inputmode="numeric" placeholder="例：5"></label>
+      <label class="field"><span class="label">相手のスコア（任意）</span><input id="rightScoreInput" type="number" min="0" inputmode="numeric" placeholder="例：3"></label>
+      <label class="field full"><span class="label">メモ</span><textarea id="memo" placeholder="試合内容や反省点など"></textarea></label>
+      <div class="layout-box full">
+        <p class="layout-title">この試合に紐づける配置図</p>
+        <select id="layoutSelect"></select>
+        <div class="layout-actions"><button id="layoutRefresh" class="btn" type="button">配置図リストを更新</button><a class="btn" href="../layout/">配置図を開く</a></div>
+        <small id="layoutMeta" class="layout-meta"></small>
+      </div>
+    </div>
+    <div class="entry-actions"><button id="cancelEdit" class="btn" type="button">閉じる</button><button id="saveRecord" class="btn primary" type="button">✓ 新規登録</button></div>
+  </section>
+
+  <section class="panel card-panel" id="cardPanel">
+    <div class="card-panel-head">
+      <div><h2>対戦記録一覧</h2><span>タイトルを押すと記録内容が開きます</span></div>
+      <div id="cardCount" class="card-count"></div>
+    </div>
+    <div id="cardList" class="card-list"></div>
+  </section>
+
+  <section class="panel calendar-panel" id="calendarPanel" hidden>
+    <div class="calendar-head">
+      <div><h2>カレンダー</h2><div><span id="monthLabel" class="month-label"></span><span id="monthCount" class="month-count"></span></div></div>
+      <div class="calendar-controls"><button id="prevMonth" class="btn" type="button">←</button><button id="todayMonth" class="btn" type="button">今月</button><button id="nextMonth" class="btn" type="button">→</button></div>
+    </div>
+    <div id="calendarGrid" class="calendar-grid"></div>
+  </section>
+
+  <details class="panel records-details" id="tablePanel" hidden open>
+    <summary>対戦記録一覧 <span class="summary-sub">クリックで開閉</span></summary>
+    <div class="table-wrap"><table><thead id="recordsHead"></thead><tbody id="recordsBody"></tbody></table></div>
+  </details>
+</main>
+<div id="toast" class="toast"></div>
+
+<script>
+const $=s=>document.querySelector(s),qa=s=>Array.from(document.querySelectorAll(s)),KEY='poolMatchRecords',LAYOUTS='poolNotes';
+let editingId=null,calDate=new Date();
+function load(k=KEY,d=[]){try{const v=JSON.parse(localStorage.getItem(k));return v??d}catch{return d}}
+function save(v){localStorage.setItem(KEY,JSON.stringify(v))}
+function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function norm(v){v=String(v??'').trim();return v==='自由入力'?'':v}
+function pad(n){return String(Math.max(0,Math.floor(Number(n)||0))).padStart(2,'0')}
+function fmtSec(s){s=Math.max(0,Math.floor(Number(s)||0));return pad(s/3600|0)+':'+pad((s%3600)/60|0)+':'+pad(s%60)}
+function fmtMin(s){s=Math.max(0,Math.floor(Number(s)||0));return pad(s/60|0)+':'+pad(s%60)}
+function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1500)}
+function resultClass(r){return r==='勝ち'?'win':r==='負け'?'lose':r==='引き分け'?'draw':'pending'}
+function formatSavedTime(value){if(!value)return'';const d=new Date(value);return Number.isNaN(d.getTime())?String(value):d.toLocaleString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}
+function valueWithFree(id){const s=$('#'+id),f=$('#'+id+'Free');return s.value==='自由入力'?f.value.trim():s.value.trim()}
+function setSelectWithFree(id,value){const s=$('#'+id),f=$('#'+id+'Free'),opts=[...s.options].map(o=>o.value);const v=norm(value);if(opts.includes(v)){s.value=v;f.value=''}else if(v){s.value='自由入力';f.value=v}else{s.value='';f.value=''}f.style.display=s.value==='自由入力'?'block':'none'}
+['game','type','race'].forEach(id=>$('#'+id).addEventListener('change',()=>{$('#'+id+'Free').style.display=$('#'+id).value==='自由入力'?'block':'none'}));
+function readLayouts(){const v=load(LAYOUTS,[]);return Array.isArray(v)?v.filter(Boolean):[]}
+function layoutTime(x){const t=Date.parse(x?.updatedAt||x?.createdAt||x?.date||'');return Number.isNaN(t)?0:t}
+function refreshLayouts(keep=true){const s=$('#layoutSelect'),cur=keep?s.value:'';const list=readLayouts().sort((a,b)=>layoutTime(b)-layoutTime(a));s.innerHTML='';s.add(new Option('配置図なし',''));list.forEach(x=>s.add(new Option((x.title||'名称なし')+(x.updatedAt||x.createdAt||x.date?'｜'+formatSavedTime(x.updatedAt||x.createdAt||x.date):''),String(x.id))));if(cur&&list.some(x=>String(x.id)===String(cur)))s.value=cur;updateLayoutMeta()}
+function selectedLayout(){const id=$('#layoutSelect').value;return id?readLayouts().find(x=>String(x.id)===String(id))||null:null}
+function updateLayoutMeta(){const x=selectedLayout();$('#layoutMeta').textContent=x?'選択中：'+(x.title||'名称なし'):'配置図メーカーで保存した配置を選べます。'}
+$('#layoutSelect').addEventListener('change',updateLayoutMeta);$('#layoutRefresh').onclick=()=>{refreshLayouts(true);toast('配置図リストを更新しました')};
+function setActiveViewButton(id){qa('.view-btn').forEach(b=>b.classList.toggle('active-view',b.id===id))}
+function showView(view){
+  $('#entryPanel').hidden=true;$('#entryPanel').style.display='none';$('#cardPanel').hidden=view!=='card';$('#calendarPanel').hidden=view!=='calendar';$('#tablePanel').hidden=view!=='table';
+  setActiveViewButton(view==='card'?'cardBtn':view==='calendar'?'calendarBtn':'tableBtn');
+  if(view==='calendar')renderCalendar();
+}
+function showEntry(edit=false){
+  $('#cardPanel').hidden=true;$('#calendarPanel').hidden=true;$('#tablePanel').hidden=true;
+  $('#entryPanel').hidden=false;$('#entryPanel').style.display='block';qa('.view-btn').forEach(b=>b.classList.remove('active-view'));
+  if(!edit)clearForm();scrollTo({top:0,behavior:'smooth'})
+}
+function clearForm(){editingId=null;$('#formTitle').textContent='対戦記録を新規登録';$('#saveRecord').textContent='✓ 新規登録';$('#date').value=new Date().toISOString().slice(0,10);['matchName','shop','opponent','opponentShop','entryFee','leftScoreInput','rightScoreInput','memo'].forEach(id=>$('#'+id).value='');['game','type','race','matchResult'].forEach(id=>$('#'+id).value='');['gameFree','typeFree','raceFree'].forEach(id=>{$('#'+id).value='';$('#'+id).style.display='none'});refreshLayouts(false)}
+function recordFromForm(){const layout=selectedLayout(),l=$('#leftScoreInput').value,r=$('#rightScoreInput').value,scoreEntered=l!==''||r!=='';return{id:editingId||Date.now(),date:$('#date').value,matchName:$('#matchName').value.trim(),shop:$('#shop').value.trim(),opponent:$('#opponent').value.trim(),opponentShop:$('#opponentShop').value.trim(),leftName:'自分',rightName:$('#opponent').value.trim()||'相手',game:valueWithFree('game'),gameSel:$('#game').value,gameFree:$('#gameFree').value,type:valueWithFree('type'),typeSel:$('#type').value,typeFree:$('#typeFree').value,race:valueWithFree('race'),raceSel:$('#race').value,raceFree:$('#raceFree').value,entryFee:$('#entryFee').value.trim(),result:$('#matchResult').value,left:scoreEntered?Number(l||0):null,right:scoreEntered?Number(r||0):null,scoreEntered,matchSec:0,clockUsed:false,layoutId:$('#layoutSelect').value,layoutTitle:layout?(layout.title||'名称なし'):'配置図なし',layoutUpdatedAt:layout?(layout.updatedAt||layout.createdAt||layout.date||''):'',layoutSnapshot:layout?JSON.parse(JSON.stringify(layout)):null,memo:$('#memo').value.trim(),createdAt:new Date().toISOString(),source:'manual'}}
+$('#newEntryBtn').onclick=()=>showEntry(false);$('#cardBtn').onclick=()=>showView('card');$('#tableBtn').onclick=()=>showView('table');$('#cancelEdit').onclick=()=>{editingId=null;showView('card')};
+$('#saveRecord').onclick=()=>{const rec=recordFromForm(),rows=load(KEY,[]),i=rows.findIndex(x=>String(x.id)===String(editingId));if(i>=0){rec.createdAt=rows[i].createdAt||rec.createdAt;rows[i]=rec}else rows.unshift(rec);save(rows);render();renderCards();renderCalendar();toast(i>=0?'更新しました':'登録しました');editingId=null;showView('card')};
+function clockText(r){if(!r.clockUsed)return'';return esc(norm(r.leftName)||'自分')+' '+fmtMin(r.clockLeft??0)+' / '+esc(norm(r.rightName)||'相手')+' '+fmtMin(r.clockRight??0)}
+function meta(r){return[norm(r.game),norm(r.type),norm(r.race)].filter(Boolean).map(esc).join('<br>')}
+function scoreText(r){if(r.scoreEntered===false)return'';if(r.left==null&&r.right==null)return'';return pad(r.left)+'-'+pad(r.right)}
+
+function renderCards(){
+ const rows=load(KEY,[]),list=$('#cardList');$('#cardCount').textContent=rows.length?rows.length+'試合':'';
+ if(!rows.length){list.innerHTML='<div class="card-empty">記録はまだありません。</div>';return}
+ list.innerHTML=rows.map(r=>{
+   const title=norm(r.matchName)||((r.date?String(r.date).replaceAll('-','/')+' ':'')+'対戦記録');
+   const opponent=norm(r.rightName)||norm(r.opponent)||'';
+   const score=scoreText(r);
+   const detailRows=[
+     ['日付',r.date],['試合会場 / 店舗名',r.shop],['対戦相手',opponent],['相手所属店舗',r.opponentShop],
+     ['種目',r.game],['形式',r.type],['何先',r.race],['対戦結果',r.result],['スコア',score],
+     ['エントリーフィー',r.entryFee],['試合時間',Number(r.matchSec||0)>0?fmtSec(r.matchSec):''],
+     ['チェスクロック',r.clockUsed?clockText(r):''],
+     ['配置図',norm(r.layoutTitle)&&norm(r.layoutTitle)!=='配置図なし'?r.layoutTitle:''],
+     ['メモ',r.memo]
+   ].filter(x=>norm(x[1]));
+   return '<article class="match-card" data-id="'+esc(r.id)+'">'+
+     '<button class="match-card-toggle title-only" type="button" onclick="toggleCard(this)">'+
+       '<div class="match-card-title">'+esc(title)+'</div>'+
+       '<span class="match-card-arrow">⌄</span>'+
+     '</button>'+
+     '<div class="match-card-detail">'+
+       (detailRows.length?'<div class="match-detail-grid">'+detailRows.map(x=>'<div class="match-detail-item '+(x[0]==='メモ'?'match-detail-wide':'')+'"><span class="k">'+esc(x[0])+'</span><span class="v">'+esc(x[1])+'</span></div>').join('')+'</div>':'<div class="card-empty">登録内容はありません。</div>')+
+       '<div class="match-card-actions"><button type="button" onclick="editRecord(\''+r.id+'\')">編集</button><button type="button" class="danger" onclick="deleteRecord(\''+r.id+'\')">削除</button></div>'+
+     '</div>'+
+   '</article>';
+ }).join('');
+}
+window.toggleCard=btn=>btn.closest('.match-card').classList.toggle('open');
+
+function render(){const rows=load(KEY,[]),head=$('#recordsHead'),body=$('#recordsBody');if(!rows.length){head.innerHTML='<tr><th>対戦記録</th></tr>';body.innerHTML='<tr><td class="empty">記録はまだありません。</td></tr>';return}
+ const hasMatch=rows.some(r=>norm(r.matchName)),hasShop=rows.some(r=>norm(r.shop)),hasOpponentShop=rows.some(r=>norm(r.opponentShop)),hasLeft=rows.some(r=>norm(r.leftName)),hasRight=rows.some(r=>norm(r.rightName)||norm(r.opponent)),hasScore=rows.some(r=>scoreText(r)),hasResult=rows.some(r=>norm(r.result)),hasFee=rows.some(r=>norm(r.entryFee)),hasTime=rows.some(r=>Number(r.matchSec||0)>0),hasClock=rows.some(r=>!!r.clockUsed),hasMeta=rows.some(r=>[norm(r.game),norm(r.type),norm(r.race)].some(Boolean)),hasLM=rows.some(r=>(norm(r.layoutTitle)&&norm(r.layoutTitle)!=='配置図なし')||norm(r.memo));
+ const cols=[{s:true,l:'日付',c:r=>esc(r.date)},{s:hasMatch,l:'試合名',c:r=>esc(r.matchName)},{s:hasShop,l:'会場',c:r=>esc(r.shop)},{s:hasLeft,l:'自分',c:r=>esc(r.leftName)},{s:hasRight,l:'相手',c:r=>esc(r.rightName||r.opponent)},{s:hasOpponentShop,l:'相手所属店舗',c:r=>esc(r.opponentShop)},{s:hasScore,l:'スコア',c:r=>scoreText(r)},{s:hasResult,l:'結果',c:r=>norm(r.result)?'<span class="badge '+resultClass(r.result)+'">'+esc(r.result)+'</span>':''},{s:hasFee,l:'エントリーフィー',c:r=>esc(r.entryFee)},{s:hasTime,l:'試合時間',c:r=>Number(r.matchSec||0)>0?fmtSec(r.matchSec):''},{s:hasClock,l:'チェスクロック',c:r=>clockText(r)},{s:hasMeta,l:'種目/形式/何先',c:r=>meta(r)},{s:hasLM,l:'配置図/メモ',c:r=>{const p=[];if(norm(r.layoutTitle)&&norm(r.layoutTitle)!=='配置図なし')p.push(esc(r.layoutTitle));if(r.layoutUpdatedAt)p.push('<small>配置更新：'+esc(formatSavedTime(r.layoutUpdatedAt))+'</small>');if(norm(r.memo))p.push('<small>'+esc(r.memo)+'</small>');return p.join('<br>')}},{s:true,l:'操作',c:r=>'<div class="actions"><button onclick="editRecord(\''+r.id+'\')">編集</button><button class="danger" onclick="deleteRecord(\''+r.id+'\')">削除</button></div>'}].filter(x=>x.s);
+ head.innerHTML='<tr>'+cols.map(x=>'<th>'+x.l+'</th>').join('')+'</tr>';body.innerHTML=rows.map(r=>'<tr>'+cols.map(x=>'<td>'+x.c(r)+'</td>').join('')+'</tr>').join('')}
+window.editRecord=id=>{const r=load(KEY,[]).find(x=>String(x.id)===String(id));if(!r)return;editingId=r.id;$('#formTitle').textContent='対戦記録を編集';$('#saveRecord').textContent='✓ 更新する';$('#date').value=r.date||'';$('#matchName').value=r.matchName||'';$('#shop').value=r.shop||'';$('#opponent').value=r.opponent||r.rightName||'';$('#opponentShop').value=r.opponentShop||'';setSelectWithFree('game',r.game);setSelectWithFree('type',r.type);setSelectWithFree('race',r.race);$('#entryFee').value=r.entryFee||'';$('#matchResult').value=r.result||'';$('#leftScoreInput').value=r.left==null?'':r.left;$('#rightScoreInput').value=r.right==null?'':r.right;$('#memo').value=r.memo||'';refreshLayouts(false);if(r.layoutId)$('#layoutSelect').value=String(r.layoutId);updateLayoutMeta();showEntry(true)}
+window.deleteRecord=id=>{if(!confirm('この記録を削除しますか？'))return;save(load(KEY,[]).filter(x=>String(x.id)!==String(id)));render();renderCards();renderCalendar()}
+function localDateKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function renderCalendar(){const y=calDate.getFullYear(),m=calDate.getMonth(),rows=load(KEY,[]),monthRows=rows.filter(r=>{const d=new Date(r.date+'T00:00:00');return !Number.isNaN(d.getTime())&&d.getFullYear()===y&&d.getMonth()===m});$('#monthLabel').textContent=y+'年'+(m+1)+'月';$('#monthCount').textContent='今月 '+monthRows.length+'試合';
+ const grid=$('#calendarGrid');grid.innerHTML='';['日','月','火','水','木','金','土'].forEach(x=>{const e=document.createElement('div');e.className='cal-dow';e.textContent=x;grid.appendChild(e)});
+ const first=new Date(y,m,1),start=new Date(y,m,1-first.getDay());for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);const box=document.createElement('div');box.className='cal-day'+(d.getMonth()!==m?' muted':'');box.innerHTML='<div class="cal-num">'+d.getDate()+'</div>';const key=localDateKey(d);monthRows.filter(r=>r.date===key).forEach(r=>{const ev=document.createElement('div');ev.className='cal-event';const title=norm(r.matchName)||norm(r.opponent)||norm(r.game)||'試合';ev.innerHTML='<b>'+esc(title)+'</b><small>'+(norm(r.shop)?esc(r.shop):'会場未入力')+'</small>';box.appendChild(ev)});grid.appendChild(box)}}
+$('#calendarBtn').onclick=()=>showView('calendar');$('#prevMonth').onclick=()=>{calDate=new Date(calDate.getFullYear(),calDate.getMonth()-1,1);renderCalendar()};$('#nextMonth').onclick=()=>{calDate=new Date(calDate.getFullYear(),calDate.getMonth()+1,1);renderCalendar()};$('#todayMonth').onclick=()=>{calDate=new Date();renderCalendar()};
+$('#csvBtn').onclick=()=>{const rows=load(KEY,[]);if(!rows.length){toast('出力する記録がありません');return}const cols=[['日付','date'],['試合名','matchName'],['会場','shop'],['対戦相手','opponent'],['相手所属店舗','opponentShop'],['種目','game'],['形式','type'],['何先','race'],['エントリーフィー','entryFee'],['結果','result'],['自分スコア','left'],['相手スコア','right'],['試合時間秒','matchSec'],['メモ','memo']];const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';const csv='\uFEFF'+[cols.map(x=>q(x[0])).join(','),...rows.map(r=>cols.map(x=>q(r[x[1]])).join(','))].join('\r\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='billiards-match-records.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
+window.addEventListener('storage',()=>{render();renderCards();renderCalendar()});refreshLayouts(false);clearForm();render();renderCards();renderCalendar();showView('card');
+</script>
+</body></html>
