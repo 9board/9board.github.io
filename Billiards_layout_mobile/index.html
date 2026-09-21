@@ -1,15 +1,47 @@
 <!doctype html>
 <html lang="ja">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-<title>9BOARD</title>
-<script>
-location.replace("../pc/?v=20260921-new9board-1");
-</script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+  <meta name="theme-color" content="#101418" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>ビリヤード配置図メーカー｜球配置・ショットライン作成</title>
+  <meta name="description" content="ビリヤードの球配置とショットラインをブラウザで作成・保存できる無料の配置図メーカー。手球と1〜15番の球に対応。" />
+  <link rel="stylesheet" href="styles.css?v=20260921-9board-clean-1" />
 </head>
-<body><p><a href="../pc/?v=20260921-new9board-1">9BOARDを開く</a></p></body>
+<body>
+  <main class="app">
+    <header class="topbar"><div><p class="eyebrow">BILLIARDS LAYOUT MAKER</p><h1>ビリヤード配置図メーカー</h1></div></header>
+    <nav class="primary-menu" aria-label="画面メニュー">
+      <button id="guideBtn" type="button">配置の作り方</button><button id="savedBtn" type="button">保存した配置</button><button id="matchRecordBtn" type="button" onclick="location.href='../Billiards_counter/'">対戦記録</button>
+      <small class="quick-help"><span>球の削除：PCは右クリック／スマホは長押し</span><span class="menu-help-line">☰ メニュー開閉・ドラッグ移動 / 縦・横：台の向き / ✥ 球を動かす / ▣ 全部まとめて / ↗ 矢印・線 / ◇ 線を消す / ✎ メモを追加 / 💾 配置を保存 / 対戦記録：スコア表と配置図の紐づけ</span></small>
+    </nav>
+    <div class="workspace"><div id="boardColumn" class="board-column portrait"><div class="table-and-tip">
+    <aside id="editorMenu" class="editor-sidebar" data-orientation="portrait" aria-label="台の向きと編集ツール">
+      <div class="menu-drag-handle" aria-label="メニューを移動" title="ここをドラッグして移動">•••</div>
+      <button id="menuToggleBtn" class="menu-toggle-btn" type="button" aria-expanded="true" aria-label="編集メニューを閉じる" title="編集メニューを閉じる"><span aria-hidden="true">×</span><small>閉じる</small></button>
+      <div class="orientation-control" aria-label="台の向き"><div class="editor-row"><span class="tool-help">縦向きの台</span><button id="portraitBtn" type="button" class="active" aria-pressed="true" aria-label="縦向き" title="縦向き">縦</button></div><div class="editor-row"><span class="tool-help">横向きの台</span><button id="landscapeBtn" type="button" aria-pressed="false" aria-label="横向き" title="横向き">横</button></div></div>
+    <nav class="tools" aria-label="編集ツール"><span id="saveState" hidden>未保存</span>
+      <section id="lineColorPanel" class="line-color-panel" hidden aria-label="矢印と線の設定"><div class="color-panel-head"><div><b>矢印・線</b><small>種類と色を選択。もう一度同じ種類を押すと解除</small></div><button id="lineColorClose" class="color-panel-close" type="button" aria-label="設定を閉じる">× 閉じる</button></div><div class="line-width-control" aria-label="線の太さ"><span>太さ</span><input id="lineWidthRange" type="range" min="1" max="8" step="1" value="2" /><span id="lineWidthValue" class="line-width-value">2</span></div><button id="ghostToggle" class="auto-color-btn" type="button" aria-pressed="false">イメージボール OFF</button><small>ONで先玉の反対側に表示。補助球はドラッグで調整でき、調整後も追従します。スマホでは長押しで削除。</small><div class="color-line-types" aria-label="描画の種類"><button id="colorArrowBtn" type="button">↗ 矢印</button><button id="colorPlainBtn" type="button">╱ 線</button></div><button id="autoColorBtn" class="auto-color-btn" type="button">球の色に合わせる（デフォルト）</button><div id="lineColorSwatches" class="line-color-swatches"></div><label class="custom-color">その他の色（自由に選ぶ） <input id="lineColorPicker" type="color" value="#ff2f92" /></label></section>
+      <div class="tools-row">
+        <div class="editor-row"><span class="tool-help">球を動かす</span><button type="button" data-mode="move" class="active" title="移動" aria-label="移動"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 12h18M9 6l3-3 3 3M9 18l3 3 3-3M6 9l-3 3 3 3M18 9l3 3-3 3"/></svg></button></div>
+        <div class="editor-row"><span class="tool-help">全部まとめて</span><button type="button" id="groupMoveBtn" aria-pressed="false" title="まとめて移動" aria-label="まとめて移動"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="12" height="12" rx="2"/><rect x="9" y="9" width="12" height="12" rx="2"/></svg></button></div>
+        <div class="editor-row"><span class="tool-help">矢印・線</span><button type="button" id="drawBtn" title="矢印・線" aria-label="矢印・線"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20L20 4M10 4h10v10"/></svg></button></div>
+        <div class="editor-row"><span class="tool-help">線を消す</span><button type="button" data-mode="erase" title="消去" aria-label="消去"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13l9-9 8 8-9 9H9l-5-5zM9 8l8 8M12 21h9"/></svg></button></div>
+        <div class="editor-row"><span class="tool-help">メモを追加</span><button type="button" id="memoBtn" title="メモ" aria-label="メモ"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-6L16 3l5 5-11 11-6 1zM13 6l5 5"/></svg></button></div>
+        <div class="editor-row"><span class="tool-help" id="saveHelp" aria-live="polite">配置を保存</span><button type="button" id="saveBtn" class="save" title="配置を保存" aria-label="配置を保存"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h12l4 4v14H3V3h2Z"/><path d="M7 3v6h10V3M7 21v-8h10v8M14 5v2"/></svg></button></div>
+      </div></nav></aside>
+    <section class="table-wrap" aria-label="ビリヤード台"><div id="table" class="table"><div class="rail top"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="rail bottom"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="rail left"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="rail right"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="cloth"><div class="head-line"></div><div class="spot head-spot"></div><div class="spot foot-spot"></div><div id="targetGuide" class="target-guide" hidden></div><svg id="lines"></svg><div id="ballsLayer"></div><div id="notesLayer"></div></div><b class="pocket p1"></b><b class="pocket p2"></b><b class="pocket p3"></b><b class="pocket p4"></b><b class="pocket p5"></b><b class="pocket p6"></b></div><div class="hint" id="hint">球をドラッグして配置</div></section>
+    <div class="side-controls"><section class="tip-point" aria-label="撞点"><p class="tip-label">撞点</p><div id="cueDiagram" class="cue-diagram" title="手玉をタップして撞点を記録"><div id="tipMark" class="tip-mark" hidden></div></div><p class="tip-help">赤い点をドラッグ</p><button id="tipClearBtn" class="tip-clear">印を消す</button></section><section class="tray"><div id="trayBalls" class="tray-balls"></div><button id="zoomResetBtn" type="button" title="台の拡大を元に戻す">拡大リセット</button><button id="resetBtn">リセット</button></section></div>
+    </div></div></div></div></main>
+  <dialog id="memoDialog"><form method="dialog"><h2>ショットメモ</h2><textarea id="memo" placeholder="例：右下を撞いて、2クッションで戻す"></textarea><div class="memo-style-grid"><label>文字色 <input id="memoColor" type="color" value="#ffe15b"></label><label>背景色 <input id="memoBackground" type="color" value="#07110d"></label><label>フォント<select id="memoFont"><option value="gothic">ゴシック</option><option value="mincho">明朝</option><option value="rounded">丸ゴシック</option><option value="hand">手書き風</option></select></label><label>文字サイズ<select id="memoSize"><option value="15">小</option><option value="18" selected>中</option><option value="22">大</option></select></label></div><label class="memo-transparent"><input id="memoTransparent" type="checkbox"> 背景色なし</label><div class="memo-actions"><button value="cancel" class="memo-cancel">閉じる</button><button value="ok">完了</button></div></form></dialog>
+  <dialog id="guideDialog" class="guide-dialog"><div class="dialog-head"><div><p class="guide-label">操作ガイド</p><h2>配置の作り方</h2></div><button id="guideCloseBtn" type="button" aria-label="閉じる">×</button></div><ol><li><b>メニューを開く・閉じる・動かす</b><span>「☰」をタップすると開き、「×」で閉じます。閉じた状態では「☰」ボタン自体をドラッグして移動できます。開いた状態では上の「•••」をドラッグします</span></li><li><b>台の向きを選ぶ</b><span>台の左にある「縦」「横」で切り替えます。スマホを横向きにすると、台全体・穴・球・線・メモが一緒に横向きになります。PCでもスマホでも同じ台のデザインを拡大・縮小して表示します</span></li><li><b>左のアイコンで編集する</b><span>台の左に編集アイコンを縦に並べています。各アイコンの左側に短い説明があります。球の移動、まとめて移動、矢印・線、線の消去、メモ、保存をここから選べます</span></li><li><b>球を置く</b><span>球の一覧をタップすると台に追加できます。一覧から置きたい場所へ直接ドラッグ＆ドロップもできます。球同士を近づけると、ぴったり接触する位置にそろいます。拡大・縮小しても位置関係は変わりません。手玉と点線のイメージボールは何個でも置けます</span></li><li><b>矢印・線を描く</b><span>「矢印・線」を開いて種類と色を選びます。選んだ機能は、同じ種類をもう一度押して解除するまで続けて描けます</span></li><li><b>色と太さを指定して描く</b><span>基本は描き始めた球と同じ色です。1〜15番の球色または自由色、線の太さも変更できます</span></li><li><b>移動・追従を外す</b><span>球をつかむと球だけ、矢印・線をつかむとその線だけが動きます。線の先端をつかむと球への追従が外れ、その端を自由に動かせます</span></li><li><b>まとめて移動</b><span>「まとめて移動」を押すと、球・線・メモをどこをつかんでも全部まとめて移動できます。もう一度押すと個別移動に戻ります</span></li><li><b>球を削除する</b><span>PCでは台の上の球を右クリック、スマホでは球を動かさず約0.6秒長押しすると削除できます。タップ・ダブルタップ・ダブルクリックでは球は消えません。ドラッグや2本指の操作を始めると長押し削除はキャンセルされます。消去モードでも球の削除方法は同じです</span></li><li><b>線・メモを削除する</b><span>線・配置したメモはダブルクリックで削除できます。線は「消去」を選んでタップしても削除できます</span></li><li><b>撞点を記録</b><span>大きい手玉をタップし、赤い点を好きな位置へドラッグできます</span></li><li><b>保存済みを開く</b><span>画面上部の「保存した配置」から、保存した配置の一覧を呼び出せます</span></li><li><b>対戦記録に紐づける</b><span>画面上部の「対戦記録」から、保存した配置図をプルダウンで選び、どの試合での配置かを記録できます</span></li></ol><p class="guide-tip">色パネルは「閉じる」かパネルの外側をクリックすると閉じます。保存した配置の「画像を保存」では、画面と同じ向きの台・罫線・穴・球・線・メモ・撞点を1枚の画像として保存できます。</p></dialog>
+  <dialog id="savedDialog"><div class="dialog-head"><h2>保存した配置</h2><button onclick="savedDialog.close()">×</button></div><div class="saved-controls"><div class="saved-view-buttons" aria-label="表示方法"><button id="savedCardView" type="button">カード</button><button id="savedListView" type="button">一覧</button><button type="button" onclick="location.href='../Billiards_counter/'">対戦記録で使う</button></div><label>並び順<select id="savedSort"><option value="newest">更新日時：新しい順</option><option value="oldest">更新日時：古い順</option></select></label></div><div id="savedList"></div></dialog>
+  <script src="app.js?v=20260921-9board-clean-1"></script>
+  <script src="patch-ui.js?v=20260921-9board-clean-1"></script>
+  <script src="patch-pan.js?v=20260921-9board-clean-1"></script>
+  <script src="patch-menu-free.js?v=20260921-9board-clean-1"></script>
+</body>
 </html>
