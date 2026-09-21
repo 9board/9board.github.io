@@ -416,12 +416,18 @@ dialog::backdrop{background:rgba(11,39,31,.34);backdrop-filter:blur(3px)}
 .brand-logo{display:block!important;width:360px!important;height:82px!important;max-width:360px!important;object-fit:contain!important;object-position:left center!important;visibility:visible!important;opacity:1!important}
 @media(max-width:1200px){.brand-logo{width:320px!important;max-width:320px!important;height:74px!important}}
 
+
+/* final header logo fix */
+.app-header{overflow:visible!important;z-index:999!important}
+.brand{position:relative!important;z-index:1000!important;flex:0 0 360px!important;width:360px!important;min-width:360px!important;height:82px!important;overflow:visible!important}
+.brand-logo{position:relative!important;z-index:1001!important;display:block!important;width:360px!important;height:82px!important;max-width:360px!important;max-height:82px!important;object-fit:contain!important;object-position:left center!important;visibility:visible!important;opacity:1!important}
+
 </style>
 </head>
 <body>
 <header class="app-header">
   <div class="brand">
-    <img class="brand-logo" src="https://raw.githubusercontent.com/9board/9board.github.io/main/pc/assets/brand-logo-live.webp?v=8" alt="9BOARD">
+    <img class="brand-logo" src="assets/9board-logo-verified.webp?v=10" alt="9BOARD">
   </div>
   <nav class="topnav">
     <button class="active">⌂ 配置図</button><button type="button" onclick="openCounterPage()">▣ カウンター</button><button type="button" onclick="window.open('../Billiardsmatch-records/','_blank')">▣ 対戦記録</button>
