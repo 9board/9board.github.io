@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>9BOARD Layout</title>
+<meta name="robots" content="noindex">
+<script>
+(function(){
+  var isMobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||
+    window.matchMedia('(max-width: 900px)').matches;
+  location.replace(isMobile?'../mobile/':'../pc/');
+})();
+</script>
+</head>
+<body><noscript><p><a href="../pc/">PC版</a> / <a href="../mobile/">スマホ版</a></p></noscript></body>
+</html>
