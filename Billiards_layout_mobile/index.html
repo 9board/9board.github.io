@@ -9,7 +9,7 @@
   <meta http-equiv="Expires" content="0" />
   <title>ビリヤード配置図メーカー｜球配置・ショットライン作成</title>
   <meta name="description" content="ビリヤードの球配置とショットラインをブラウザで作成・保存できる無料の配置図メーカー。手球と1〜15番の球に対応。" />
-  <link rel="stylesheet" href="styles.css?v=74" />
+  <link rel="stylesheet" href="styles.css?v=20260921-9board-clean-1" />
 </head>
 <body>
   <main class="app">
@@ -39,9 +39,9 @@
   <dialog id="memoDialog"><form method="dialog"><h2>ショットメモ</h2><textarea id="memo" placeholder="例：右下を撞いて、2クッションで戻す"></textarea><div class="memo-style-grid"><label>文字色 <input id="memoColor" type="color" value="#ffe15b"></label><label>背景色 <input id="memoBackground" type="color" value="#07110d"></label><label>フォント<select id="memoFont"><option value="gothic">ゴシック</option><option value="mincho">明朝</option><option value="rounded">丸ゴシック</option><option value="hand">手書き風</option></select></label><label>文字サイズ<select id="memoSize"><option value="15">小</option><option value="18" selected>中</option><option value="22">大</option></select></label></div><label class="memo-transparent"><input id="memoTransparent" type="checkbox"> 背景色なし</label><div class="memo-actions"><button value="cancel" class="memo-cancel">閉じる</button><button value="ok">完了</button></div></form></dialog>
   <dialog id="guideDialog" class="guide-dialog"><div class="dialog-head"><div><p class="guide-label">操作ガイド</p><h2>配置の作り方</h2></div><button id="guideCloseBtn" type="button" aria-label="閉じる">×</button></div><ol><li><b>メニューを開く・閉じる・動かす</b><span>「☰」をタップすると開き、「×」で閉じます。閉じた状態では「☰」ボタン自体をドラッグして移動できます。開いた状態では上の「•••」をドラッグします</span></li><li><b>台の向きを選ぶ</b><span>台の左にある「縦」「横」で切り替えます。スマホを横向きにすると、台全体・穴・球・線・メモが一緒に横向きになります。PCでもスマホでも同じ台のデザインを拡大・縮小して表示します</span></li><li><b>左のアイコンで編集する</b><span>台の左に編集アイコンを縦に並べています。各アイコンの左側に短い説明があります。球の移動、まとめて移動、矢印・線、線の消去、メモ、保存をここから選べます</span></li><li><b>球を置く</b><span>球の一覧をタップすると台に追加できます。一覧から置きたい場所へ直接ドラッグ＆ドロップもできます。球同士を近づけると、ぴったり接触する位置にそろいます。拡大・縮小しても位置関係は変わりません。手玉と点線のイメージボールは何個でも置けます</span></li><li><b>矢印・線を描く</b><span>「矢印・線」を開いて種類と色を選びます。選んだ機能は、同じ種類をもう一度押して解除するまで続けて描けます</span></li><li><b>色と太さを指定して描く</b><span>基本は描き始めた球と同じ色です。1〜15番の球色または自由色、線の太さも変更できます</span></li><li><b>移動・追従を外す</b><span>球をつかむと球だけ、矢印・線をつかむとその線だけが動きます。線の先端をつかむと球への追従が外れ、その端を自由に動かせます</span></li><li><b>まとめて移動</b><span>「まとめて移動」を押すと、球・線・メモをどこをつかんでも全部まとめて移動できます。もう一度押すと個別移動に戻ります</span></li><li><b>球を削除する</b><span>PCでは台の上の球を右クリック、スマホでは球を動かさず約0.6秒長押しすると削除できます。タップ・ダブルタップ・ダブルクリックでは球は消えません。ドラッグや2本指の操作を始めると長押し削除はキャンセルされます。消去モードでも球の削除方法は同じです</span></li><li><b>線・メモを削除する</b><span>線・配置したメモはダブルクリックで削除できます。線は「消去」を選んでタップしても削除できます</span></li><li><b>撞点を記録</b><span>大きい手玉をタップし、赤い点を好きな位置へドラッグできます</span></li><li><b>保存済みを開く</b><span>画面上部の「保存した配置」から、保存した配置の一覧を呼び出せます</span></li><li><b>対戦記録に紐づける</b><span>画面上部の「対戦記録」から、保存した配置図をプルダウンで選び、どの試合での配置かを記録できます</span></li></ol><p class="guide-tip">色パネルは「閉じる」かパネルの外側をクリックすると閉じます。保存した配置の「画像を保存」では、画面と同じ向きの台・罫線・穴・球・線・メモ・撞点を1枚の画像として保存できます。</p></dialog>
   <dialog id="savedDialog"><div class="dialog-head"><h2>保存した配置</h2><button onclick="savedDialog.close()">×</button></div><div class="saved-controls"><div class="saved-view-buttons" aria-label="表示方法"><button id="savedCardView" type="button">カード</button><button id="savedListView" type="button">一覧</button><button type="button" onclick="location.href='../Billiards_counter/'">対戦記録で使う</button></div><label>並び順<select id="savedSort"><option value="newest">更新日時：新しい順</option><option value="oldest">更新日時：古い順</option></select></label></div><div id="savedList"></div></dialog>
-  <script src="app.js?v=64"></script>
-  <script src="patch-ui.js?v=8"></script>
-  <script src="patch-pan.js?v=3"></script>
-  <script src="patch-menu-free.js?v=5"></script>
+  <script src="app.js?v=20260921-9board-clean-1"></script>
+  <script src="patch-ui.js?v=20260921-9board-clean-1"></script>
+  <script src="patch-pan.js?v=20260921-9board-clean-1"></script>
+  <script src="patch-menu-free.js?v=20260921-9board-clean-1"></script>
 </body>
 </html>
