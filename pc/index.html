@@ -669,6 +669,79 @@ dialog::backdrop{background:rgba(11,39,31,.34);backdrop-filter:blur(3px)}
 .mini-ball.cue::after{width:8px!important;height:8px!important}
 #diagram .ball.cue::after{width:4px!important;height:4px!important}
 
+
+/* ===== exact photographed-ball sprite ===== */
+.mini-ball:not(.ghost-pick),
+#diagram .ball:not(.ghost){
+  background-color:transparent!important;
+  background-image:var(--ball-photo)!important;
+  background-size:400% 400%!important;
+  background-repeat:no-repeat!important;
+  border:0!important;
+  box-shadow:0 2px 7px rgba(0,0,0,.24)!important;
+}
+.mini-ball:not(.ghost-pick)::before,
+.mini-ball:not(.ghost-pick)::after,
+#diagram .ball:not(.ghost)::before,
+#diagram .ball:not(.ghost)::after{
+  content:none!important;
+  display:none!important;
+}
+.mini-ball:not(.ghost-pick) span,
+#diagram .ball:not(.ghost) span{
+  display:none!important;
+}
+/* inline style background image is authoritative */
+.mini-ball:not(.ghost-pick),
+#diagram .ball:not(.ghost){
+  background-image:url("./assets/billiard-balls-photo-sprite.webp?v=1")!important;
+}
+
+/* ghost ring stays the same dash count in palette and on table */
+.mini-ball.ghost-pick,
+#diagram .ball.ghost{
+  background-image:none!important;
+  background-color:transparent!important;
+}
+.mini-ball.ghost-pick::before,
+#diagram .ball.ghost::before{
+  background:repeating-conic-gradient(#e53333 0 12deg,transparent 12deg 30deg)!important;
+}
+
+/* same long-neck mascot art, transparent, peeking from the TOP edge */
+.panel-bird{
+  position:absolute!important;
+  top:-60px!important;
+  left:28px!important;
+  right:auto!important;
+  width:170px!important;
+  height:82px!important;
+  z-index:20!important;
+  pointer-events:none!important;
+  overflow:hidden!important;
+  background-image:url("./assets/9board-bird-transparent.webp?v=1")!important;
+  background-repeat:no-repeat!important;
+  background-size:165px auto!important;
+  background-position:left 0!important;
+  transform:rotate(-2deg)!important;
+  transform-origin:left bottom!important;
+}
+.right-panel{margin-top:34px!important}
+
+/* tighten left menu so the longest label never clips; all buttons same size */
+.layout{grid-template-columns:174px minmax(520px,1fr) 290px!important}
+.left-panel{width:174px!important;box-sizing:border-box!important}
+.tool{
+  height:50px!important;
+  min-height:50px!important;
+  max-height:50px!important;
+  padding:6px 4px!important;
+  grid-template-columns:26px minmax(0,1fr) 24px!important;
+}
+.tool .ico{width:26px!important;height:26px!important;left:auto!important}
+.tool .text{font-size:11.5px!important;overflow:visible!important}
+.tool[data-tool="group"] .text{font-size:10.5px!important;letter-spacing:-.03em!important}
+
 </style>
 </head>
 <body>
@@ -842,6 +915,21 @@ const colors = {
   1:"#edbb22",2:"#113d9c",3:"#a91f16",4:"#dc4438",5:"#e9681f",6:"#00583b",7:"#76501b",8:"#171a18",
   9:"#edbb22",10:"#113d9c",11:"#a91f16",12:"#dc4438",13:"#e9681f",14:"#00583b",15:"#76501b"
 };
+const ballSpritePos={
+  0:[0,3],1:[0,0],2:[1,0],3:[2,0],4:[3,0],
+  5:[3,1],6:[2,1],7:[1,1],8:[0,1],
+  9:[0,2],10:[1,2],11:[2,2],12:[3,2],
+  13:[3,3],14:[2,3],15:[1,3]
+};
+function applyBallSprite(el,n,isGhost=false){
+  if(isGhost)return;
+  const p=ballSpritePos[n];
+  if(!p)return;
+  el.style.backgroundImage='url("./assets/billiard-balls-photo-sprite.webp?v=1")';
+  el.style.backgroundSize='400% 400%';
+  el.style.backgroundPosition=(p[0]*33.333333)+'% '+(p[1]*33.333333)+'%';
+  el.style.backgroundRepeat='no-repeat';
+}
 const state = {
   orientation:"landscape", tool:"move", lineType:"arrow", lineColor:"#ffffff", lineWidth:1,
   zoom:1, grid:true, pockets:true, pet:false, ghost:false, tip:{x:.5,y:.5},
@@ -925,6 +1013,7 @@ function buildPalette(){
     const b=document.createElement("button"); b.className="ball-pick"; b.title=isGhost?"イメージボール":n===0?"手玉":`${n}番`;
     const m=document.createElement("span");
     m.className="mini-ball"+(n===0?" cue":"")+(isGhost?" ghost-pick":"")+(n>=1 && n<=8?" solid":"")+(n>=9?" stripe":"");
+    applyBallSprite(m,n,isGhost);
     if(n) m.style.setProperty("--ball-color", colors[n]);
     if(n){ const s=document.createElement("span"); s.textContent=n; m.appendChild(s); }
     b.appendChild(m);
@@ -983,6 +1072,7 @@ function renderBalls(){
   state.balls.forEach(b=>{
     const el=document.createElement("div");
     el.className="ball"+(b.n===0?" cue":"")+(b.n>=1&&b.n<=8?" solid":"")+(b.n>=9?" stripe":"")+(b.ghost?" ghost":"");
+    applyBallSprite(el,b.n,b.ghost);
     el.dataset.id=b.id; el.style.left=(b.x*100)+"%"; el.style.top=(b.y*100)+"%";
     if(b.n) el.style.setProperty("--ball-color", colors[b.n]);
     if(b.n){ const sp=document.createElement("span"); sp.textContent=b.n; el.appendChild(sp); }
