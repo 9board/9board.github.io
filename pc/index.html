@@ -930,6 +930,38 @@ dialog::backdrop{background:rgba(11,39,31,.34);backdrop-filter:blur(3px)}
   transform-origin:left bottom!important;
 }
 
+
+/* ===== final correction: remove panel bird and restore ghost ball ===== */
+.panel-bird{display:none!important}
+.right-panel{margin-top:0!important}
+
+.mini-ball.ghost-pick,
+#diagram .ball.ghost{
+  width:31px!important;
+  height:31px!important;
+  min-width:31px!important;
+  min-height:31px!important;
+  box-sizing:border-box!important;
+  border:2px dashed #e53333!important;
+  border-radius:50%!important;
+  background:transparent!important;
+  background-image:none!important;
+  box-shadow:none!important;
+  opacity:1!important;
+  overflow:visible!important;
+}
+.mini-ball.ghost-pick::before,
+.mini-ball.ghost-pick::after,
+#diagram .ball.ghost::before,
+#diagram .ball.ghost::after{
+  content:none!important;
+  display:none!important;
+}
+#diagram .ball.ghost span,
+.mini-ball.ghost-pick span{
+  display:none!important;
+}
+
 </style>
 </head>
 <body>
@@ -1022,8 +1054,7 @@ dialog::backdrop{background:rgba(11,39,31,.34);backdrop-filter:blur(3px)}
   </section>
 
   <aside class="panel right-panel">
-    <div class="panel-bird" aria-hidden="true"></div>
-    <div class="right-scroll">
+<div class="right-scroll">
     <section class="section">
       <div class="section-title">🎱 ボール</div>
       <div class="ball-palette" id="ballPalette"></div>
