@@ -22,8 +22,9 @@ button,input,select,textarea{font:inherit}button{border:0}
 .wrap{padding:14px 16px 0}
 .section-title{display:flex;justify-content:space-between;align-items:center;margin:20px 2px 10px}.section-title h2{font-size:18px;margin:0}.section-title button{background:none;color:var(--muted);font-size:12px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
-.feature{background:#fff;border:1px solid #f0f1f3;border-radius:22px;padding:16px;min-height:120px;display:flex;flex-direction:column;align-items:flex-start;box-shadow:0 5px 16px rgba(20,28,38,.045)}
-.feature b{margin-top:auto;font-size:15px}.feature small{font-size:11px;color:var(--muted);margin-top:3px}.ficon{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;font-size:22px;font-weight:900}.green{background:#e4f4ed;color:#117354}.blue{background:#e7f0fd;color:#1a64bb}.yellow{background:#fff7cf;color:#9e7700}.red{background:#fde8e9;color:#c23038}
+.feature{background:#fff;border:1px solid #f0f1f3;border-radius:22px;padding:12px 12px 14px;min-height:154px;display:flex;flex-direction:column;align-items:center;text-align:center;box-shadow:0 5px 16px rgba(20,28,38,.045)}
+.feature b{margin-top:auto;font-size:15px}.feature small{font-size:11px;color:var(--muted);margin-top:3px}.feature-art{width:100%;height:88px;object-fit:contain;display:block;margin:0 auto 7px}.ficon{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;font-size:22px;font-weight:900}.green{background:#e4f4ed;color:#117354}.blue{background:#e7f0fd;color:#1a64bb}.yellow{background:#fff7cf;color:#9e7700}.red{background:#fde8e9;color:#c23038}
+.counter-hero{width:min(250px,72vw);height:180px;object-fit:contain;display:block;margin:0 auto 10px;border-radius:18px;background:#fff}
 .card,.menu-card{background:#fff;border-radius:22px;border:1px solid #f0f1f3;overflow:hidden;box-shadow:0 5px 16px rgba(20,28,38,.045)}
 .summary-row,.menu-row{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:15px 16px;border:0;border-bottom:1px solid var(--line);background:#fff;color:var(--ink);text-align:left}.summary-row:last-child,.menu-row:last-child{border-bottom:0}.summary-row strong{font-size:14px}.summary-row small{display:block;color:var(--muted);font-size:11px;margin-top:3px}.badge{padding:5px 9px;background:#f1f3f5;border-radius:999px;font-size:12px;font-weight:800}
 .page-head{display:flex;justify-content:space-between;align-items:center;padding:4px 2px 10px}.page-head h1{font-size:23px;margin:0}.page-head button{padding:10px 13px;border-radius:12px;background:#eef1f3;color:#34404c;border:1px solid #e1e5e9;font-weight:900;font-size:12px}
@@ -53,7 +54,7 @@ button,input,select,textarea{font:inherit}button{border:0}
 .counter-row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px}.player{text-align:center}.player input{width:100%;text-align:center;border:0;background:#f5f7f7;border-radius:10px;padding:8px;font-weight:900}.score{font-size:56px;font-weight:950;color:#1d4e42;line-height:1.15;margin:12px 0}.vs{font-weight:950;color:#839088}.score-controls{display:grid;grid-template-columns:1fr 1fr;gap:7px}.score-controls button{height:42px;border-radius:12px;background:#edf7f3;color:#087457;font-size:24px;font-weight:900}.race{display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:14px;border-top:1px solid var(--line);font-size:12px;font-weight:900}.race select{border:1px solid var(--line);border-radius:10px;padding:8px;background:#fff}
 .new-form{display:none;background:#fff;border-radius:22px;padding:14px;margin-bottom:12px;border:1px solid #eef0f2}.new-form.show{display:grid;gap:10px}.new-form label{display:grid;gap:5px;font-size:11px;font-weight:800;color:#59616a}.new-form input,.new-form select,.new-form textarea{border:1px solid #dfe3e7;border-radius:11px;padding:10px;background:#fff}.new-form textarea{min-height:90px}.cols{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 .bottom-nav{position:absolute;left:0;right:0;bottom:0;z-index:40;height:calc(var(--nav) + env(safe-area-inset-bottom));padding:8px 6px env(safe-area-inset-bottom);display:grid;grid-template-columns:repeat(5,1fr);background:rgba(255,255,255,.97);border-top:1px solid var(--line);backdrop-filter:blur(12px)}
-.nav-btn{background:none;color:#778087;font-size:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}.nav-btn span{font-size:9px;font-weight:800}.nav-btn.active{color:var(--green2)}
+.nav-btn{background:none;color:#778087;font-size:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0}.nav-btn span{font-size:9px;font-weight:800}.nav-btn.active{color:var(--green2)}.nav-art{width:36px;height:36px;object-fit:contain;display:block;border-radius:8px;background:#fff}.nav-btn.active .nav-art{outline:2px solid rgba(7,132,95,.18);outline-offset:1px}
 .toast{position:absolute;left:50%;bottom:calc(var(--nav) + 16px);transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#22312c;color:#fff;border-radius:999px;padding:9px 14px;font-size:12px;font-weight:800;transition:.18s;z-index:60}.toast.show{opacity:1;transform:translate(-50%,0)}
 @media(max-width:390px){.brand-logo{height:74px}.feature{min-height:108px}.tool{min-width:64px}.score{font-size:48px}}
 
@@ -62,20 +63,20 @@ button,input,select,textarea{font:inherit}button{border:0}
 .section-title>span{font-size:12px;color:var(--muted)}
 </style>
 </head>
-<body data-build="2026-09-21-2305">
+<body data-build="2026-09-22-0757">
 <div class="phone">
 <main class="app-view" id="appView">
 <section class="screen active" data-screen="home">
 <header class="home-header">
-<img class="brand-logo" src="https://raw.githubusercontent.com/waraka2026/pool-note/main/assets/brand-logo.png" alt="9BOARD">
+<img class="brand-logo" src="./assets/9board-logo-20260922.jpg?v=20260922-1" alt="9BOARD">
 <p class="tagline">Billiardsを記録するアプリ</p>
 </header>
 <div class="wrap">
 <div class="section-title"><h2>よく使う機能</h2><span>タップして開く</span></div>
 <div class="grid2">
-<button class="feature jump" data-to="layout"><span class="ficon green">◫</span><b>配置図</b><small>球・線・矢印・メモ</small></button>
-<button class="feature jump" data-to="counter"><span class="ficon blue">#</span><b>カウンター</b><small>平場のスコア記録</small></button>
-<button class="feature jump" data-to="matches"><span class="ficon yellow">▤</span><b>対戦記録</b><small>大会・結果・メモ</small></button>
+<button class="feature jump" data-to="layout"><img class="feature-art" src="./assets/layout-20260922.jpg?v=20260922-1" alt=""><b>配置図</b><small>球・線・矢印・メモ</small></button>
+<button class="feature jump" data-to="counter"><img class="feature-art" src="./assets/counter-20260922.jpg?v=20260922-1" alt=""><b>カウンター</b><small>平場のスコア記録</small></button>
+<button class="feature jump" data-to="matches"><img class="feature-art" src="./assets/matches-20260922.jpg?v=20260922-1" alt=""><b>対戦記録</b><small>大会・結果・メモ</small></button>
 <button class="feature jump" data-to="menu"><span class="ficon red">☰</span><b>その他</b><small>保存データ・設定</small></button>
 </div>
 <div class="section-title"><h2>アプリの状態</h2><button id="refreshSummary">更新</button></div>
@@ -122,6 +123,7 @@ button,input,select,textarea{font:inherit}button{border:0}
 <section class="screen" data-screen="counter">
 <header class="topbar"><div><strong>カウンター</strong><small>Practice Counter</small></div><button id="resetCounter" class="circle-btn">↻</button></header>
 <div class="wrap">
+<img class="counter-hero" src="./assets/counter-stopwatch-20260922.jpg?v=20260922-1" alt="ストップウォッチを見る鳥">
 <div class="page-head"><h1>スコア</h1><button id="saveCounter">記録する</button></div>
 <div class="counter-card">
 <div class="counter-row">
@@ -171,10 +173,10 @@ button,input,select,textarea{font:inherit}button{border:0}
 </main>
 
 <nav class="bottom-nav">
-<button class="nav-btn active" data-to="home">⌂<span>ホーム</span></button>
-<button class="nav-btn" data-to="layout">◫<span>配置図</span></button>
-<button class="nav-btn" data-to="counter">#<span>カウンター</span></button>
-<button class="nav-btn" data-to="matches">▤<span>対戦記録</span></button>
+<button class="nav-btn active" data-to="home"><img class="nav-art" src="./assets/home-20260922.jpg?v=20260922-1" alt=""><span>ホーム</span></button>
+<button class="nav-btn" data-to="layout"><img class="nav-art" src="./assets/layout-20260922.jpg?v=20260922-1" alt=""><span>配置図</span></button>
+<button class="nav-btn" data-to="counter"><img class="nav-art" src="./assets/counter-20260922.jpg?v=20260922-1" alt=""><span>カウンター</span></button>
+<button class="nav-btn" data-to="matches"><img class="nav-art" src="./assets/matches-20260922.jpg?v=20260922-1" alt=""><span>対戦記録</span></button>
 <button class="nav-btn" data-to="menu">⚙︎<span>メニュー</span></button>
 </nav>
 <div class="toast" id="toast"></div>
@@ -231,7 +233,7 @@ felt.addEventListener("pointercancel",()=>{drawing=null;renderLayout();hideAim()
 
 const ballbar=$("#ballbar");
 for(let n=0;n<=15;n++){const b=document.createElement("button"),m=document.createElement("div");m.className="palette-ball "+(n===0?"cue":n<=8?"solid":"stripe");if(n)m.style.setProperty("--ball-color",colors[n]);const s=document.createElement("span");s.textContent=n||"";m.appendChild(s);b.appendChild(m);let start=null,preview=null;b.addEventListener("pointerdown",e=>{start={x:e.clientX,y:e.clientY,moved:false};b.setPointerCapture?.(e.pointerId);e.preventDefault()});b.addEventListener("pointermove",e=>{if(!start)return;if(!start.moved&&Math.hypot(e.clientX-start.x,e.clientY-start.y)>5){start.moved=true;preview=m.cloneNode(true);preview.style.position="fixed";preview.style.zIndex="999";preview.style.pointerEvents="none";preview.style.left=e.clientX+"px";preview.style.top=e.clientY+"px";document.body.appendChild(preview)}if(start.moved){preview.style.left=e.clientX+"px";preview.style.top=e.clientY+"px";showAim(e)}});const end=(e,cancel=false)=>{if(!start)return;const moved=start.moved;preview?.remove();preview=null;start=null;hideAim();if(cancel)return;const r=felt.getBoundingClientRect();if(moved&&e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom)addBall(n,point(e));else if(!moved)addBall(n)};b.addEventListener("pointerup",e=>end(e));b.addEventListener("pointercancel",e=>end(e,true));ballbar.appendChild(b)}
-$$$(".tool[data-tool]").forEach(b=>b.onclick=()=>{$$$(".tool[data-tool]").forEach(x=>x.classList.remove("active"));b.classList.add("active");tool=b.dataset.tool});
+$(".tool[data-tool]").forEach(b=>b.onclick=()=>{$(".tool[data-tool]").forEach(x=>x.classList.remove("active"));b.classList.add("active");tool=b.dataset.tool});
 $("#clearLayout").onclick=()=>{if(confirm("配置をリセットしますか？")){balls=[];lines=[];memos=[];commit();renderLayout();setZoom(1)}};
 $("#saveLayout").onclick=()=>{const title=prompt("保存名","配置 "+new Date().toLocaleString("ja-JP",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"}));if(!title)return;const list=store.get("9b_layouts");list.unshift({id:Date.now(),title,date:new Date().toISOString(),balls:structuredClone(balls),lines:structuredClone(lines),memos:structuredClone(memos)});store.set("9b_layouts",list);renderSaved();renderHome();toast("配置を保存しました")};
 $("#clearSavedLayouts").onclick=()=>{if(confirm("保存した配置をすべて削除しますか？")){store.set("9b_layouts",[]);renderSaved();renderHome()}};
@@ -240,7 +242,7 @@ $("#exportPng").onclick=()=>{const c=document.createElement("canvas");c.width=12
 
 const toolbar=$("#layoutToolbar");let tdrag=null;toolbar.addEventListener("pointerdown",e=>{if(e.target.closest("button"))return;tdrag={x:e.clientX,left:toolbar.scrollLeft}});toolbar.addEventListener("pointermove",e=>{if(tdrag)toolbar.scrollLeft=tdrag.left-(e.clientX-tdrag.x)});toolbar.addEventListener("pointerup",()=>tdrag=null);toolbar.addEventListener("pointercancel",()=>tdrag=null);
 
-let score={p1:0,p2:0};$$$("[data-score]").forEach(b=>b.onclick=()=>{const k=b.dataset.score;score[k]=Math.max(0,score[k]+Number(b.dataset.delta));$("#"+k+"score").textContent=score[k]});$("#resetCounter").onclick=()=>{score={p1:0,p2:0};$("#p1score").textContent=$("#p2score").textContent=0};$("#saveCounter").onclick=()=>{const list=store.get("9b_counter");list.unshift({id:Date.now(),date:new Date().toISOString(),p1:$("#p1name").value,p2:$("#p2name").value,s1:score.p1,s2:score.p2,type:$("#raceType").value});store.set("9b_counter",list);renderCounter();renderHome();toast("スコアを記録しました")};$("#clearCounterHistory").onclick=()=>{store.set("9b_counter",[]);renderCounter();renderHome()};
+let score={p1:0,p2:0};$("[data-score]").forEach(b=>b.onclick=()=>{const k=b.dataset.score;score[k]=Math.max(0,score[k]+Number(b.dataset.delta));$("#"+k+"score").textContent=score[k]});$("#resetCounter").onclick=()=>{score={p1:0,p2:0};$("#p1score").textContent=$("#p2score").textContent=0};$("#saveCounter").onclick=()=>{const list=store.get("9b_counter");list.unshift({id:Date.now(),date:new Date().toISOString(),p1:$("#p1name").value,p2:$("#p2name").value,s1:score.p1,s2:score.p2,type:$("#raceType").value});store.set("9b_counter",list);renderCounter();renderHome();toast("スコアを記録しました")};$("#clearCounterHistory").onclick=()=>{store.set("9b_counter",[]);renderCounter();renderHome()};
 function renderCounter(){const list=store.get("9b_counter"),el=$("#counterHistory");el.innerHTML=list.length?list.map(x=>`<div class="summary-row"><div><strong>${esc(x.p1)} ${x.s1} - ${x.s2} ${esc(x.p2)}</strong><small>${esc(x.type)} ・ ${new Date(x.date).toLocaleString("ja-JP")}</small></div></div>`).join(""):'<div class="summary-row"><strong>まだ履歴はありません</strong></div>'}
 
 const form=$("#matchForm");function showForm(on){form.classList.toggle("show",on)}$("#newMatchBtn").onclick=$("#newMatchText").onclick=()=>{showForm(!form.classList.contains("show"));$("#matchDate").value ||= new Date().toISOString().slice(0,10)};$("#cancelMatch").onclick=()=>showForm(false);form.onsubmit=e=>{e.preventDefault();const list=store.get("9b_matches");list.unshift({id:Date.now(),date:$("#matchDate").value,status:$("#matchStatus").value,title:$("#matchTitle").value||"無題",venue:$("#matchVenue").value,opponent:$("#matchOpponent").value,result:$("#matchResult").value,race:$("#matchRace").value,fee:$("#matchFee").value,url:$("#matchUrl").value,memo:$("#matchMemo").value});store.set("9b_matches",list);form.reset();showForm(false);renderMatches();renderHome();toast("対戦記録を保存しました")};
