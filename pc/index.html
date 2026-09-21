@@ -47,7 +47,7 @@ body{overflow-x:hidden}
 }
 .quick-help b{color:#0b8e67}
 .layout{
-  display:grid;grid-template-columns:220px minmax(520px,1fr) 290px;
+  display:grid;grid-template-columns:190px minmax(520px,1fr) 290px;
   gap:14px;padding:16px;max-width:1536px;margin:0 auto;min-height:calc(100vh - 122px)
 }
 .panel{
@@ -56,7 +56,7 @@ body{overflow-x:hidden}
 
 /* left menu */
 .left-panel{
-  padding:14px;max-height:calc(100vh - 138px);overflow:auto;position:sticky;top:122px;align-self:start
+  padding:10px;max-height:calc(100vh - 138px);overflow:auto;position:sticky;top:122px;align-self:start
 }
 .left-panel::-webkit-scrollbar{width:7px}
 .left-panel::-webkit-scrollbar-thumb{background:#cdded6;border-radius:9px}
@@ -67,12 +67,12 @@ body{overflow-x:hidden}
 .orientation button.active{background:var(--green);color:#fff;border-color:var(--green)}
 .tool-list{display:grid;gap:8px}
 .tool{
-  width:100%;display:flex;align-items:center;gap:12px;min-height:54px;border:1px solid var(--line);
-  border-radius:14px;background:#fff;color:#23463d;padding:9px 12px;font-weight:800;text-align:left
+  width:100%;display:flex;align-items:center;justify-content:center;gap:0;min-height:52px;border:1px solid var(--line);
+  border-radius:14px;background:#fff;color:#23463d;padding:9px 38px;font-weight:800;text-align:center;position:relative
 }
 .tool .ico{
   width:30px;height:30px;border-radius:9px;background:#eef7f3;display:grid;place-items:center;
-  font-size:19px;color:#0b6f56;flex:0 0 auto
+  font-size:19px;color:#0b6f56;position:absolute;left:10px
 }
 .tool small{font-size:10px;color:#789087;font-weight:700}
 .tool.active{background:linear-gradient(135deg,#0a9c72,#08b080);color:#fff;border-color:transparent}
@@ -215,7 +215,7 @@ dialog::backdrop{background:rgba(11,39,31,.34);backdrop-filter:blur(3px)}
 .memo-dialog .ok{background:var(--green);color:#fff}
 
 @media(max-width:1100px){
-  .layout{grid-template-columns:190px minmax(430px,1fr) 250px}
+  .layout{grid-template-columns:180px minmax(430px,1fr) 250px}
   .stage{padding-right:145px}
   .pet-zone{transform:scale(.88);transform-origin:bottom right}
 }
@@ -410,12 +410,18 @@ dialog::backdrop{background:rgba(11,39,31,.34);backdrop-filter:blur(3px)}
 #diagram .ball.ghost span{display:none!important}
 .brand-logo{visibility:visible!important;opacity:1!important}
 
+
+.tool .text{width:100%;text-align:center;white-space:nowrap;font-size:14px}
+.brand{flex:0 0 auto!important;min-width:0!important}
+.brand-logo{display:block!important;width:360px!important;height:82px!important;max-width:360px!important;object-fit:contain!important;object-position:left center!important;visibility:visible!important;opacity:1!important}
+@media(max-width:1200px){.brand-logo{width:320px!important;max-width:320px!important;height:74px!important}}
+
 </style>
 </head>
 <body>
 <header class="app-header">
   <div class="brand">
-    <img class="brand-logo" src="assets/9board-logo-fixed.webp?v=5" alt="9BOARD">
+    <img class="brand-logo" src="https://raw.githubusercontent.com/9board/9board.github.io/main/pc/assets/brand-logo-live.webp?v=8" alt="9BOARD">
   </div>
   <nav class="topnav">
     <button class="active">⌂ 配置図</button><button type="button" onclick="openCounterPage()">▣ カウンター</button><button type="button" onclick="window.open('../Billiardsmatch-records/','_blank')">▣ 対戦記録</button>
@@ -755,7 +761,7 @@ function renderBalls(){
         if(line){attachLine(line);addGhostOppositeArrow(line);completedLine=line}
       }
       pointerAction=null;hideAim();renderLines();
-      if(completedLine?.type==="arrow")setTool("move");
+      if(completedLine)setTool("move");
     });
     el.addEventListener("pointercancel",()=>{clearTimeout(longTimer);pointerAction=null;hideAim()});
     el.addEventListener("dblclick",e=>{e.preventDefault();e.stopPropagation();removeBall(b.id)});
@@ -795,12 +801,14 @@ function attachLine(l){
   if(b){l.endBallId=b.id;l.x2=b.x;l.y2=b.y}else delete l.endBallId;
 }
 function renderLines(){
-  svg.querySelectorAll(".draw-line,.line-hit").forEach(e=>e.remove());
+  svg.querySelectorAll(".draw-line,.line-hit,.line-end-hit").forEach(e=>e.remove());
   state.lines.forEach(l=>{
     syncLineAttachments(l);
 
     const hit=document.createElementNS("http://www.w3.org/2000/svg","line");
     const ln=document.createElementNS("http://www.w3.org/2000/svg","line");
+    const h1=document.createElementNS("http://www.w3.org/2000/svg","circle");
+    const h2=document.createElementNS("http://www.w3.org/2000/svg","circle");
 
     function getDisplayCoords(){
       let x1=l.x1,y1=l.y1,x2=l.x2,y2=l.y2;
@@ -812,70 +820,61 @@ function renderLines(){
           const dx=(x2-x1)*r.width,dy=(y2-y1)*r.height;
           const len=Math.hypot(dx,dy);
           if(len>0){
-            const radius=11;
-            const ux=dx/len,uy=dy/len;
-            if(startAttached){
-              x1+=ux*(radius/r.width);
-              y1+=uy*(radius/r.height);
-            }
-            if(endAttached){
-              x2-=ux*(radius/r.width);
-              y2-=uy*(radius/r.height);
-            }
+            const radius=11,ux=dx/len,uy=dy/len;
+            if(startAttached){x1+=ux*(radius/r.width);y1+=uy*(radius/r.height)}
+            if(endAttached){x2-=ux*(radius/r.width);y2-=uy*(radius/r.height)}
           }
         }
       }
       return {x1,y1,x2,y2};
     }
-    function setCoords(el){
+
+    function setCoords(){
       const c=getDisplayCoords();
-      el.setAttribute("x1",c.x1*100+"%");
-      el.setAttribute("y1",c.y1*100+"%");
-      el.setAttribute("x2",c.x2*100+"%");
-      el.setAttribute("y2",c.y2*100+"%");
+      hit.setAttribute("x1",c.x1*100+"%");hit.setAttribute("y1",c.y1*100+"%");
+      hit.setAttribute("x2",c.x2*100+"%");hit.setAttribute("y2",c.y2*100+"%");
+      ln.setAttribute("x1",c.x1*100+"%");ln.setAttribute("y1",c.y1*100+"%");
+      ln.setAttribute("x2",c.x2*100+"%");ln.setAttribute("y2",c.y2*100+"%");
+      h1.setAttribute("cx",l.x1*100+"%");h1.setAttribute("cy",l.y1*100+"%");
+      h2.setAttribute("cx",l.x2*100+"%");h2.setAttribute("cy",l.y2*100+"%");
     }
-    setCoords(hit);setCoords(ln);
 
     hit.setAttribute("stroke","rgba(0,0,0,0.001)");
     hit.setAttribute("stroke-width",Math.max(18,l.width+14));
     hit.setAttribute("stroke-linecap","round");
-    hit.classList.add("line-hit");
-    hit.dataset.id=l.id;
-    hit.style.pointerEvents="stroke";
+    hit.classList.add("line-hit");hit.dataset.id=l.id;hit.style.pointerEvents="stroke";
 
     ln.setAttribute("stroke",l.color);
     ln.setAttribute("stroke-width",l.width);
     ln.setAttribute("stroke-linecap","round");
-    if(l.type==="arrow") ln.setAttribute("marker-end","url(#arrowHead)");
-    ln.classList.add("draw-line");
-    ln.dataset.id=l.id;
-    ln.style.pointerEvents="none";
+    if(l.type==="arrow")ln.setAttribute("marker-end","url(#arrowHead)");
+    ln.classList.add("draw-line");ln.dataset.id=l.id;ln.style.pointerEvents="none";
+
+    [h1,h2].forEach(h=>{
+      h.setAttribute("r","13");
+      h.setAttribute("fill","rgba(0,0,0,0.001)");
+      h.classList.add("line-end-hit");
+      h.style.pointerEvents=state.tool==="move"?"all":"none";
+      h.style.cursor="grab";
+    });
+    setCoords();
 
     function removeThisLine(e){
       e?.preventDefault();e?.stopPropagation();
-      snap();
-      state.lines=state.lines.filter(x=>x.id!==l.id);
-      renderLines();
+      snap();state.lines=state.lines.filter(x=>x.id!==l.id);renderLines();
     }
 
     hit.addEventListener("dblclick",removeThisLine);
     hit.addEventListener("pointerdown",e=>{
-      if(state.tool==="erase"){
-        removeThisLine(e);
-        return;
-      }
-      if(state.tool!=="move") return;
-
+      if(state.tool==="erase"){removeThisLine(e);return}
+      if(state.tool!=="move")return;
       snap();
-      delete l.startBallId;
-      delete l.endBallId;
+      delete l.startBallId;delete l.endBallId;
       const r=cloth.getBoundingClientRect();
       pointerAction={type:"lineMove",id:l.id,sx:e.clientX,sy:e.clientY,orig:{...l},r};
       try{hit.setPointerCapture(e.pointerId)}catch(_){}
-      e.preventDefault();
-      e.stopPropagation();
+      e.preventDefault();e.stopPropagation();
     });
-
     hit.addEventListener("pointermove",e=>{
       if(!pointerAction||pointerAction.type!=="lineMove"||pointerAction.id!==l.id)return;
       const rawDx=(e.clientX-pointerAction.sx)/pointerAction.r.width;
@@ -885,23 +884,51 @@ function renderLines(){
       const minY=Math.min(o.y1,o.y2),maxY=Math.max(o.y1,o.y2);
       const dx=Math.max(-minX,Math.min(1-maxX,rawDx));
       const dy=Math.max(-minY,Math.min(1-maxY,rawDy));
-      l.x1=o.x1+dx;l.x2=o.x2+dx;
-      l.y1=o.y1+dy;l.y2=o.y2+dy;
-      setCoords(hit);setCoords(ln);
+      l.x1=o.x1+dx;l.x2=o.x2+dx;l.y1=o.y1+dy;l.y2=o.y2+dy;
+      setCoords();
     });
 
-    function finishLineMove(e){
+    function finishMove(e){
       if(!pointerAction||pointerAction.type!=="lineMove"||pointerAction.id!==l.id)return;
-      attachLine(l);
-      pointerAction=null;
+      attachLine(l);pointerAction=null;
       try{hit.releasePointerCapture(e.pointerId)}catch(_){}
       renderLines();
     }
-    hit.addEventListener("pointerup",finishLineMove);
-    hit.addEventListener("pointercancel",finishLineMove);
+    hit.addEventListener("pointerup",finishMove);
+    hit.addEventListener("pointercancel",finishMove);
 
-    svg.appendChild(hit);
-    svg.appendChild(ln);
+    function startResize(which,h,e){
+      if(state.tool!=="move")return;
+      snap();
+      if(which==="start")delete l.startBallId; else delete l.endBallId;
+      pointerAction={type:"lineResize",id:l.id,which};
+      try{h.setPointerCapture(e.pointerId)}catch(_){}
+      e.preventDefault();e.stopPropagation();
+    }
+    function resize(which,e){
+      if(!pointerAction||pointerAction.type!=="lineResize"||pointerAction.id!==l.id||pointerAction.which!==which)return;
+      const p=normPoint(e);
+      if(which==="start"){l.x1=p.x;l.y1=p.y}else{l.x2=p.x;l.y2=p.y}
+      setCoords();
+    }
+    function finishResize(which,h,e){
+      if(!pointerAction||pointerAction.type!=="lineResize"||pointerAction.id!==l.id||pointerAction.which!==which)return;
+      attachLine(l);pointerAction=null;
+      try{h.releasePointerCapture(e.pointerId)}catch(_){}
+      renderLines();
+    }
+
+    h1.addEventListener("pointerdown",e=>startResize("start",h1,e));
+    h1.addEventListener("pointermove",e=>resize("start",e));
+    h1.addEventListener("pointerup",e=>finishResize("start",h1,e));
+    h1.addEventListener("pointercancel",e=>finishResize("start",h1,e));
+
+    h2.addEventListener("pointerdown",e=>startResize("end",h2,e));
+    h2.addEventListener("pointermove",e=>resize("end",e));
+    h2.addEventListener("pointerup",e=>finishResize("end",h2,e));
+    h2.addEventListener("pointercancel",e=>finishResize("end",h2,e));
+
+    svg.appendChild(hit);svg.appendChild(ln);svg.appendChild(h1);svg.appendChild(h2);
   });
 }
 function renderAll(){
@@ -988,7 +1015,7 @@ cloth.addEventListener("pointerup",()=>{
     if(line){attachLine(line);addGhostOppositeArrow(line);completedLine=line}
   }
   pointerAction=null;
-  if(completedLine?.type==="arrow")setTool("move");
+  if(completedLine)setTool("move");
 });
 
 $("#memoOk").addEventListener("click",()=>{
