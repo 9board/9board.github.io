@@ -962,6 +962,25 @@ dialog::backdrop{background:rgba(11,39,31,.34);backdrop-filter:blur(3px)}
   display:none!important;
 }
 
+
+/* ===== correction: restore original placed-ball size only ===== */
+#diagram .ball,
+#diagram .ball.ghost{
+  width:15px!important;
+  height:15px!important;
+  min-width:15px!important;
+  min-height:15px!important;
+}
+#diagram .ball:not(.ghost) span{
+  width:7px!important;
+  height:7px!important;
+  min-width:7px!important;
+  font-size:5px!important;
+}
+#diagram .ball.ghost{
+  border-width:2px!important;
+}
+
 </style>
 </head>
 <body>
