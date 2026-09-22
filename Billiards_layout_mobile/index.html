@@ -14,7 +14,7 @@ button,input,select,textarea{font:inherit}button{border:0}
 .app-view{height:100dvh;overflow-y:auto;padding-bottom:calc(var(--nav) + env(safe-area-inset-bottom) + 18px);scrollbar-width:none}.app-view::-webkit-scrollbar{display:none}
 .screen{display:none}.screen.active{display:block}
 .home-header{padding:calc(18px + env(safe-area-inset-top)) 18px 10px;text-align:center;background:#fff;border-bottom:1px solid var(--line)}
-.brand-logo{width:min(390px,88vw);height:86px;object-fit:contain;display:block;margin:0 auto}
+.brand-logo{width:min(430px,94vw);height:100px;object-fit:contain;display:block;margin:0 auto}
 .tagline{margin:-2px 0 0;text-align:left;font-size:12px;font-weight:800;color:#515961;padding-left:2px}
 .topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:calc(12px + env(safe-area-inset-top)) 16px 11px;background:rgba(246,247,249,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
 .topbar strong{font-size:18px}.topbar small{display:block;font-size:10px;color:var(--muted);margin-top:2px}
@@ -53,16 +53,16 @@ button,input,select,textarea{font:inherit}button{border:0}
 .counter-row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px}.player{text-align:center}.player input{width:100%;text-align:center;border:0;background:#f5f7f7;border-radius:10px;padding:8px;font-weight:900}.score{font-size:56px;font-weight:950;color:#1d4e42;line-height:1.15;margin:12px 0}.vs{font-weight:950;color:#839088}.score-controls{display:grid;grid-template-columns:1fr 1fr;gap:7px}.score-controls button{height:42px;border-radius:12px;background:#edf7f3;color:#087457;font-size:24px;font-weight:900}.race{display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:14px;border-top:1px solid var(--line);font-size:12px;font-weight:900}.race select{border:1px solid var(--line);border-radius:10px;padding:8px;background:#fff}
 .new-form{display:none;background:#fff;border-radius:22px;padding:14px;margin-bottom:12px;border:1px solid #eef0f2}.new-form.show{display:grid;gap:10px}.new-form label{display:grid;gap:5px;font-size:11px;font-weight:800;color:#59616a}.new-form input,.new-form select,.new-form textarea{border:1px solid #dfe3e7;border-radius:11px;padding:10px;background:#fff}.new-form textarea{min-height:90px}.cols{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 .bottom-nav{position:absolute;left:0;right:0;bottom:0;z-index:40;height:calc(var(--nav) + env(safe-area-inset-bottom));padding:8px 6px env(safe-area-inset-bottom);display:grid;grid-template-columns:repeat(5,1fr);background:rgba(255,255,255,.97);border-top:1px solid var(--line);backdrop-filter:blur(12px)}
-.nav-btn{background:none;color:#778087;font-size:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0}.nav-btn span{font-size:10px;font-weight:800}.nav-btn.active{color:var(--green2)}.nav-art{width:48px;height:48px;object-fit:contain;display:block;border-radius:8px;background:#fff}.nav-btn.active .nav-art{outline:2px solid rgba(7,132,95,.18);outline-offset:1px}
+.nav-btn{background:none;color:#778087;font-size:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0}.nav-btn span{font-size:10px;font-weight:800}.nav-btn.active{color:var(--green2)}.nav-art{width:48px;height:48px;object-fit:contain;display:block;border-radius:8px;background:#fff;transition:transform .16s ease}.nav-btn.active .nav-art{outline:2px solid rgba(7,132,95,.18);outline-offset:1px}@keyframes navTap{0%{transform:scale(1) rotate(0)}35%{transform:scale(.82) rotate(-4deg)}70%{transform:scale(1.12) rotate(2deg)}100%{transform:scale(1) rotate(0)}}.nav-btn.nav-tap .nav-art{animation:navTap .28s ease-out}
 .toast{position:absolute;left:50%;bottom:calc(var(--nav) + 16px);transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#22312c;color:#fff;border-radius:999px;padding:9px 14px;font-size:12px;font-weight:800;transition:.18s;z-index:60}.toast.show{opacity:1;transform:translate(-50%,0)}
-@media(max-width:390px){.brand-logo{height:74px}.feature{min-height:152px}.feature-art{height:88px}.nav-art{width:44px;height:44px}.tool{min-width:64px}.score{font-size:48px}}
+@media(max-width:390px){.brand-logo{height:88px;width:min(420px,96vw)}.feature{min-height:152px}.feature-art{height:88px}.nav-art{width:44px;height:44px}.tool{min-width:64px}.score{font-size:48px}}
 
 .home-header{position:relative}
 .home-gear{position:absolute;right:16px;top:calc(18px + env(safe-area-inset-top));width:48px;height:48px;border-radius:50%;background:#fff;border:1px solid var(--line);box-shadow:0 4px 14px rgba(0,0,0,.06);font-size:22px;color:#40484e}
 .section-title>span{font-size:12px;color:var(--muted)}
 </style>
 </head>
-<body data-build="2026-09-22-v3">
+<body data-build="2026-09-22-v4">
 <div class="phone">
 <main class="app-view" id="appView">
 <section class="screen active" data-screen="home">
@@ -76,7 +76,7 @@ button,input,select,textarea{font:inherit}button{border:0}
 <button class="feature jump" data-to="layout"><img class="feature-art" src="./assets/layout-20260922-v3.jpg?v=20260922-3" alt=""><b>配置図</b><small>球・線・矢印・メモ</small></button>
 <button class="feature jump" data-to="counter"><img class="feature-art" src="./assets/counter-20260922-v3.jpg?v=20260922-3" alt=""><b>カウンター</b><small>平場のスコア記録</small></button>
 <button class="feature jump" data-to="matches"><img class="feature-art" src="./assets/matches-20260922-v3.jpg?v=20260922-3" alt=""><b>対戦記録</b><small>大会・結果・メモ</small></button>
-<button class="feature jump" data-to="menu"><img class="feature-art" src="./assets/menu-20260922-v3.jpg?v=20260922-3" alt=""><b>その他</b><small>保存データ・設定</small></button>
+<button class="feature jump" data-to="menu"><img class="feature-art" src="./assets/menu-20260922-v4.jpg?v=20260922-4" alt=""><b>その他</b><small>保存データ・設定</small></button>
 </div>
 <div class="section-title"><h2>アプリの状態</h2><button id="refreshSummary">更新</button></div>
 <div class="card" id="homeSummary"></div>
@@ -175,7 +175,7 @@ button,input,select,textarea{font:inherit}button{border:0}
 <button class="nav-btn" data-to="layout"><img class="nav-art" src="./assets/layout-20260922-v3.jpg?v=20260922-3" alt=""><span>配置図</span></button>
 <button class="nav-btn" data-to="counter"><img class="nav-art" src="./assets/counter-20260922-v3.jpg?v=20260922-3" alt=""><span>カウンター</span></button>
 <button class="nav-btn" data-to="matches"><img class="nav-art" src="./assets/matches-20260922-v3.jpg?v=20260922-3" alt=""><span>対戦記録</span></button>
-<button class="nav-btn" data-to="menu"><img class="nav-art" src="./assets/menu-20260922-v3.jpg?v=20260922-3" alt=""><span>メニュー</span></button>
+<button class="nav-btn" data-to="menu"><img class="nav-art" src="./assets/menu-20260922-v4.jpg?v=20260922-4" alt=""><span>メニュー</span></button>
 </nav>
 <div class="toast" id="toast"></div>
 </div>
@@ -184,7 +184,7 @@ const $=(s,p=document)=>p.querySelector(s),$$=(s,p=document)=>[...p.querySelecto
 const store={get(k,d=[]){try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set(k,v){localStorage.setItem(k,JSON.stringify(v))}};
 const toast=m=>{const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove("show"),1300)};
 function go(name,updateUrl=true){const valid=["home","layout","counter","matches","menu"];if(!valid.includes(name))name="home";$$(".screen").forEach(s=>s.classList.toggle("active",s.dataset.screen===name));$$(".nav-btn").forEach(b=>b.classList.toggle("active",b.dataset.to===name));$("#appView").scrollTo({top:0});if(name==="home")renderHome();if(updateUrl&&location.hash!=="#"+name)history.pushState(null,"","#"+name)}
-$$("[data-to],.jump").forEach(b=>b.addEventListener("click",()=>go(b.dataset.to)));window.addEventListener("hashchange",()=>go((location.hash||"#home").slice(1),false));
+$("[data-to],.jump").forEach(b=>b.addEventListener("click",()=>go(b.dataset.to)));window.addEventListener("hashchange",()=>go((location.hash||"#home").slice(1),false));$(".bottom-nav .nav-btn").forEach(b=>b.addEventListener("pointerdown",()=>{if(!b.querySelector(".nav-art"))return;b.classList.remove("nav-tap");void b.offsetWidth;b.classList.add("nav-tap");setTimeout(()=>b.classList.remove("nav-tap"),320)}));
 
 const colors={1:"#edbb22",2:"#113d9c",3:"#a91f16",4:"#dc4438",5:"#e9681f",6:"#00583b",7:"#76501b",8:"#171a18",9:"#edbb22",10:"#113d9c",11:"#a91f16",12:"#dc4438",13:"#e9681f",14:"#00583b",15:"#76501b"};
 const felt=$("#felt"),svg=$("#svgLayer"),ballsLayer=$("#ballsLayer"),notesLayer=$("#notesLayer"),tableViewport=$("#tableViewport"),tableStage=$("#tableStage");
