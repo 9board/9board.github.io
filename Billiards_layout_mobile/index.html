@@ -36,12 +36,12 @@ button,input,select,textarea{font:inherit}button{border:0;-webkit-appearance:non
 #svgLayer{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none}
 #ballsLayer,#notesLayer{position:absolute;inset:0;z-index:4;pointer-events:none}
 #aimGuide{position:absolute;inset:0;z-index:2;display:none;pointer-events:none}#aimGuide.visible{display:block}#aimGuide:before,#aimGuide:after{content:"";position:absolute;border-color:rgba(255,255,255,.82);filter:drop-shadow(0 0 1px #22595b)}#aimGuide:before{left:var(--x);top:0;bottom:0;border-left:1px solid}#aimGuide:after{top:var(--y);left:0;right:0;border-top:1px solid}
-.ball,.palette-ball{--ball-color:#fff;position:absolute;border-radius:50%;transform:translate(-50%,-50%);pointer-events:auto;touch-action:none;overflow:hidden!important;border:1px solid rgba(255,255,255,.96)!important;box-shadow:0 3px 7px rgba(0,0,0,.26),inset 4px 4px 7px rgba(255,255,255,.42),inset -5px -6px 8px rgba(0,0,0,.24)!important}.ball{width:11px!important;height:11px!important;min-width:11px!important;min-height:11px!important;box-sizing:border-box;transition:width .10s ease,height .10s ease,box-shadow .10s ease}.ball.dragging{width:24px!important;height:24px!important;min-width:24px!important;min-height:24px!important;box-shadow:0 4px 12px rgba(0,0,0,.34),inset 4px 4px 7px rgba(255,255,255,.42),inset -5px -6px 8px rgba(0,0,0,.24)!important;z-index:20}.palette-ball{position:relative!important;transform:none!important;width:28px!important;height:28px!important;min-width:28px!important;min-height:28px!important}
+.ball,.palette-ball{--ball-color:#fff;position:absolute;border-radius:50%;transform:translate(-50%,-50%);pointer-events:auto;touch-action:none;overflow:hidden!important;border:1px solid rgba(255,255,255,.96)!important;box-shadow:0 3px 7px rgba(0,0,0,.26),inset 4px 4px 7px rgba(255,255,255,.42),inset -5px -6px 8px rgba(0,0,0,.24)!important}.ball{width:11px!important;height:11px!important;min-width:11px!important;min-height:11px!important;box-sizing:border-box;transition:width .10s ease,height .10s ease,box-shadow .10s ease}.ball.dragging{width:20px!important;height:20px!important;min-width:20px!important;min-height:20px!important;box-shadow:0 4px 12px rgba(0,0,0,.34),inset 4px 4px 7px rgba(255,255,255,.42),inset -5px -6px 8px rgba(0,0,0,.24)!important;z-index:20}.palette-ball{position:relative!important;transform:none!important;width:28px!important;height:28px!important;min-width:28px!important;min-height:28px!important}
 
 .ball.solid,.palette-ball.solid{background:radial-gradient(circle at 28% 22%,rgba(255,255,255,.92) 0 5%,rgba(255,255,255,.26) 10%,transparent 23%),radial-gradient(circle at 46% 42%,var(--ball-color) 0 58%,color-mix(in srgb,var(--ball-color) 78%,black) 100%)!important}
 .ball.stripe,.palette-ball.stripe{background:radial-gradient(circle at 28% 22%,rgba(255,255,255,.95) 0 5%,rgba(255,255,255,.28) 11%,transparent 23%),linear-gradient(to bottom,#f1ead3 0 24%,var(--ball-color) 24% 68%,#e7dfc6 68% 100%)!important}
 .ball.cue,.palette-ball.cue{background:radial-gradient(circle at 28% 22%,#fff 0 8%,rgba(255,255,255,.8) 15%,transparent 28%),radial-gradient(circle at 47% 43%,#ffffff 0 68%,#f7f7f7 86%,#e8e8e8 100%)!important}
-.ball:not(.ghost) span,.palette-ball:not(.ghost-pick) span{position:absolute!important;z-index:5!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;display:grid!important;place-items:center!important;background:#efe7c9!important;color:#111!important;border-radius:50%!important;box-shadow:inset 0 0 0 1px rgba(70,55,38,.18),0 1px 2px rgba(0,0,0,.18)!important;font-weight:900!important;font-family:Arial,Helvetica,sans-serif!important;line-height:1!important}.ball:not(.ghost) span{width:6px!important;height:6px!important;min-width:6px!important;font-size:4px!important}.ball.dragging:not(.ghost) span{width:13px!important;height:13px!important;min-width:13px!important;font-size:7px!important}.palette-ball:not(.ghost-pick) span{width:16px!important;height:16px!important;min-width:16px!important;font-size:8px!important}
+.ball:not(.ghost) span,.palette-ball:not(.ghost-pick) span{position:absolute!important;z-index:5!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;display:grid!important;place-items:center!important;background:#efe7c9!important;color:#111!important;border-radius:50%!important;box-shadow:inset 0 0 0 1px rgba(70,55,38,.18),0 1px 2px rgba(0,0,0,.18)!important;font-weight:900!important;font-family:Arial,Helvetica,sans-serif!important;line-height:1!important}.ball:not(.ghost) span{width:6px!important;height:6px!important;min-width:6px!important;font-size:4px!important}.ball.dragging:not(.ghost) span{width:11px!important;height:11px!important;min-width:11px!important;font-size:6px!important}.palette-ball:not(.ghost-pick) span{width:16px!important;height:16px!important;min-width:16px!important;font-size:8px!important}
 .ball.ghost,.palette-ball.ghost-pick{position:relative!important;background:transparent!important;border:0!important;box-shadow:none!important;overflow:visible!important}
 .ball.ghost::before,.palette-ball.ghost-pick::before{content:""!important;display:block!important;position:absolute!important;inset:1px!important;border-radius:50%!important;background:repeating-conic-gradient(#e53333 0 12deg,transparent 12deg 30deg)!important;-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 2px))!important;mask:radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 2px))!important}
 .ball.ghost::after,.palette-ball.ghost-pick::after{content:none!important;display:none!important}
@@ -64,7 +64,7 @@ button,input,select,textarea{font:inherit}button{border:0;-webkit-appearance:non
 .section-title>span{font-size:12px;color:var(--muted)}
 </style>
 </head>
-<body data-build="2026-09-22-v18">
+<body data-build="2026-09-22-v19">
 <div class="phone">
 <main class="app-view" id="appView">
 <section class="screen active" data-screen="home">
@@ -264,18 +264,34 @@ function beginAll(e){drag={kind:"all",last:point(e)};felt.setPointerCapture?.(e.
 function ballDown(e){e.stopPropagation();const id=e.currentTarget.dataset.id;if(tool==="erase"){balls=balls.filter(x=>x.id!==id);commit();renderLayout();return}const o=balls.find(x=>x.id===id);if((tool==="line"||tool==="arrow")&&o){drawing={id:Date.now()+Math.random(),type:tool,x1:o.x,y1:o.y,x2:o.x,y2:o.y,color:lineColor,width:lineWidth,startBallId:o.id};felt.setPointerCapture?.(e.pointerId);showAim(e);e.preventDefault();return}if(tool==="moveall"){beginAll(e);return}if(tool!=="move")return;drag={kind:"ball",id,startX:e.clientX,startY:e.clientY,moved:false,liftPx:28,el:e.currentTarget};e.currentTarget.classList.add("dragging");e.currentTarget.setPointerCapture?.(e.pointerId);showAimAt(o.x,o.y);e.preventDefault()}
 function finishBallDrag(){
   if(!drag||drag.kind!=="ball")return false;
-  drag.el?.classList.remove("dragging");
+  drag.el?.classList.remove("dragging");$(".ball.dragging").forEach(el=>el.classList.remove("dragging"));
   commit();drag=null;hideAim();renderLayout();
   return true;
 }
 function memoDown(e){e.stopPropagation();const id=e.currentTarget.dataset.id;if(tool==="erase"){memos=memos.filter(x=>x.id!==id);commit();renderLayout();return}if(tool==="moveall"){beginAll(e);return}if(tool!=="move")return;drag={kind:"memo",id};e.currentTarget.setPointerCapture?.(e.pointerId);e.preventDefault()}
-document.addEventListener("pointermove",e=>{if(!drag)return;const p=point(e);if(drag.kind==="all"){shiftAll(p.x-drag.last.x,p.y-drag.last.y);drag.last=p;renderLayout();showAim(e);return}const arr=drag.kind==="ball"?balls:memos,o=arr.find(x=>x.id===drag.id);if(!o)return;if(drag.kind==="ball"){
-  const r=felt.getBoundingClientRect(),b=ballEdgeBounds(),liftPct=((drag.liftPx||28)/r.height)*100;
-  o.x=clamp(p.x,b.minX,b.maxX);
-  o.y=clamp(p.y-liftPct,b.minY,b.maxY);
-}else{o.x=p.x;o.y=p.y}renderLayout();if(drag.kind==="ball"){if(Math.hypot(e.clientX-drag.startX,e.clientY-drag.startY)>3)drag.moved=true;if(isOverFelt(e))showAimAt(o.x,o.y);else hideAim()}},{passive:false});
+document.addEventListener("pointermove",e=>{
+  if(!drag)return;
+  const p=point(e);
+  if(drag.kind==="all"){
+    shiftAll(p.x-drag.last.x,p.y-drag.last.y);drag.last=p;renderLayout();showAim(e);return;
+  }
+  const arr=drag.kind==="ball"?balls:memos,o=arr.find(x=>x.id===drag.id);if(!o)return;
+  if(drag.kind==="ball"){
+    const r=felt.getBoundingClientRect(),b=ballEdgeBounds(),liftPct=((drag.liftPx||28)/r.height)*100;
+    o.x=clamp(p.x,b.minX,b.maxX);
+    o.y=clamp(p.y-liftPct,b.minY,b.maxY);
+    let el=drag.el;
+    if(!el||!el.isConnected){el=ballsLayer.querySelector(`.ball[data-id="${o.id}"]`);drag.el=el}
+    if(el){el.classList.add("dragging");el.style.left=o.x+"%";el.style.top=o.y+"%"}
+    if(Math.hypot(e.clientX-drag.startX,e.clientY-drag.startY)>3)drag.moved=true;
+    if(isOverFelt(e))showAimAt(o.x,o.y);else hideAim();
+    e.preventDefault();
+    return;
+  }
+  o.x=p.x;o.y=p.y;renderLayout();
+},{passive:false});
 document.addEventListener("pointerup",()=>{if(finishBallDrag())return;if(drag){drag=null;hideAim();commit()}});document.addEventListener("pointercancel",()=>{if(finishBallDrag())return;drag=null;hideAim()});window.addEventListener("pointerup",finishBallDrag,true);window.addEventListener("pointercancel",finishBallDrag,true);
-felt.addEventListener("pointerdown",e=>{if(e.target!==felt&&e.target!==svg)return;const p=point(e);if(tool==="move"){const near=nearestBall(e,36);if(near){drag={kind:"ball",id:near.id,startX:e.clientX,startY:e.clientY,moved:false,liftPx:28};felt.setPointerCapture?.(e.pointerId);showAimAt(near.x,near.y);e.preventDefault();return}}if(tool==="line"||tool==="arrow"){drawing={id:Date.now()+Math.random(),type:tool,x1:p.x,y1:p.y,x2:p.x,y2:p.y,color:lineColor,width:lineWidth};felt.setPointerCapture?.(e.pointerId);showAim(e)}else if(tool==="memo"){const text=prompt("メモを入力");if(text){memos.push({id:Date.now()+Math.random(),text,x:p.x,y:p.y});commit();renderLayout()}}else if(tool==="moveall")beginAll(e)});
+felt.addEventListener("pointerdown",e=>{if(e.target!==felt&&e.target!==svg)return;const p=point(e);if(tool==="move"){const near=nearestBall(e,36);if(near){const el=ballsLayer.querySelector(`.ball[data-id="${near.id}"]`);drag={kind:"ball",id:near.id,startX:e.clientX,startY:e.clientY,moved:false,liftPx:28,el};el?.classList.add("dragging");felt.setPointerCapture?.(e.pointerId);showAimAt(near.x,near.y);e.preventDefault();return}}if(tool==="line"||tool==="arrow"){drawing={id:Date.now()+Math.random(),type:tool,x1:p.x,y1:p.y,x2:p.x,y2:p.y,color:lineColor,width:lineWidth};felt.setPointerCapture?.(e.pointerId);showAim(e)}else if(tool==="memo"){const text=prompt("メモを入力");if(text){memos.push({id:Date.now()+Math.random(),text,x:p.x,y:p.y});commit();renderLayout()}}else if(tool==="moveall")beginAll(e)});
 felt.addEventListener("pointermove",e=>{if(!drawing)return;const p=point(e);drawing.x2=p.x;drawing.y2=p.y;showAim(e);const tmp=[...lines,drawing];const old=lines;lines=tmp;renderLines();lines=old});
 function addGhostOppositeArrow(line){
   if(!ghostAuto||line.type!=="arrow"||!line.startBallId)return;
