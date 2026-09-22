@@ -13,8 +13,8 @@ button,input,select,textarea{font:inherit}button{border:0;-webkit-appearance:non
 .phone{width:min(100%,520px);min-height:100dvh;margin:auto;background:var(--bg);position:relative;overflow:hidden;box-shadow:0 0 40px rgba(0,0,0,.12)}
 .app-view{height:100dvh;overflow-y:auto;padding-bottom:calc(var(--nav) + env(safe-area-inset-bottom) + 18px);scrollbar-width:none}.app-view::-webkit-scrollbar{display:none}
 .screen{display:none}.screen.active{display:block}
-.home-header{padding:calc(8px + env(safe-area-inset-top)) 8px 2px;text-align:center;background:transparent;border-bottom:0}
-.brand-logo{width:min(470px,98vw);height:112px;object-fit:cover;object-position:center;display:block;margin:0 auto}
+.home-header{padding:calc(8px + env(safe-area-inset-top)) 8px 2px;text-align:left;background:transparent;border-bottom:0}
+.brand-logo{width:min(470px,98vw);height:112px;object-fit:cover;object-position:left center;display:block;margin:0;background:transparent}
 .tagline{margin:-2px 0 0;text-align:left;font-size:12px;font-weight:800;color:#515961;padding-left:2px}
 .topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:calc(12px + env(safe-area-inset-top)) 16px 11px;background:rgba(246,247,249,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
 .topbar strong{font-size:18px}.topbar small{display:block;font-size:10px;color:var(--muted);margin-top:2px}
@@ -64,7 +64,7 @@ button,input,select,textarea{font:inherit}button{border:0;-webkit-appearance:non
 .section-title>span{font-size:12px;color:var(--muted)}
 </style>
 </head>
-<body data-build="2026-09-22-v21">
+<body data-build="2026-09-23-v22">
 <div class="phone">
 <main class="app-view" id="appView">
 <section class="screen active" data-screen="home">
@@ -197,8 +197,32 @@ button,input,select,textarea{font:inherit}button{border:0;-webkit-appearance:non
 const $=(s,p=document)=>p.querySelector(s),$$=(s,p=document)=>[...p.querySelectorAll(s)];
 const store={get(k,d=[]){try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set(k,v){localStorage.setItem(k,JSON.stringify(v))}};
 const toast=m=>{const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove("show"),1300)};
-function go(name,updateUrl=true){const valid=["home","layout","counter","matches","menu"];if(!valid.includes(name))name="home";$$$(".screen").forEach(s=>s.classList.toggle("active",s.dataset.screen===name));$$$(".nav-btn").forEach(b=>b.classList.toggle("active",b.dataset.to===name));$("#appView").scrollTo({top:0});if(name==="home")renderHome();if(updateUrl&&location.hash!=="#"+name)history.pushState(null,"","#"+name)}
-$$$("[data-to],.jump").forEach(b=>b.addEventListener("click",()=>go(b.dataset.to)));window.addEventListener("hashchange",()=>go((location.hash||"#home").slice(1),false));$$$(".bottom-nav .nav-btn").forEach(b=>b.addEventListener("pointerdown",()=>{if(!b.querySelector(".nav-art"))return;b.classList.remove("nav-tap");void b.offsetWidth;b.classList.add("nav-tap");setTimeout(()=>b.classList.remove("nav-tap"),320)}));
+function makeBrandLogoTransparent(){
+  const img=$(".brand-logo");if(!img)return;
+  const run=()=>{
+    const w=img.naturalWidth,h=img.naturalHeight;if(!w||!h)return;
+    const cv=document.createElement("canvas");cv.width=w;cv.height=h;
+    const x=cv.getContext("2d",{willReadFrequently:true});x.drawImage(img,0,0);
+    const im=x.getImageData(0,0,w,h),d=im.data,seen=new Uint8Array(w*h),q=new Int32Array(w*h);
+    let head=0,tail=0;
+    const bg=p=>{const i=p*4,r=d[i],g=d[i+1],b=d[i+2],mx=Math.max(r,g,b),mn=Math.min(r,g,b);return r>210&&g>210&&b>210&&(mx-mn)<24};
+    const add=p=>{if(p<0||p>=w*h||seen[p]||!bg(p))return;seen[p]=1;q[tail++]=p};
+    for(let xx=0;xx<w;xx++){add(xx);add((h-1)*w+xx)}
+    for(let yy=0;yy<h;yy++){add(yy*w);add(yy*w+w-1)}
+    while(head<tail){
+      const p=q[head++],i=p*4;d[i+3]=0;
+      const px=p%w;
+      if(px>0)add(p-1);if(px<w-1)add(p+1);if(p>=w)add(p-w);if(p<w*(h-1))add(p+w);
+    }
+    x.putImageData(im,0,0);
+    img.style.background="transparent";
+    img.src=cv.toDataURL("image/png");
+  };
+  if(img.complete)run();else img.addEventListener("load",run,{once:true});
+}
+makeBrandLogoTransparent();
+function go(name,updateUrl=true){const valid=["home","layout","counter","matches","menu"];if(!valid.includes(name))name="home";$(".screen").forEach(s=>s.classList.toggle("active",s.dataset.screen===name));$(".nav-btn").forEach(b=>b.classList.toggle("active",b.dataset.to===name));$("#appView").scrollTo({top:0});if(name==="home")renderHome();if(updateUrl&&location.hash!=="#"+name)history.pushState(null,"","#"+name)}
+$("[data-to],.jump").forEach(b=>b.addEventListener("click",()=>go(b.dataset.to)));window.addEventListener("hashchange",()=>go((location.hash||"#home").slice(1),false));$(".bottom-nav .nav-btn").forEach(b=>b.addEventListener("pointerdown",()=>{if(!b.querySelector(".nav-art"))return;b.classList.remove("nav-tap");void b.offsetWidth;b.classList.add("nav-tap");setTimeout(()=>b.classList.remove("nav-tap"),320)}));
 
 const colors={1:"#f2b51d",2:"#263f8f",3:"#d92b2e",4:"#2a245c",5:"#f15428",6:"#176341",7:"#7a2f38",8:"#171717",9:"#e2a51a",10:"#24408f",11:"#d62d30",12:"#332764",13:"#f0522d",14:"#1e6945",15:"#7a3038"};
 function isOverFelt(e){const r=felt.getBoundingClientRect();return e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom;}
@@ -353,7 +377,7 @@ $("#exportPng").onclick=()=>{const c=document.createElement("canvas");c.width=12
 
 const toolbar=$("#layoutToolbar");let tdrag=null;toolbar.addEventListener("pointerdown",e=>{if(e.target.closest("button"))return;tdrag={x:e.clientX,left:toolbar.scrollLeft}});toolbar.addEventListener("pointermove",e=>{if(tdrag)toolbar.scrollLeft=tdrag.left-(e.clientX-tdrag.x)});toolbar.addEventListener("pointerup",()=>tdrag=null);toolbar.addEventListener("pointercancel",()=>tdrag=null);
 
-let score={p1:0,p2:0};$$$("[data-score]").forEach(b=>b.onclick=()=>{const k=b.dataset.score;score[k]=Math.max(0,score[k]+Number(b.dataset.delta));$("#"+k+"score").textContent=score[k]});$("#resetCounter").onclick=()=>{score={p1:0,p2:0};$("#p1score").textContent=$("#p2score").textContent=0};$("#saveCounter").onclick=()=>{const list=store.get("9b_counter");list.unshift({id:Date.now(),date:new Date().toISOString(),p1:$("#p1name").value,p2:$("#p2name").value,s1:score.p1,s2:score.p2,type:$("#raceType").value});store.set("9b_counter",list);renderCounter();renderHome();toast("スコアを記録しました")};$("#clearCounterHistory").onclick=()=>{store.set("9b_counter",[]);renderCounter();renderHome()};
+let score={p1:0,p2:0};$("[data-score]").forEach(b=>b.onclick=()=>{const k=b.dataset.score;score[k]=Math.max(0,score[k]+Number(b.dataset.delta));$("#"+k+"score").textContent=score[k]});$("#resetCounter").onclick=()=>{score={p1:0,p2:0};$("#p1score").textContent=$("#p2score").textContent=0};$("#saveCounter").onclick=()=>{const list=store.get("9b_counter");list.unshift({id:Date.now(),date:new Date().toISOString(),p1:$("#p1name").value,p2:$("#p2name").value,s1:score.p1,s2:score.p2,type:$("#raceType").value});store.set("9b_counter",list);renderCounter();renderHome();toast("スコアを記録しました")};$("#clearCounterHistory").onclick=()=>{store.set("9b_counter",[]);renderCounter();renderHome()};
 function renderCounter(){const list=store.get("9b_counter"),el=$("#counterHistory");el.innerHTML=list.length?list.map(x=>`<div class="summary-row"><div><strong>${esc(x.p1)} ${x.s1} - ${x.s2} ${esc(x.p2)}</strong><small>${esc(x.type)} ・ ${new Date(x.date).toLocaleString("ja-JP")}</small></div></div>`).join(""):'<div class="summary-row"><strong>まだ履歴はありません</strong></div>'}
 
 const form=$("#matchForm");function showForm(on){form.classList.toggle("show",on)}$("#newMatchBtn").onclick=$("#newMatchText").onclick=()=>{showForm(!form.classList.contains("show"));$("#matchDate").value ||= new Date().toISOString().slice(0,10)};$("#cancelMatch").onclick=()=>showForm(false);form.onsubmit=e=>{e.preventDefault();const list=store.get("9b_matches");list.unshift({id:Date.now(),date:$("#matchDate").value,status:$("#matchStatus").value,title:$("#matchTitle").value||"無題",venue:$("#matchVenue").value,opponent:$("#matchOpponent").value,result:$("#matchResult").value,race:$("#matchRace").value,fee:$("#matchFee").value,url:$("#matchUrl").value,memo:$("#matchMemo").value});store.set("9b_matches",list);form.reset();showForm(false);renderMatches();renderHome();toast("対戦記録を保存しました")};
