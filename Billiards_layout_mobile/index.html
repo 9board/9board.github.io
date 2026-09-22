@@ -64,7 +64,7 @@ button,input,select,textarea{font:inherit}button{border:0;-webkit-appearance:non
 .section-title>span{font-size:12px;color:var(--muted)}
 </style>
 </head>
-<body data-build="2026-09-23-v31">
+<body data-build="2026-09-23-v32">
 <div class="phone">
 <main class="app-view" id="appView">
 <section class="screen active" data-screen="home">
@@ -310,7 +310,7 @@ function nearestBallPoint(p,radiusPx=22){
   for(const b of balls){if(b.ghost)continue;const dx=(p.x-b.x)*r.width/100,dy=(p.y-b.y)*r.height/100,d=Math.hypot(dx,dy);if(d<=bestD){best=b;bestD=d}}
   return best;
 }
-function markSnapBall(id=null){$(".ball.snap-target").forEach(el=>el.classList.remove("snap-target"));if(id!=null)ballsLayer.querySelector(`.ball[data-id="${id}"]`)?.classList.add("snap-target")}
+function markSnapBall(id=null){$$(".ball.snap-target").forEach(el=>el.classList.remove("snap-target"));if(id!=null)ballsLayer.querySelector(`.ball[data-id="${id}"]`)?.classList.add("snap-target")}
 function setMoveTool(){tool="move";$$(".tool[data-tool]").forEach(x=>x.classList.toggle("active",x.dataset.tool==="move"))}
 function syncLinesForBall(ball){
   let changed=false;
