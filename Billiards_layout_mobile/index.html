@@ -64,7 +64,7 @@ button,input,select,textarea{font:inherit}button{border:0;-webkit-appearance:non
 .section-title>span{font-size:12px;color:var(--muted)}
 </style>
 </head>
-<body data-build="2026-09-23-v24">
+<body data-build="2026-09-23-v25">
 <div class="phone">
 <main class="app-view" id="appView">
 <section class="screen active" data-screen="home">
@@ -221,8 +221,8 @@ function makeBrandLogoTransparent(){
   if(img.complete)run();else img.addEventListener("load",run,{once:true});
 }
 makeBrandLogoTransparent();
-function go(name,updateUrl=true){const valid=["home","layout","counter","matches","menu"];if(!valid.includes(name))name="home";$$(".screen").forEach(s=>s.classList.toggle("active",s.dataset.screen===name));$$(".nav-btn").forEach(b=>b.classList.toggle("active",b.dataset.to===name));$("#appView").scrollTo({top:0});if(name==="home")renderHome();if(updateUrl&&location.hash!=="#"+name)history.pushState(null,"","#"+name)}
-$$("[data-to],.jump").forEach(b=>b.addEventListener("click",()=>go(b.dataset.to)));window.addEventListener("hashchange",()=>go((location.hash||"#home").slice(1),false));$$(".bottom-nav .nav-btn").forEach(b=>b.addEventListener("pointerdown",()=>{if(!b.querySelector(".nav-art"))return;b.classList.remove("nav-tap");void b.offsetWidth;b.classList.add("nav-tap");setTimeout(()=>b.classList.remove("nav-tap"),320)}));
+function go(name,updateUrl=true){const valid=["home","layout","counter","matches","menu"];if(!valid.includes(name))name="home";$$(".screen").forEach(s=>s.classList.toggle("active",s.dataset.screen===name));$$(".nav-btn").forEach(b=>b.classList.toggle("active",b.dataset.to===name));$("#appView").scrollTo({top:0});if(name==="home")renderHome();if(updateUrl&&location.hash!=="#"+name)window.history.pushState(null,"","#"+name)}
+$("[data-to],.jump").forEach(b=>{b.type="button";b.addEventListener("click",e=>{e.preventDefault();go(b.dataset.to)})});window.addEventListener("hashchange",()=>go((location.hash||"#home").slice(1),false));$$(".bottom-nav .nav-btn").forEach(b=>b.addEventListener("pointerdown",()=>{if(!b.querySelector(".nav-art"))return;b.classList.remove("nav-tap");void b.offsetWidth;b.classList.add("nav-tap");setTimeout(()=>b.classList.remove("nav-tap"),320)}));
 
 const colors={1:"#f2b51d",2:"#263f8f",3:"#d92b2e",4:"#2a245c",5:"#f15428",6:"#176341",7:"#7a2f38",8:"#171717",9:"#e2a51a",10:"#24408f",11:"#d62d30",12:"#332764",13:"#f0522d",14:"#1e6945",15:"#7a3038"};
 function isOverFelt(e){const r=felt.getBoundingClientRect();return e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom;}
