@@ -32,15 +32,20 @@ button,input,select,textarea{font:inherit}button{border:0;-webkit-appearance:non
 .table-stage{position:absolute;inset:0;transform-origin:center center;will-change:transform}
 .table-frame{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;pointer-events:none;z-index:1}
 .cloth{position:absolute;left:7.1%;top:12.4%;width:85.8%;height:75.2%;overflow:hidden;z-index:2;touch-action:none;background:#149fa2}
-.cloth.grid-on{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 700 300' preserveAspectRatio='none'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='.33' stroke-width='.8' stroke-dasharray='1.5 2.5'%3E%3Cpath d='M100 0V300M200 0V300M300 0V300M400 0V300M500 0V300M600 0V300M0 75H700M0 150H700M0 225H700'/%3E%3C/g%3E%3C/svg%3E"),linear-gradient(#149fa2,#149fa2);background-size:100% 100%,100% 100%;background-repeat:no-repeat}
+.cloth.grid-on{background-image:linear-gradient(rgba(255,255,255,.30) .7px,transparent .7px),linear-gradient(90deg,rgba(255,255,255,.30) .7px,transparent .7px),linear-gradient(#149fa2,#149fa2);background-size:14.2857% 25%,14.2857% 25%,100% 100%}
 #svgLayer{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none}
 #ballsLayer,#notesLayer{position:absolute;inset:0;z-index:4;pointer-events:none}
 #aimGuide{position:absolute;inset:0;z-index:2;display:none;pointer-events:none}#aimGuide.visible{display:block}#aimGuide:before,#aimGuide:after{content:"";position:absolute;border-color:rgba(255,255,255,.82);filter:drop-shadow(0 0 1px #22595b)}#aimGuide:before{left:var(--x);top:0;bottom:0;border-left:1px solid}#aimGuide:after{top:var(--y);left:0;right:0;border-top:1px solid}
-.ball,.palette-ball{--ball-color:#fff;position:absolute;width:15px;height:15px;min-width:15px;min-height:15px;border-radius:50%;transform:translate(-50%,-50%);border:0;box-shadow:0 2px 5px rgba(0,0,0,.26);pointer-events:auto;touch-action:none;background-image:url("../pc/assets/billiard-balls-photo-sprite.webp?v=1");background-size:400% 400%;background-repeat:no-repeat}
-.ball:before,.ball:after,.palette-ball:before,.palette-ball:after,.ball span,.palette-ball span{display:none!important;content:none!important}
-.palette-ball{position:relative;transform:none;width:31px;height:31px;min-width:31px;min-height:31px}
-.ball.ghost,.palette-ball.ghost-pick{background:transparent!important;background-image:none!important;border:2px dashed #e53333!important;box-shadow:none!important}
-.ballbar-title{font-size:12px;font-weight:900;color:#456058;margin:12px 1px 7px}.ballbar{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:4px 2px 10px;overflow:visible}.ballbar button{background:#fff;border:1px solid var(--line);border-radius:13px;min-height:48px;padding:6px;display:grid;place-items:center;touch-action:none}
+.ball,.palette-ball{--ball-color:#fff;position:absolute;width:15px;height:15px;border-radius:50%;transform:translate(-50%,-50%);border:1px solid rgba(255,255,255,.96);box-shadow:0 2px 5px rgba(0,0,0,.28),inset -2px -3px 4px rgba(0,0,0,.2),inset 2px 2px 4px rgba(255,255,255,.25);pointer-events:auto;touch-action:none}
+.ball:before,.palette-ball:before{content:"";position:absolute;left:3px;top:2px;width:5px;height:4px;border-radius:50%;background:rgba(255,255,255,.72);z-index:2}
+.ball.solid,.palette-ball.solid{background:radial-gradient(circle at 40% 35%,var(--ball-color) 0 58%,color-mix(in srgb,var(--ball-color) 65%,black) 100%)}
+.ball.stripe,.palette-ball.stripe{background:radial-gradient(circle at 50% 45%,#fff 0 62%,#e7e6e2 100%);overflow:hidden}
+.ball.stripe:after,.palette-ball.stripe:after{content:"";position:absolute;left:-9%;right:-9%;top:27%;height:46%;background:var(--ball-color);z-index:1}
+.ball.cue,.palette-ball.cue{background:radial-gradient(circle at 45% 42%,#fffef8 0 52%,#ebe8dc 78%,#d5d1c4 100%)}
+.ball span,.palette-ball span{position:absolute;z-index:3;left:50%;top:50%;transform:translate(-50%,-50%);width:7px;height:7px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:5px;font-weight:900;color:#111}
+.palette-ball{position:relative;transform:none;width:28px;height:28px;min-width:28px;min-height:28px;flex:0 0 auto}.palette-ball span{width:12px;height:12px;font-size:7px}
+.ball.ghost,.palette-ball.ghost-pick{background:transparent!important;border:2px dashed #e53333!important;box-shadow:none!important}
+.ballbar-title{font-size:12px;font-weight:900;color:#456058;margin:12px 1px 7px}.ballbar{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 10px;scrollbar-width:none;-webkit-overflow-scrolling:touch}.ballbar::-webkit-scrollbar{display:none}.ballbar button{background:none;padding:0;min-width:28px;touch-action:none}
 .table-memo{position:absolute;transform:translate(-50%,-50%);background:#fff6c8;border:1px solid #ead88f;border-radius:8px;padding:5px 7px;font-size:10px;font-weight:800;pointer-events:auto;touch-action:none;white-space:nowrap}
 .toolbar{display:flex;gap:8px;overflow-x:auto;padding:10px 2px 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}.toolbar::-webkit-scrollbar{display:none}
 .tool{min-width:68px;height:52px;border-radius:13px;background:#fff;border:1px solid #dfe5e2;color:#34564d;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:18px;font-weight:900;flex:0 0 auto}.tool span{font-size:9px}.tool.active{background:linear-gradient(135deg,#0a9c72,#08b080);color:#fff;border-color:transparent}
@@ -58,7 +63,7 @@ button,input,select,textarea{font:inherit}button{border:0;-webkit-appearance:non
 .section-title>span{font-size:12px;color:var(--muted)}
 </style>
 </head>
-<body data-build="2026-09-22-v10">
+<body data-build="2026-09-22-v11">
 <div class="phone">
 <main class="app-view" id="appView">
 <section class="screen active" data-screen="home">
@@ -183,8 +188,6 @@ function go(name,updateUrl=true){const valid=["home","layout","counter","matches
 $$("[data-to],.jump").forEach(b=>b.addEventListener("click",()=>go(b.dataset.to)));window.addEventListener("hashchange",()=>go((location.hash||"#home").slice(1),false));$$(".bottom-nav .nav-btn").forEach(b=>b.addEventListener("pointerdown",()=>{if(!b.querySelector(".nav-art"))return;b.classList.remove("nav-tap");void b.offsetWidth;b.classList.add("nav-tap");setTimeout(()=>b.classList.remove("nav-tap"),320)}));
 
 const colors={1:"#f2b51d",2:"#263f8f",3:"#d92b2e",4:"#2a245c",5:"#f15428",6:"#176341",7:"#7a2f38",8:"#171717",9:"#e2a51a",10:"#24408f",11:"#d62d30",12:"#332764",13:"#f0522d",14:"#1e6945",15:"#7a3038"};
-const ballSpritePos={0:[0,3],1:[0,0],2:[1,0],3:[2,0],4:[3,0],5:[3,1],6:[2,1],7:[1,1],8:[0,1],9:[0,2],10:[1,2],11:[2,2],12:[3,2],13:[3,3],14:[2,3],15:[1,3]};
-function applyBallSprite(el,n,isGhost=false){if(isGhost)return;const p=ballSpritePos[n];if(!p)return;el.style.backgroundPosition=(p[0]*33.333333)+"% "+(p[1]*33.333333)+"%";}
 function isOverFelt(e){const r=felt.getBoundingClientRect();return e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom;}
 const felt=$("#felt"),svg=$("#svgLayer"),ballsLayer=$("#ballsLayer"),notesLayer=$("#notesLayer"),tableViewport=$("#tableViewport"),tableStage=$("#tableStage");
 const aim=$("#aimGuide"),clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
@@ -231,7 +234,7 @@ tableViewport.addEventListener("pointercancel",stopTablePan);
 
 function ballClass(n,ghost=false){return "ball "+(ghost?"ghost":n===0?"cue":n<=8?"solid":"stripe")}
 function renderLines(){svg.innerHTML="";const ns="http://www.w3.org/2000/svg";for(const l of lines){if(l.type==="arrow"){const defs=document.createElementNS(ns,"defs"),marker=document.createElementNS(ns,"marker"),path=document.createElementNS(ns,"path"),id="a"+String(l.id).replace(/\W/g,"");marker.id=id;marker.setAttribute("viewBox","0 0 10 10");marker.setAttribute("refX","8");marker.setAttribute("refY","5");marker.setAttribute("markerWidth","5");marker.setAttribute("markerHeight","5");marker.setAttribute("orient","auto");path.setAttribute("d","M0 0 L10 5 L0 10 z");path.setAttribute("fill","#fff");marker.appendChild(path);defs.appendChild(marker);svg.appendChild(defs);l._marker=id}const el=document.createElementNS(ns,"line");for(const [k,v] of [["x1",l.x1+"%"],["y1",l.y1+"%"],["x2",l.x2+"%"],["y2",l.y2+"%"],["stroke","#fff"],["stroke-width","1"],["stroke-linecap","round"]])el.setAttribute(k,v);if(l._marker)el.setAttribute("marker-end",`url(#${l._marker})`);svg.appendChild(el)}}
-function renderLayout(){ballsLayer.innerHTML="";notesLayer.innerHTML="";renderLines();for(const b of balls){const el=document.createElement("div");el.className=ballClass(b.n,!!b.ghost);el.dataset.id=b.id;el.style.left=b.x+"%";el.style.top=b.y+"%";applyBallSprite(el,b.n,!!b.ghost);el.addEventListener("pointerdown",ballDown);ballsLayer.appendChild(el)}for(const m of memos){const el=document.createElement("div");el.className="table-memo";el.dataset.id=m.id;el.style.left=m.x+"%";el.style.top=m.y+"%";el.textContent=m.text;el.addEventListener("pointerdown",memoDown);notesLayer.appendChild(el)}}
+function renderLayout(){ballsLayer.innerHTML="";notesLayer.innerHTML="";renderLines();for(const b of balls){const el=document.createElement("div");el.className=ballClass(b.n,!!b.ghost);el.dataset.id=b.id;el.style.left=b.x+"%";el.style.top=b.y+"%";if(!b.ghost&&b.n)el.style.setProperty("--ball-color",colors[b.n]);if(!b.ghost){const sp=document.createElement("span");sp.textContent=b.n||"";el.appendChild(sp)}el.addEventListener("pointerdown",ballDown);ballsLayer.appendChild(el)}for(const m of memos){const el=document.createElement("div");el.className="table-memo";el.dataset.id=m.id;el.style.left=m.x+"%";el.style.top=m.y+"%";el.textContent=m.text;el.addEventListener("pointerdown",memoDown);notesLayer.appendChild(el)}}
 function addBall(n,p,ghost=false){const base=p||{x:n===0?22:65+(n%5)*4,y:40+(n%4)*7};balls.push({id:crypto.randomUUID?.()||Date.now()+Math.random(),n,x:base.x,y:base.y,ghost});commit();renderLayout()}
 function shiftAll(dx,dy){balls.forEach(o=>{o.x=clamp(o.x+dx,1,99);o.y=clamp(o.y+dy,2,98)});memos.forEach(o=>{o.x=clamp(o.x+dx,1,99);o.y=clamp(o.y+dy,2,98)});lines.forEach(l=>{l.x1=clamp(l.x1+dx,0,100);l.y1=clamp(l.y1+dy,0,100);l.x2=clamp(l.x2+dx,0,100);l.y2=clamp(l.y2+dy,0,100)})}
 function beginAll(e){drag={kind:"all",last:point(e)};felt.setPointerCapture?.(e.pointerId);e.preventDefault();showAim(e)}
@@ -249,7 +252,8 @@ const ballbar=$("#ballbar");
   const ghost=value===-1,n=ghost?0:value;
   const b=document.createElement("button"),m=document.createElement("div");
   m.className="palette-ball "+(ghost?"ghost-pick":n===0?"cue":n<=8?"solid":"stripe");
-  applyBallSprite(m,n,ghost);
+  if(!ghost&&n)m.style.setProperty("--ball-color",colors[n]);
+  if(!ghost){const s=document.createElement("span");s.textContent=n||"";m.appendChild(s)}
   b.title=ghost?"イメージボール":n===0?"手玉":n+"番";
   b.appendChild(m);
   let start=null,preview=null;
