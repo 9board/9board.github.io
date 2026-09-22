@@ -64,7 +64,7 @@ button,input,select,textarea{font:inherit}button{border:0;-webkit-appearance:non
 .section-title>span{font-size:12px;color:var(--muted)}
 </style>
 </head>
-<body data-build="2026-09-22-v16">
+<body data-build="2026-09-22-v17">
 <div class="phone">
 <main class="app-view" id="appView">
 <section class="screen active" data-screen="home">
@@ -217,7 +217,11 @@ function showAimAt(x,y){aim.style.setProperty("--x",clamp(x,0,100)+"%");aim.styl
 function showAim(e){const p=point(e);showAimAt(p.x,p.y)}
 function nearestBall(e,radius=28){const r=felt.getBoundingClientRect();let best=null,bestD=radius;for(const b of balls){const bx=r.left+r.width*b.x/100,by=r.top+r.height*b.y/100,d=Math.hypot(e.clientX-bx,e.clientY-by);if(d<=bestD){best=b;bestD=d}}return best}
 function hideAim(){aim.classList.remove("visible")}
-function point(e){const r=felt.getBoundingClientRect();return{x:clamp((e.clientX-r.left)/r.width*100,1,99),y:clamp((e.clientY-r.top)/r.height*100,2,98)}}
+function ballEdgeBounds(){
+  const w=felt.clientWidth||1,h=felt.clientHeight||1,rad=5.5;
+  return{minX:rad/w*100,maxX:100-rad/w*100,minY:rad/h*100,maxY:100-rad/h*100}
+}
+function point(e){const r=felt.getBoundingClientRect();return{x:clamp((e.clientX-r.left)/r.width*100,0,100),y:clamp((e.clientY-r.top)/r.height*100,0,100)}}
 
 const zoom={scale:1,min:1,max:3,tx:0,ty:0};
 function clampPan(){if(zoom.scale<=1){zoom.tx=0;zoom.ty=0;return}const r=tableViewport.getBoundingClientRect(),mx=r.width*(zoom.scale-1)/2,my=r.height*(zoom.scale-1)/2;zoom.tx=clamp(zoom.tx,-mx,mx);zoom.ty=clamp(zoom.ty,-my,my)}
@@ -250,14 +254,22 @@ tableViewport.addEventListener("pointercancel",stopTablePan);
 function ballClass(n,ghost=false){return "ball "+(ghost?"ghost":n===0?"cue":n<=8?"solid":"stripe")}
 function renderLines(){svg.innerHTML="";const ns="http://www.w3.org/2000/svg";for(const l of lines){if(l.type==="arrow"){const defs=document.createElementNS(ns,"defs"),marker=document.createElementNS(ns,"marker"),path=document.createElementNS(ns,"path"),id="a"+String(l.id).replace(/\W/g,"");marker.id=id;marker.setAttribute("viewBox","0 0 10 10");marker.setAttribute("refX","8");marker.setAttribute("refY","5");marker.setAttribute("markerWidth","5");marker.setAttribute("markerHeight","5");marker.setAttribute("orient","auto");path.setAttribute("d","M0 0 L10 5 L0 10 z");path.setAttribute("fill","#fff");marker.appendChild(path);defs.appendChild(marker);svg.appendChild(defs);l._marker=id}const el=document.createElementNS(ns,"line");for(const [k,v] of [["x1",l.x1+"%"],["y1",l.y1+"%"],["x2",l.x2+"%"],["y2",l.y2+"%"],["stroke",l.color||"#fff"],["stroke-width",String(l.width||1)],["stroke-linecap","round"]])el.setAttribute(k,v);if(l._marker)el.setAttribute("marker-end",`url(#${l._marker})`);svg.appendChild(el)}}
 function renderLayout(){ballsLayer.innerHTML="";notesLayer.innerHTML="";renderLines();for(const b of balls){const el=document.createElement("div");el.className=ballClass(b.n,!!b.ghost)+(drag&&drag.kind==="ball"&&drag.id===b.id?" dragging":"");el.dataset.id=b.id;el.style.left=b.x+"%";el.style.top=b.y+"%";if(!b.ghost&&b.n)el.style.setProperty("--ball-color",colors[b.n]);if(!b.ghost){const sp=document.createElement("span");sp.textContent=b.n||"";el.appendChild(sp)}el.addEventListener("pointerdown",ballDown);ballsLayer.appendChild(el)}for(const m of memos){const el=document.createElement("div");el.className="table-memo";el.dataset.id=m.id;el.style.left=m.x+"%";el.style.top=m.y+"%";el.textContent=m.text;el.addEventListener("pointerdown",memoDown);notesLayer.appendChild(el)}}
-function addBall(n,p,ghost=false){const base=p||{x:n===0?22:65+(n%5)*4,y:40+(n%4)*7};balls.push({id:crypto.randomUUID?.()||Date.now()+Math.random(),n,x:base.x,y:base.y,ghost});commit();renderLayout()}
-function shiftAll(dx,dy){balls.forEach(o=>{o.x=clamp(o.x+dx,1,99);o.y=clamp(o.y+dy,2,98)});memos.forEach(o=>{o.x=clamp(o.x+dx,1,99);o.y=clamp(o.y+dy,2,98)});lines.forEach(l=>{l.x1=clamp(l.x1+dx,0,100);l.y1=clamp(l.y1+dy,0,100);l.x2=clamp(l.x2+dx,0,100);l.y2=clamp(l.y2+dy,0,100)})}
+function addBall(n,p,ghost=false){
+  const base=p||{x:n===0?22:65+(n%5)*4,y:40+(n%4)*7},b=ballEdgeBounds();
+  base.x=clamp(base.x,b.minX,b.maxX);base.y=clamp(base.y,b.minY,b.maxY);
+  balls.push({id:crypto.randomUUID?.()||Date.now()+Math.random(),n,x:base.x,y:base.y,ghost});commit();renderLayout()
+}
+function shiftAll(dx,dy){const b=ballEdgeBounds();balls.forEach(o=>{o.x=clamp(o.x+dx,b.minX,b.maxX);o.y=clamp(o.y+dy,b.minY,b.maxY)});memos.forEach(o=>{o.x=clamp(o.x+dx,1,99);o.y=clamp(o.y+dy,2,98)});lines.forEach(l=>{l.x1=clamp(l.x1+dx,0,100);l.y1=clamp(l.y1+dy,0,100);l.x2=clamp(l.x2+dx,0,100);l.y2=clamp(l.y2+dy,0,100)})}
 function beginAll(e){drag={kind:"all",last:point(e)};felt.setPointerCapture?.(e.pointerId);e.preventDefault();showAim(e)}
 function ballDown(e){e.stopPropagation();const id=e.currentTarget.dataset.id;if(tool==="erase"){balls=balls.filter(x=>x.id!==id);commit();renderLayout();return}const o=balls.find(x=>x.id===id);if((tool==="line"||tool==="arrow")&&o){drawing={id:Date.now()+Math.random(),type:tool,x1:o.x,y1:o.y,x2:o.x,y2:o.y,color:lineColor,width:lineWidth,startBallId:o.id};felt.setPointerCapture?.(e.pointerId);showAim(e);e.preventDefault();return}if(tool==="moveall"){beginAll(e);return}if(tool!=="move")return;const p=point(e);drag={kind:"ball",id,startX:e.clientX,startY:e.clientY,moved:false,liftPx:28};e.currentTarget.setPointerCapture?.(e.pointerId);showAimAt(o.x,o.y);e.preventDefault()}
 function finishBallDrag(){if(drag&&drag.kind==="ball"){commit();drag=null;hideAim();renderLayout()}}
 function memoDown(e){e.stopPropagation();const id=e.currentTarget.dataset.id;if(tool==="erase"){memos=memos.filter(x=>x.id!==id);commit();renderLayout();return}if(tool==="moveall"){beginAll(e);return}if(tool!=="move")return;drag={kind:"memo",id};e.currentTarget.setPointerCapture?.(e.pointerId);e.preventDefault()}
-document.addEventListener("pointermove",e=>{if(!drag)return;const p=point(e);if(drag.kind==="all"){shiftAll(p.x-drag.last.x,p.y-drag.last.y);drag.last=p;renderLayout();showAim(e);return}const arr=drag.kind==="ball"?balls:memos,o=arr.find(x=>x.id===drag.id);if(!o)return;if(drag.kind==="ball"){const r=felt.getBoundingClientRect();const liftPct=((drag.liftPx||28)/r.height)*100;o.x=clamp(p.x,1,99);o.y=clamp(p.y-liftPct,2,98)}else{o.x=p.x;o.y=p.y}renderLayout();if(drag.kind==="ball"){if(Math.hypot(e.clientX-drag.startX,e.clientY-drag.startY)>3)drag.moved=true;if(isOverFelt(e))showAimAt(o.x,o.y);else hideAim()}},{passive:false});
-document.addEventListener("pointerup",()=>{if(drag){drag=null;hideAim();commit()}});document.addEventListener("pointercancel",()=>{drag=null;hideAim()});
+document.addEventListener("pointermove",e=>{if(!drag)return;const p=point(e);if(drag.kind==="all"){shiftAll(p.x-drag.last.x,p.y-drag.last.y);drag.last=p;renderLayout();showAim(e);return}const arr=drag.kind==="ball"?balls:memos,o=arr.find(x=>x.id===drag.id);if(!o)return;if(drag.kind==="ball"){
+  const r=felt.getBoundingClientRect(),b=ballEdgeBounds(),liftPct=((drag.liftPx||28)/r.height)*100;
+  o.x=clamp(p.x,b.minX,b.maxX);
+  o.y=clamp(p.y-liftPct,b.minY,b.maxY);
+}else{o.x=p.x;o.y=p.y}renderLayout();if(drag.kind==="ball"){if(Math.hypot(e.clientX-drag.startX,e.clientY-drag.startY)>3)drag.moved=true;if(isOverFelt(e))showAimAt(o.x,o.y);else hideAim()}},{passive:false});
+document.addEventListener("pointerup",()=>{if(drag){const wasBall=drag.kind==="ball";drag=null;hideAim();commit();if(wasBall)renderLayout()}});document.addEventListener("pointercancel",()=>{const wasBall=drag&&drag.kind==="ball";drag=null;hideAim();if(wasBall)renderLayout()});
 felt.addEventListener("pointerdown",e=>{if(e.target!==felt&&e.target!==svg)return;const p=point(e);if(tool==="move"){const near=nearestBall(e,30);if(near){drag={kind:"ball",id:near.id,startX:e.clientX,startY:e.clientY,moved:false,liftPx:28};felt.setPointerCapture?.(e.pointerId);showAimAt(near.x,near.y);e.preventDefault();return}}if(tool==="line"||tool==="arrow"){drawing={id:Date.now()+Math.random(),type:tool,x1:p.x,y1:p.y,x2:p.x,y2:p.y,color:lineColor,width:lineWidth};felt.setPointerCapture?.(e.pointerId);showAim(e)}else if(tool==="memo"){const text=prompt("メモを入力");if(text){memos.push({id:Date.now()+Math.random(),text,x:p.x,y:p.y});commit();renderLayout()}}else if(tool==="moveall")beginAll(e)});
 felt.addEventListener("pointermove",e=>{if(!drawing)return;const p=point(e);drawing.x2=p.x;drawing.y2=p.y;showAim(e);const tmp=[...lines,drawing];const old=lines;lines=tmp;renderLines();lines=old});
 function addGhostOppositeArrow(line){
