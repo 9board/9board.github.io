@@ -31,21 +31,22 @@ button,input,select,textarea{font:inherit}button{border:0;-webkit-appearance:non
 .table-viewport{position:relative;width:100%;aspect-ratio:758/448;border-radius:20px;overflow:hidden;background:#eef1f3;touch-action:none}
 .table-stage{position:absolute;inset:0;transform-origin:center center;will-change:transform}
 .table-frame{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;pointer-events:none;z-index:1}
-.cloth{position:absolute;left:7.1%;top:12.4%;width:85.8%;height:75.2%;overflow:hidden;z-index:2;touch-action:none;background:#149fa2}
-.cloth.grid-on{background-image:linear-gradient(rgba(255,255,255,.30) .7px,transparent .7px),linear-gradient(90deg,rgba(255,255,255,.30) .7px,transparent .7px),linear-gradient(#149fa2,#149fa2);background-size:14.2857% 25%,14.2857% 25%,100% 100%}
+.cloth{position:absolute;left:6.7%;top:12.4%;width:86.4%;height:75.2%;overflow:hidden;z-index:2;touch-action:none;background:#149fa2;clip-path:polygon(10px 0,calc(100% - 10px) 0,100% 10px,100% calc(100% - 10px),calc(100% - 10px) 100%,10px 100%,0 calc(100% - 10px),0 10px)}
+.cloth.grid-on{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 700 300' preserveAspectRatio='none'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='.33' stroke-width='.8' stroke-dasharray='1.5 2.5'%3E%3Cpath d='M100 0V300M200 0V300M300 0V300M400 0V300M500 0V300M600 0V300M0 75H700M0 150H700M0 225H700'/%3E%3C/g%3E%3C/svg%3E"),linear-gradient(#149fa2,#149fa2);background-size:100% 100%,100% 100%;background-repeat:no-repeat}
 #svgLayer{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none}
 #ballsLayer,#notesLayer{position:absolute;inset:0;z-index:4;pointer-events:none}
 #aimGuide{position:absolute;inset:0;z-index:2;display:none;pointer-events:none}#aimGuide.visible{display:block}#aimGuide:before,#aimGuide:after{content:"";position:absolute;border-color:rgba(255,255,255,.82);filter:drop-shadow(0 0 1px #22595b)}#aimGuide:before{left:var(--x);top:0;bottom:0;border-left:1px solid}#aimGuide:after{top:var(--y);left:0;right:0;border-top:1px solid}
-.ball,.palette-ball{--ball-color:#fff;position:absolute;width:15px;height:15px;border-radius:50%;transform:translate(-50%,-50%);border:1px solid rgba(255,255,255,.96);box-shadow:0 2px 5px rgba(0,0,0,.28),inset -2px -3px 4px rgba(0,0,0,.2),inset 2px 2px 4px rgba(255,255,255,.25);pointer-events:auto;touch-action:none}
-.ball:before,.palette-ball:before{content:"";position:absolute;left:3px;top:2px;width:5px;height:4px;border-radius:50%;background:rgba(255,255,255,.72);z-index:2}
-.ball.solid,.palette-ball.solid{background:radial-gradient(circle at 40% 35%,var(--ball-color) 0 58%,color-mix(in srgb,var(--ball-color) 65%,black) 100%)}
-.ball.stripe,.palette-ball.stripe{background:radial-gradient(circle at 50% 45%,#fff 0 62%,#e7e6e2 100%);overflow:hidden}
-.ball.stripe:after,.palette-ball.stripe:after{content:"";position:absolute;left:-9%;right:-9%;top:27%;height:46%;background:var(--ball-color);z-index:1}
-.ball.cue,.palette-ball.cue{background:radial-gradient(circle at 45% 42%,#fffef8 0 52%,#ebe8dc 78%,#d5d1c4 100%)}
-.ball span,.palette-ball span{position:absolute;z-index:3;left:50%;top:50%;transform:translate(-50%,-50%);width:7px;height:7px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:5px;font-weight:900;color:#111}
-.palette-ball{position:relative;transform:none;width:28px;height:28px;min-width:28px;min-height:28px;flex:0 0 auto}.palette-ball span{width:12px;height:12px;font-size:7px}
-.ball.ghost,.palette-ball.ghost-pick{background:transparent!important;border:2px dashed #e53333!important;box-shadow:none!important}
-.ballbar-title{font-size:12px;font-weight:900;color:#456058;margin:12px 1px 7px}.ballbar{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 10px;scrollbar-width:none;-webkit-overflow-scrolling:touch}.ballbar::-webkit-scrollbar{display:none}.ballbar button{background:none;padding:0;min-width:28px;touch-action:none}
+.ball,.palette-ball{--ball-color:#fff;position:absolute;width:31px!important;height:31px!important;min-width:31px!important;min-height:31px!important;border-radius:50%;transform:translate(-50%,-50%);pointer-events:auto;touch-action:none;overflow:hidden!important;border:1px solid rgba(255,255,255,.96)!important;box-shadow:0 3px 7px rgba(0,0,0,.26),inset 4px 4px 7px rgba(255,255,255,.42),inset -5px -6px 8px rgba(0,0,0,.24)!important}
+.palette-ball{position:relative!important;transform:none!important;width:31px!important;height:31px!important;min-width:31px!important;min-height:31px!important}
+.ball.solid,.palette-ball.solid{background:radial-gradient(circle at 28% 22%,rgba(255,255,255,.92) 0 5%,rgba(255,255,255,.26) 10%,transparent 23%),radial-gradient(circle at 46% 42%,var(--ball-color) 0 58%,color-mix(in srgb,var(--ball-color) 78%,black) 100%)!important}
+.ball.stripe,.palette-ball.stripe{background:radial-gradient(circle at 28% 22%,rgba(255,255,255,.95) 0 5%,rgba(255,255,255,.28) 11%,transparent 23%),linear-gradient(to bottom,#f1ead3 0 24%,var(--ball-color) 24% 68%,#e7dfc6 68% 100%)!important}
+.ball.cue,.palette-ball.cue{background:radial-gradient(circle at 28% 22%,#fff 0 7%,rgba(255,255,255,.6) 14%,transparent 26%),radial-gradient(circle at 47% 43%,#f5f0df 0 60%,#ddd5bd 84%,#c8bea4 100%)!important}
+.ball:not(.ghost) span,.palette-ball:not(.ghost-pick) span{position:absolute!important;z-index:5!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;display:grid!important;place-items:center!important;background:#efe7c9!important;color:#111!important;border-radius:50%!important;width:18px!important;height:18px!important;min-width:18px!important;font-size:9px!important;box-shadow:inset 0 0 0 1px rgba(70,55,38,.18),0 1px 2px rgba(0,0,0,.18)!important;font-weight:900!important;font-family:Arial,Helvetica,sans-serif!important;line-height:1!important}
+.ball.ghost,.palette-ball.ghost-pick{position:relative!important;background:transparent!important;border:0!important;box-shadow:none!important;overflow:visible!important}
+.ball.ghost::before,.palette-ball.ghost-pick::before{content:""!important;display:block!important;position:absolute!important;inset:1px!important;border-radius:50%!important;background:repeating-conic-gradient(#e53333 0 12deg,transparent 12deg 30deg)!important;-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 2px))!important;mask:radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 2px))!important}
+.ball.ghost::after,.palette-ball.ghost-pick::after{content:none!important;display:none!important}
+.ballbar-title{font-size:12px;font-weight:900;color:#456058;margin:12px 1px 7px}.ballbar{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:4px 2px 12px;overflow:visible}.ballbar button{aspect-ratio:1;background:#fff;border:1px solid var(--line);border-radius:13px;padding:5px;display:grid;place-items:center;touch-action:none;min-width:0}
+.layout-settings{border-top:1px solid var(--line);padding-top:14px;margin-top:2px}.layout-setting-title{font-size:14px;font-weight:950;color:#0b7557;margin:0 0 12px}.line-type{display:grid;grid-template-columns:1fr 1fr;gap:8px}.line-type button{border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px;font-weight:900;color:#34584e}.line-type button.active{background:var(--green);color:#fff;border-color:var(--green)}.setting-row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;color:#4d695f;font-weight:800;margin-top:11px}.setting-row input[type="range"]{flex:1;min-width:0}.swatches{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}.swatch{width:29px;height:29px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px #cbdad3}.swatch.active{box-shadow:0 0 0 3px #0a9f73}.switch{position:relative;width:44px;height:25px;border-radius:999px;background:#ccd9d3;flex:0 0 auto}.switch i{position:absolute;width:19px;height:19px;top:3px;left:3px;border-radius:50%;background:#fff;transition:.18s}.switch.on{background:var(--green)}.switch.on i{left:22px}.cue-card{display:flex;align-items:center;gap:14px}.cue-diagram{width:88px;height:88px;border-radius:50%;background:radial-gradient(circle at 38% 32%,#fff,#f5f3df 72%,#ddd9c9);border:1px solid #cfd9d3;box-shadow:inset 0 0 0 6px #fff,0 4px 12px rgba(0,0,0,.08);position:relative;touch-action:none;flex:none}.tip-dot{position:absolute;width:11px;height:11px;border-radius:50%;background:#e43b30;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,.25);transform:translate(-50%,-50%)}.cue-side b{font-size:13px}.tip-help{font-size:11px;color:#6c8179;margin-top:3px}.cue-side button{border:0;background:none;color:#0b6f56;text-decoration:underline;font-weight:900;padding:0;margin-top:7px}
 .table-memo{position:absolute;transform:translate(-50%,-50%);background:#fff6c8;border:1px solid #ead88f;border-radius:8px;padding:5px 7px;font-size:10px;font-weight:800;pointer-events:auto;touch-action:none;white-space:nowrap}
 .toolbar{display:flex;gap:8px;overflow-x:auto;padding:10px 2px 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}.toolbar::-webkit-scrollbar{display:none}
 .tool{min-width:68px;height:52px;border-radius:13px;background:#fff;border:1px solid #dfe5e2;color:#34564d;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:18px;font-weight:900;flex:0 0 auto}.tool span{font-size:9px}.tool.active{background:linear-gradient(135deg,#0a9c72,#08b080);color:#fff;border-color:transparent}
@@ -63,7 +64,7 @@ button,input,select,textarea{font:inherit}button{border:0;-webkit-appearance:non
 .section-title>span{font-size:12px;color:var(--muted)}
 </style>
 </head>
-<body data-build="2026-09-22-v11">
+<body data-build="2026-09-22-v12">
 <div class="phone">
 <main class="app-view" id="appView">
 <section class="screen active" data-screen="home">
@@ -91,7 +92,7 @@ button,input,select,textarea{font:inherit}button{border:0;-webkit-appearance:non
 <div class="layout-card">
 <div class="table-viewport" id="tableViewport">
 <div class="table-stage" id="tableStage">
-<img class="table-frame" src="https://raw.githubusercontent.com/waraka2026/pool-note/main/assets/reference-table-clean-v2.png" alt="">
+<img class="table-frame" src="../pc/assets/reference-table-clean-v2.png?v=20260921-new9board-1" alt="">
 <div class="cloth grid-on" id="felt">
 <svg id="svgLayer"></svg><div id="aimGuide"></div>
 <div id="ballsLayer"></div><div id="notesLayer"></div>
@@ -113,6 +114,18 @@ button,input,select,textarea{font:inherit}button{border:0;-webkit-appearance:non
 </div>
 <div class="ballbar-title">ボール</div>
 <div class="ballbar" id="ballbar"></div>
+<div class="layout-settings">
+  <div class="layout-setting-title">╱ 線・矢印の設定</div>
+  <div class="line-type"><button id="typeArrow" class="active">↗ 矢印</button><button id="typeLine">╱ 線</button></div>
+  <div class="setting-row"><span>カラー</span><input id="colorPicker" type="color" value="#ffffff"></div>
+  <div class="swatches" id="swatches"></div>
+  <div class="setting-row"><span>太さ</span><input id="widthRange" type="range" min="1" max="8" value="1"><b id="widthValue">1</b></div>
+  <div class="setting-row"><span>イメージボール</span><button class="switch" id="ghostSwitch" aria-label="イメージボール"><i></i></button></div>
+</div>
+<div class="layout-settings">
+  <div class="layout-setting-title">◎ 撞点</div>
+  <div class="cue-card"><div class="cue-diagram" id="cueDiagram"><span class="tip-dot" id="tipDot" style="left:50%;top:50%"></span></div><div class="cue-side"><b>赤い点をドラッグ</b><div class="tip-help">手玉のどこを撞くかを記録</div><button id="tipClearBtn">印を消す</button></div></div>
+</div>
 <div class="save-grid"><button id="saveLayout">✓ 配置を保存</button><button id="exportPng" class="alt">▣ 画像保存</button></div>
 </div>
 <div class="section-title"><h2>保存した配置</h2><button id="clearSavedLayouts">すべて削除</button></div>
@@ -191,7 +204,7 @@ const colors={1:"#f2b51d",2:"#263f8f",3:"#d92b2e",4:"#2a245c",5:"#f15428",6:"#17
 function isOverFelt(e){const r=felt.getBoundingClientRect();return e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom;}
 const felt=$("#felt"),svg=$("#svgLayer"),ballsLayer=$("#ballsLayer"),notesLayer=$("#notesLayer"),tableViewport=$("#tableViewport"),tableStage=$("#tableStage");
 const aim=$("#aimGuide"),clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
-let tool="move",balls=[],lines=[],memos=[],history=[],future=[],drawing=null,drag=null;
+let tool="move",balls=[],lines=[],memos=[],history=[],future=[],drawing=null,drag=null,lineColor="#ffffff",lineWidth=1,ghostAuto=false,tip={x:.5,y:.5};
 function snapshot(){return JSON.stringify({balls,lines,memos})}
 function commit(){history.push(snapshot());if(history.length>50)history.shift();future=[]}
 function restore(raw){if(!raw)return;const s=JSON.parse(raw);balls=s.balls||[];lines=s.lines||[];memos=s.memos||[];renderLayout()}
@@ -233,18 +246,25 @@ tableViewport.addEventListener("pointerup",stopTablePan);
 tableViewport.addEventListener("pointercancel",stopTablePan);
 
 function ballClass(n,ghost=false){return "ball "+(ghost?"ghost":n===0?"cue":n<=8?"solid":"stripe")}
-function renderLines(){svg.innerHTML="";const ns="http://www.w3.org/2000/svg";for(const l of lines){if(l.type==="arrow"){const defs=document.createElementNS(ns,"defs"),marker=document.createElementNS(ns,"marker"),path=document.createElementNS(ns,"path"),id="a"+String(l.id).replace(/\W/g,"");marker.id=id;marker.setAttribute("viewBox","0 0 10 10");marker.setAttribute("refX","8");marker.setAttribute("refY","5");marker.setAttribute("markerWidth","5");marker.setAttribute("markerHeight","5");marker.setAttribute("orient","auto");path.setAttribute("d","M0 0 L10 5 L0 10 z");path.setAttribute("fill","#fff");marker.appendChild(path);defs.appendChild(marker);svg.appendChild(defs);l._marker=id}const el=document.createElementNS(ns,"line");for(const [k,v] of [["x1",l.x1+"%"],["y1",l.y1+"%"],["x2",l.x2+"%"],["y2",l.y2+"%"],["stroke","#fff"],["stroke-width","1"],["stroke-linecap","round"]])el.setAttribute(k,v);if(l._marker)el.setAttribute("marker-end",`url(#${l._marker})`);svg.appendChild(el)}}
+function renderLines(){svg.innerHTML="";const ns="http://www.w3.org/2000/svg";for(const l of lines){if(l.type==="arrow"){const defs=document.createElementNS(ns,"defs"),marker=document.createElementNS(ns,"marker"),path=document.createElementNS(ns,"path"),id="a"+String(l.id).replace(/\W/g,"");marker.id=id;marker.setAttribute("viewBox","0 0 10 10");marker.setAttribute("refX","8");marker.setAttribute("refY","5");marker.setAttribute("markerWidth","5");marker.setAttribute("markerHeight","5");marker.setAttribute("orient","auto");path.setAttribute("d","M0 0 L10 5 L0 10 z");path.setAttribute("fill","#fff");marker.appendChild(path);defs.appendChild(marker);svg.appendChild(defs);l._marker=id}const el=document.createElementNS(ns,"line");for(const [k,v] of [["x1",l.x1+"%"],["y1",l.y1+"%"],["x2",l.x2+"%"],["y2",l.y2+"%"],["stroke",l.color||"#fff"],["stroke-width",String(l.width||1)],["stroke-linecap","round"]])el.setAttribute(k,v);if(l._marker)el.setAttribute("marker-end",`url(#${l._marker})`);svg.appendChild(el)}}
 function renderLayout(){ballsLayer.innerHTML="";notesLayer.innerHTML="";renderLines();for(const b of balls){const el=document.createElement("div");el.className=ballClass(b.n,!!b.ghost);el.dataset.id=b.id;el.style.left=b.x+"%";el.style.top=b.y+"%";if(!b.ghost&&b.n)el.style.setProperty("--ball-color",colors[b.n]);if(!b.ghost){const sp=document.createElement("span");sp.textContent=b.n||"";el.appendChild(sp)}el.addEventListener("pointerdown",ballDown);ballsLayer.appendChild(el)}for(const m of memos){const el=document.createElement("div");el.className="table-memo";el.dataset.id=m.id;el.style.left=m.x+"%";el.style.top=m.y+"%";el.textContent=m.text;el.addEventListener("pointerdown",memoDown);notesLayer.appendChild(el)}}
 function addBall(n,p,ghost=false){const base=p||{x:n===0?22:65+(n%5)*4,y:40+(n%4)*7};balls.push({id:crypto.randomUUID?.()||Date.now()+Math.random(),n,x:base.x,y:base.y,ghost});commit();renderLayout()}
 function shiftAll(dx,dy){balls.forEach(o=>{o.x=clamp(o.x+dx,1,99);o.y=clamp(o.y+dy,2,98)});memos.forEach(o=>{o.x=clamp(o.x+dx,1,99);o.y=clamp(o.y+dy,2,98)});lines.forEach(l=>{l.x1=clamp(l.x1+dx,0,100);l.y1=clamp(l.y1+dy,0,100);l.x2=clamp(l.x2+dx,0,100);l.y2=clamp(l.y2+dy,0,100)})}
 function beginAll(e){drag={kind:"all",last:point(e)};felt.setPointerCapture?.(e.pointerId);e.preventDefault();showAim(e)}
-function ballDown(e){e.stopPropagation();const id=e.currentTarget.dataset.id;if(tool==="erase"){balls=balls.filter(x=>x.id!==id);commit();renderLayout();return}const o=balls.find(x=>x.id===id);if((tool==="line"||tool==="arrow")&&o){drawing={id:Date.now()+Math.random(),type:tool,x1:o.x,y1:o.y,x2:o.x,y2:o.y};felt.setPointerCapture?.(e.pointerId);showAim(e);e.preventDefault();return}if(tool==="moveall"){beginAll(e);return}if(tool!=="move")return;drag={kind:"ball",id,startX:e.clientX,startY:e.clientY,moved:false};e.currentTarget.setPointerCapture?.(e.pointerId);e.preventDefault()}
+function ballDown(e){e.stopPropagation();const id=e.currentTarget.dataset.id;if(tool==="erase"){balls=balls.filter(x=>x.id!==id);commit();renderLayout();return}const o=balls.find(x=>x.id===id);if((tool==="line"||tool==="arrow")&&o){drawing={id:Date.now()+Math.random(),type:tool,x1:o.x,y1:o.y,x2:o.x,y2:o.y,color:lineColor,width:lineWidth,startBallId:o.id};felt.setPointerCapture?.(e.pointerId);showAim(e);e.preventDefault();return}if(tool==="moveall"){beginAll(e);return}if(tool!=="move")return;drag={kind:"ball",id,startX:e.clientX,startY:e.clientY,moved:false};e.currentTarget.setPointerCapture?.(e.pointerId);e.preventDefault()}
 function memoDown(e){e.stopPropagation();const id=e.currentTarget.dataset.id;if(tool==="erase"){memos=memos.filter(x=>x.id!==id);commit();renderLayout();return}if(tool==="moveall"){beginAll(e);return}if(tool!=="move")return;drag={kind:"memo",id};e.currentTarget.setPointerCapture?.(e.pointerId);e.preventDefault()}
 document.addEventListener("pointermove",e=>{if(!drag)return;const p=point(e);if(drag.kind==="all"){shiftAll(p.x-drag.last.x,p.y-drag.last.y);drag.last=p;renderLayout();showAim(e);return}const arr=drag.kind==="ball"?balls:memos,o=arr.find(x=>x.id===drag.id);if(!o)return;o.x=p.x;o.y=p.y;renderLayout();if(drag.kind==="ball"){if(Math.hypot(e.clientX-drag.startX,e.clientY-drag.startY)>5)drag.moved=true;if(drag.moved&&isOverFelt(e))showAim(e);else hideAim()}},{passive:false});
 document.addEventListener("pointerup",()=>{if(drag){drag=null;hideAim();commit()}});document.addEventListener("pointercancel",()=>{drag=null;hideAim()});
-felt.addEventListener("pointerdown",e=>{if(e.target!==felt&&e.target!==svg)return;const p=point(e);if(tool==="line"||tool==="arrow"){drawing={id:Date.now()+Math.random(),type:tool,x1:p.x,y1:p.y,x2:p.x,y2:p.y};felt.setPointerCapture?.(e.pointerId);showAim(e)}else if(tool==="memo"){const text=prompt("メモを入力");if(text){memos.push({id:Date.now()+Math.random(),text,x:p.x,y:p.y});commit();renderLayout()}}else if(tool==="moveall")beginAll(e)});
+felt.addEventListener("pointerdown",e=>{if(e.target!==felt&&e.target!==svg)return;const p=point(e);if(tool==="line"||tool==="arrow"){drawing={id:Date.now()+Math.random(),type:tool,x1:p.x,y1:p.y,x2:p.x,y2:p.y,color:lineColor,width:lineWidth};felt.setPointerCapture?.(e.pointerId);showAim(e)}else if(tool==="memo"){const text=prompt("メモを入力");if(text){memos.push({id:Date.now()+Math.random(),text,x:p.x,y:p.y});commit();renderLayout()}}else if(tool==="moveall")beginAll(e)});
 felt.addEventListener("pointermove",e=>{if(!drawing)return;const p=point(e);drawing.x2=p.x;drawing.y2=p.y;showAim(e);const tmp=[...lines,drawing];const old=lines;lines=tmp;renderLines();lines=old});
-felt.addEventListener("pointerup",()=>{if(drawing){lines.push(drawing);drawing=null;commit();renderLayout()}hideAim()});
+function addGhostOppositeArrow(line){
+  if(!ghostAuto||line.type!=="arrow"||!line.startBallId)return;
+  const source=balls.find(b=>b.id===line.startBallId&&!b.ghost);if(!source)return;
+  const r=felt.getBoundingClientRect(),dx=(line.x2-line.x1)*r.width,dy=(line.y2-line.y1)*r.height,len=Math.hypot(dx,dy);if(len<8)return;
+  const spacing=15,pos={x:clamp(source.x-(dx/len)*(spacing/r.width)*100,1,99),y:clamp(source.y-(dy/len)*(spacing/r.height)*100,2,98)};
+  balls=balls.filter(b=>!b.ghost);balls.push({id:crypto.randomUUID?.()||Date.now()+Math.random(),n:0,x:pos.x,y:pos.y,ghost:true});
+}
+felt.addEventListener("pointerup",()=>{if(drawing){lines.push(drawing);addGhostOppositeArrow(drawing);drawing=null;commit();renderLayout()}hideAim()});
 felt.addEventListener("pointercancel",()=>{drawing=null;renderLayout();hideAim()});
 
 const ballbar=$("#ballbar");
@@ -274,7 +294,21 @@ const ballbar=$("#ballbar");
   };
   b.addEventListener("pointerup",e=>end(e));b.addEventListener("pointercancel",e=>end(e,true));ballbar.appendChild(b)
 });
-$$(".tool[data-tool]").forEach(b=>b.onclick=()=>{$$(".tool[data-tool]").forEach(x=>x.classList.remove("active"));b.classList.add("active");tool=b.dataset.tool});
+$(".tool[data-tool]").forEach(b=>b.onclick=()=>{$(".tool[data-tool]").forEach(x=>x.classList.remove("active"));b.classList.add("active");tool=b.dataset.tool});
+$("#typeArrow").onclick=()=>{tool="arrow";$(".tool[data-tool]").forEach(x=>x.classList.toggle("active",x.dataset.tool==="arrow"));$("#typeArrow").classList.add("active");$("#typeLine").classList.remove("active")};
+$("#typeLine").onclick=()=>{tool="line";$(".tool[data-tool]").forEach(x=>x.classList.toggle("active",x.dataset.tool==="line"));$("#typeLine").classList.add("active");$("#typeArrow").classList.remove("active")};
+$("#colorPicker").oninput=e=>lineColor=e.target.value;
+$("#widthRange").oninput=e=>{lineWidth=+e.target.value;$("#widthValue").textContent=e.target.value};
+const swatchColors=["#edbb22","#113d9c","#a91f16","#dc4438","#e9681f","#00583b","#76501b","#171a18"],sw=$("#swatches");
+swatchColors.forEach(col=>{const b=document.createElement("button");b.className="swatch";b.style.background=col;b.onclick=()=>{lineColor=col;$("#colorPicker").value=col;$(".swatch").forEach(x=>x.classList.remove("active"));b.classList.add("active")};sw.appendChild(b)});
+$("#ghostSwitch").onclick=()=>{ghostAuto=!ghostAuto;$("#ghostSwitch").classList.toggle("on",ghostAuto)};
+const cue=$("#cueDiagram"),tipDot=$("#tipDot");
+function moveTip(e){const r=cue.getBoundingClientRect();let x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;const dx=x-.5,dy=y-.5,d=Math.hypot(dx,dy);if(d>.39){x=.5+dx/d*.39;y=.5+dy/d*.39}tip={x,y};tipDot.style.left=x*100+"%";tipDot.style.top=y*100+"%"}
+cue.addEventListener("pointerdown",e=>{cue.setPointerCapture?.(e.pointerId);cue._dragTip=true;moveTip(e);e.preventDefault()});
+cue.addEventListener("pointermove",e=>{if(cue._dragTip)moveTip(e)});
+cue.addEventListener("pointerup",()=>cue._dragTip=false);cue.addEventListener("pointercancel",()=>cue._dragTip=false);
+$("#tipClearBtn").onclick=()=>{tip={x:.5,y:.5};tipDot.style.left="50%";tipDot.style.top="50%"};
+
 $("#clearLayout").onclick=()=>{if(confirm("配置をリセットしますか？")){balls=[];lines=[];memos=[];commit();renderLayout();setZoom(1)}};
 $("#saveLayout").onclick=()=>{const title=prompt("保存名","配置 "+new Date().toLocaleString("ja-JP",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"}));if(!title)return;const list=store.get("9b_layouts");list.unshift({id:Date.now(),title,date:new Date().toISOString(),balls:structuredClone(balls),lines:structuredClone(lines),memos:structuredClone(memos)});store.set("9b_layouts",list);renderSaved();renderHome();toast("配置を保存しました")};
 $("#clearSavedLayouts").onclick=()=>{if(confirm("保存した配置をすべて削除しますか？")){store.set("9b_layouts",[]);renderSaved();renderHome()}};
