@@ -64,7 +64,7 @@ button,input,select,textarea{font:inherit}button{border:0;-webkit-appearance:non
 .section-title>span{font-size:12px;color:var(--muted)}
 </style>
 </head>
-<body data-build="2026-09-23-v32">
+<body data-build="2026-09-23-v33">
 <div class="phone">
 <main class="app-view" id="appView">
 <section class="screen active" data-screen="home">
@@ -320,6 +320,12 @@ function syncLinesForBall(ball){
   }
   return changed;
 }
+function confirmLineEditFromTableTap(e){
+  if(selectedLineId==null)return;
+  if(e.target.closest?.(".line-hit,.line-handle-hit"))return;
+  selectedLineId=null;markSnapBall();renderLines();
+}
+felt.addEventListener("pointerdown",confirmLineEditFromTableTap,true);
 function lineDown(e){
   e.stopPropagation();e.preventDefault();const id=e.currentTarget.dataset.lineId,l=lines.find(x=>String(x.id)===String(id));if(!l)return;
   if(tool==="erase"){lines=lines.filter(x=>String(x.id)!==String(id));selectedLineId=null;commit();renderLayout();return}
@@ -399,7 +405,7 @@ function addGhostOppositeArrow(line){
   const spacing=15,pos={x:clamp(source.x-(dx/len)*(spacing/r.width)*100,1,99),y:clamp(source.y-(dy/len)*(spacing/r.height)*100,2,98)};
   balls=balls.filter(b=>!b.ghost);balls.push({id:crypto.randomUUID?.()||Date.now()+Math.random(),n:0,x:pos.x,y:pos.y,ghost:true});
 }
-felt.addEventListener("pointerup",e=>{if(drawing){const p=point(e),snap=nearestBallPoint(p,24);if(snap){drawing.x2=snap.x;drawing.y2=snap.y;drawing.endBallId=snap.id}else drawing.endBallId=null;lines.push(drawing);selectedLineId=drawing.id;addGhostOppositeArrow(drawing);drawing=null;markSnapBall();setMoveTool();commit();renderLayout()}hideAim()});
+felt.addEventListener("pointerup",e=>{if(drawing){const p=point(e),snap=nearestBallPoint(p,24);if(snap){drawing.x2=snap.x;drawing.y2=snap.y;drawing.endBallId=snap.id}else drawing.endBallId=null;lines.push(drawing);selectedLineId=null;addGhostOppositeArrow(drawing);drawing=null;markSnapBall();setMoveTool();commit();renderLayout()}hideAim()});
 felt.addEventListener("pointercancel",()=>{drawing=null;markSnapBall();renderLayout();hideAim()});
 
 const ballbar=$("#ballbar");["selectstart","contextmenu","dragstart"].forEach(type=>{felt.addEventListener(type,e=>e.preventDefault());ballbar.addEventListener(type,e=>e.preventDefault())});
