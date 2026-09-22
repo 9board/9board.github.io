@@ -36,7 +36,7 @@ button,input,select,textarea{font:inherit}button{border:0;-webkit-appearance:non
 #svgLayer{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:auto;touch-action:none;-webkit-user-select:none;user-select:none}.line-hit{stroke:rgba(0,0,0,.001);stroke-width:22;stroke-linecap:round;pointer-events:stroke;cursor:grab}.line-selected-halo{pointer-events:none;stroke:#0ba577;stroke-opacity:.38;stroke-linecap:round}.line-handle-hit{fill:rgba(0,0,0,.001);pointer-events:all;cursor:grab}.line-handle-dot{fill:#fff;stroke:#0ba577;stroke-width:2;pointer-events:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.28))}
 #ballsLayer,#notesLayer{position:absolute;inset:0;z-index:4;pointer-events:none}
 #aimGuide{position:absolute;inset:0;z-index:2;pointer-events:none;opacity:0;contain:paint;transform:translateZ(0);will-change:opacity}#aimGuide.visible{opacity:1}#aimGuide:before,#aimGuide:after{content:"";position:absolute;background:rgba(255,255,255,.86);box-shadow:0 0 1px rgba(34,89,91,.7);transform:translateZ(0)}#aimGuide:before{left:var(--x);top:0;bottom:0;width:1px}#aimGuide:after{top:var(--y);left:0;right:0;height:1px}
-.ball,.palette-ball{--ball-color:#fff;position:absolute;border-radius:50%;transform:translate(-50%,-50%);pointer-events:auto;touch-action:none;overflow:hidden!important;border:1px solid rgba(255,255,255,.96)!important;box-shadow:0 3px 7px rgba(0,0,0,.26),inset 4px 4px 7px rgba(255,255,255,.42),inset -5px -6px 8px rgba(0,0,0,.24)!important}.ball{width:11px!important;height:11px!important;min-width:11px!important;min-height:11px!important;box-sizing:border-box;transition:width .10s ease,height .10s ease,box-shadow .10s ease}.ball.dragging{width:20px!important;height:20px!important;min-width:20px!important;min-height:20px!important;box-shadow:0 4px 12px rgba(0,0,0,.34),inset 4px 4px 7px rgba(255,255,255,.42),inset -5px -6px 8px rgba(0,0,0,.24)!important;z-index:20}.palette-ball{position:relative!important;transform:none!important;width:28px!important;height:28px!important;min-width:28px!important;min-height:28px!important}
+.ball,.palette-ball{--ball-color:#fff;position:absolute;border-radius:50%;transform:translate(-50%,-50%);pointer-events:auto;touch-action:none;overflow:hidden!important;border:1px solid rgba(255,255,255,.96)!important;box-shadow:0 3px 7px rgba(0,0,0,.26),inset 4px 4px 7px rgba(255,255,255,.42),inset -5px -6px 8px rgba(0,0,0,.24)!important}.ball{width:11px!important;height:11px!important;min-width:11px!important;min-height:11px!important;box-sizing:border-box;transition:width .10s ease,height .10s ease,box-shadow .10s ease}.ball.dragging{width:20px!important;height:20px!important;min-width:20px!important;min-height:20px!important;box-shadow:0 4px 12px rgba(0,0,0,.34),inset 4px 4px 7px rgba(255,255,255,.42),inset -5px -6px 8px rgba(0,0,0,.24)!important;z-index:20}.ball.snap-target{outline:3px solid rgba(11,165,119,.7);outline-offset:3px;z-index:19}.palette-ball{position:relative!important;transform:none!important;width:28px!important;height:28px!important;min-width:28px!important;min-height:28px!important}
 
 .ball.solid,.palette-ball.solid{background:radial-gradient(circle at 28% 22%,rgba(255,255,255,.92) 0 5%,rgba(255,255,255,.26) 10%,transparent 23%),radial-gradient(circle at 46% 42%,var(--ball-color) 0 58%,color-mix(in srgb,var(--ball-color) 78%,black) 100%)!important}
 .ball.stripe,.palette-ball.stripe{background:radial-gradient(circle at 28% 22%,rgba(255,255,255,.95) 0 5%,rgba(255,255,255,.28) 11%,transparent 23%),linear-gradient(to bottom,#f1ead3 0 24%,var(--ball-color) 24% 68%,#e7dfc6 68% 100%)!important}
@@ -64,7 +64,7 @@ button,input,select,textarea{font:inherit}button{border:0;-webkit-appearance:non
 .section-title>span{font-size:12px;color:var(--muted)}
 </style>
 </head>
-<body data-build="2026-09-23-v30">
+<body data-build="2026-09-23-v31">
 <div class="phone">
 <main class="app-view" id="appView">
 <section class="screen active" data-screen="home">
@@ -310,6 +310,7 @@ function nearestBallPoint(p,radiusPx=22){
   for(const b of balls){if(b.ghost)continue;const dx=(p.x-b.x)*r.width/100,dy=(p.y-b.y)*r.height/100,d=Math.hypot(dx,dy);if(d<=bestD){best=b;bestD=d}}
   return best;
 }
+function markSnapBall(id=null){$(".ball.snap-target").forEach(el=>el.classList.remove("snap-target"));if(id!=null)ballsLayer.querySelector(`.ball[data-id="${id}"]`)?.classList.add("snap-target")}
 function setMoveTool(){tool="move";$$(".tool[data-tool]").forEach(x=>x.classList.toggle("active",x.dataset.tool==="move"))}
 function syncLinesForBall(ball){
   let changed=false;
@@ -327,7 +328,7 @@ function lineDown(e){
 }
 function lineHandleDown(e){
   e.stopPropagation();e.preventDefault();const id=e.currentTarget.dataset.lineId,l=lines.find(x=>String(x.id)===String(id));if(!l||tool!=="move")return;
-  selectedLineId=l.id;drag={kind:"line-handle",id:l.id,handle:e.currentTarget.dataset.handle,snapBallId:null};renderLines();
+  selectedLineId=l.id;const handle=e.currentTarget.dataset.handle;drag={kind:"line-handle",id:l.id,handle,snapBallId:handle==="start"?(l.startBallId||null):(l.endBallId||null)};renderLines();
 }
 function finalizeLineDrag(){
   if(!drag||(drag.kind!=="line"&&drag.kind!=="line-handle"))return false;
@@ -335,7 +336,7 @@ function finalizeLineDrag(){
   if(l&&d.kind==="line-handle"){
     if(d.handle==="start")l.startBallId=d.snapBallId||null;else l.endBallId=d.snapBallId||null;
   }
-  drag=null;hideAim();commit();renderLines();return true;
+  drag=null;markSnapBall();hideAim();commit();renderLines();return true;
 }
 function renderLayout(){ballsLayer.innerHTML="";notesLayer.innerHTML="";renderLines();for(const b of balls){const el=document.createElement("div");el.className=ballClass(b.n,!!b.ghost)+(drag&&drag.kind==="ball"&&drag.id===b.id?" dragging":"");el.dataset.id=b.id;el.style.left=b.x+"%";el.style.top=b.y+"%";if(!b.ghost&&b.n)el.style.setProperty("--ball-color",colors[b.n]);if(!b.ghost){const sp=document.createElement("span");sp.textContent=b.n||"";el.appendChild(sp)}el.addEventListener("pointerdown",ballDown);ballsLayer.appendChild(el)}for(const m of memos){const el=document.createElement("div");el.className="table-memo";el.dataset.id=m.id;el.style.left=m.x+"%";el.style.top=m.y+"%";el.textContent=m.text;el.addEventListener("pointerdown",memoDown);notesLayer.appendChild(el)}}
 function addBall(n,p,ghost=false){
@@ -365,7 +366,7 @@ document.addEventListener("pointermove",e=>{
   }
   if(drag.kind==="line-handle"){
     const l=lines.find(x=>x.id===drag.id);if(!l)return;
-    const snap=nearestBallPoint(p,24),x=snap?snap.x:p.x,y=snap?snap.y:p.y;drag.snapBallId=snap?.id||null;
+    const snap=nearestBallPoint(p,24),x=snap?snap.x:p.x,y=snap?snap.y:p.y;drag.snapBallId=snap?.id||null;markSnapBall(drag.snapBallId);
     if(drag.handle==="start"){l.x1=x;l.y1=y}else{l.x2=x;l.y2=y}
     renderLines();showAimAt(x,y);e.preventDefault();return;
   }
@@ -390,7 +391,7 @@ document.addEventListener("pointermove",e=>{
 },{passive:false});
 document.addEventListener("pointerup",()=>{if(finishBallDrag())return;if(finalizeLineDrag())return;if(drag){drag=null;hideAim();commit()}});document.addEventListener("pointercancel",()=>{if(finishBallDrag())return;if(finalizeLineDrag())return;drag=null;hideAim()});window.addEventListener("pointerup",finishBallDrag,true);window.addEventListener("pointercancel",finishBallDrag,true);
 felt.addEventListener("pointerdown",e=>{if(e.target!==felt&&e.target!==svg)return;const p=point(e);if(tool==="move"){const near=nearestBall(e,36);if(near){const el=ballsLayer.querySelector(`.ball[data-id="${near.id}"]`);drag={kind:"ball",id:near.id,startX:e.clientX,startY:e.clientY,moved:false,liftPx:28,el};el?.classList.add("dragging");felt.setPointerCapture?.(e.pointerId);showAimAt(near.x,near.y);e.preventDefault();return}if(selectedLineId!=null){selectedLineId=null;renderLines()}}if(tool==="line"||tool==="arrow"){const snap=nearestBallPoint(p,22);drawing={id:Date.now()+Math.random(),type:tool,x1:snap?snap.x:p.x,y1:snap?snap.y:p.y,x2:snap?snap.x:p.x,y2:snap?snap.y:p.y,color:lineColor,width:lineWidth,startBallId:snap?.id||null};felt.setPointerCapture?.(e.pointerId);showAimAt(drawing.x1,drawing.y1)}else if(tool==="memo"){const text=prompt("メモを入力");if(text){memos.push({id:Date.now()+Math.random(),text,x:p.x,y:p.y});commit();renderLayout()}}else if(tool==="moveall")beginAll(e)});
-felt.addEventListener("pointermove",e=>{if(!drawing)return;const p=point(e);drawing.x2=p.x;drawing.y2=p.y;showAim(e);const tmp=[...lines,drawing];const old=lines;lines=tmp;renderLines();lines=old});
+felt.addEventListener("pointermove",e=>{if(!drawing)return;const p=point(e),snap=nearestBallPoint(p,24);drawing.x2=snap?snap.x:p.x;drawing.y2=snap?snap.y:p.y;drawing.endBallId=snap?.id||null;markSnapBall(drawing.endBallId);showAimAt(drawing.x2,drawing.y2);const tmp=[...lines,drawing];const old=lines;lines=tmp;renderLines();lines=old});
 function addGhostOppositeArrow(line){
   if(!ghostAuto||line.type!=="arrow"||!line.startBallId)return;
   const source=balls.find(b=>b.id===line.startBallId&&!b.ghost);if(!source)return;
@@ -398,8 +399,8 @@ function addGhostOppositeArrow(line){
   const spacing=15,pos={x:clamp(source.x-(dx/len)*(spacing/r.width)*100,1,99),y:clamp(source.y-(dy/len)*(spacing/r.height)*100,2,98)};
   balls=balls.filter(b=>!b.ghost);balls.push({id:crypto.randomUUID?.()||Date.now()+Math.random(),n:0,x:pos.x,y:pos.y,ghost:true});
 }
-felt.addEventListener("pointerup",e=>{if(drawing){const p=point(e),snap=nearestBallPoint(p,24);if(snap){drawing.x2=snap.x;drawing.y2=snap.y;drawing.endBallId=snap.id}else drawing.endBallId=null;lines.push(drawing);selectedLineId=drawing.id;addGhostOppositeArrow(drawing);drawing=null;setMoveTool();commit();renderLayout()}hideAim()});
-felt.addEventListener("pointercancel",()=>{drawing=null;renderLayout();hideAim()});
+felt.addEventListener("pointerup",e=>{if(drawing){const p=point(e),snap=nearestBallPoint(p,24);if(snap){drawing.x2=snap.x;drawing.y2=snap.y;drawing.endBallId=snap.id}else drawing.endBallId=null;lines.push(drawing);selectedLineId=drawing.id;addGhostOppositeArrow(drawing);drawing=null;markSnapBall();setMoveTool();commit();renderLayout()}hideAim()});
+felt.addEventListener("pointercancel",()=>{drawing=null;markSnapBall();renderLayout();hideAim()});
 
 const ballbar=$("#ballbar");["selectstart","contextmenu","dragstart"].forEach(type=>{felt.addEventListener(type,e=>e.preventDefault());ballbar.addEventListener(type,e=>e.preventDefault())});
 [-1,0,...Array.from({length:15},(_,i)=>i+1)].forEach(value=>{
