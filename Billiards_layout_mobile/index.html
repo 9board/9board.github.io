@@ -64,7 +64,7 @@ button,input,select,textarea{font:inherit}button{border:0;-webkit-appearance:non
 .section-title>span{font-size:12px;color:var(--muted)}
 </style>
 </head>
-<body data-build="2026-09-22-v20">
+<body data-build="2026-09-22-v21">
 <div class="phone">
 <main class="app-view" id="appView">
 <section class="screen active" data-screen="home">
@@ -197,8 +197,8 @@ button,input,select,textarea{font:inherit}button{border:0;-webkit-appearance:non
 const $=(s,p=document)=>p.querySelector(s),$$=(s,p=document)=>[...p.querySelectorAll(s)];
 const store={get(k,d=[]){try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set(k,v){localStorage.setItem(k,JSON.stringify(v))}};
 const toast=m=>{const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove("show"),1300)};
-function go(name,updateUrl=true){const valid=["home","layout","counter","matches","menu"];if(!valid.includes(name))name="home";$$(".screen").forEach(s=>s.classList.toggle("active",s.dataset.screen===name));$$(".nav-btn").forEach(b=>b.classList.toggle("active",b.dataset.to===name));$("#appView").scrollTo({top:0});if(name==="home")renderHome();if(updateUrl&&location.hash!=="#"+name)history.pushState(null,"","#"+name)}
-$$("[data-to],.jump").forEach(b=>b.addEventListener("click",()=>go(b.dataset.to)));window.addEventListener("hashchange",()=>go((location.hash||"#home").slice(1),false));$$(".bottom-nav .nav-btn").forEach(b=>b.addEventListener("pointerdown",()=>{if(!b.querySelector(".nav-art"))return;b.classList.remove("nav-tap");void b.offsetWidth;b.classList.add("nav-tap");setTimeout(()=>b.classList.remove("nav-tap"),320)}));
+function go(name,updateUrl=true){const valid=["home","layout","counter","matches","menu"];if(!valid.includes(name))name="home";$$$(".screen").forEach(s=>s.classList.toggle("active",s.dataset.screen===name));$$$(".nav-btn").forEach(b=>b.classList.toggle("active",b.dataset.to===name));$("#appView").scrollTo({top:0});if(name==="home")renderHome();if(updateUrl&&location.hash!=="#"+name)history.pushState(null,"","#"+name)}
+$$$("[data-to],.jump").forEach(b=>b.addEventListener("click",()=>go(b.dataset.to)));window.addEventListener("hashchange",()=>go((location.hash||"#home").slice(1),false));$$$(".bottom-nav .nav-btn").forEach(b=>b.addEventListener("pointerdown",()=>{if(!b.querySelector(".nav-art"))return;b.classList.remove("nav-tap");void b.offsetWidth;b.classList.add("nav-tap");setTimeout(()=>b.classList.remove("nav-tap"),320)}));
 
 const colors={1:"#f2b51d",2:"#263f8f",3:"#d92b2e",4:"#2a245c",5:"#f15428",6:"#176341",7:"#7a2f38",8:"#171717",9:"#e2a51a",10:"#24408f",11:"#d62d30",12:"#332764",13:"#f0522d",14:"#1e6945",15:"#7a3038"};
 function isOverFelt(e){const r=felt.getBoundingClientRect();return e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom;}
@@ -264,7 +264,7 @@ function beginAll(e){drag={kind:"all",last:point(e)};felt.setPointerCapture?.(e.
 function ballDown(e){e.stopPropagation();const id=e.currentTarget.dataset.id;if(tool==="erase"){balls=balls.filter(x=>x.id!==id);commit();renderLayout();return}const o=balls.find(x=>x.id===id);if((tool==="line"||tool==="arrow")&&o){drawing={id:Date.now()+Math.random(),type:tool,x1:o.x,y1:o.y,x2:o.x,y2:o.y,color:lineColor,width:lineWidth,startBallId:o.id};felt.setPointerCapture?.(e.pointerId);showAim(e);e.preventDefault();return}if(tool==="moveall"){beginAll(e);return}if(tool!=="move")return;drag={kind:"ball",id,startX:e.clientX,startY:e.clientY,moved:false,liftPx:28,el:e.currentTarget};e.currentTarget.classList.add("dragging");e.currentTarget.setPointerCapture?.(e.pointerId);showAimAt(o.x,o.y);e.preventDefault()}
 function finishBallDrag(){
   if(!drag||drag.kind!=="ball")return false;
-  drag.el?.classList.remove("dragging");$(".ball.dragging").forEach(el=>el.classList.remove("dragging"));
+  drag.el?.classList.remove("dragging");$$(".ball.dragging").forEach(el=>el.classList.remove("dragging"));
   commit();drag=null;hideAim();renderLayout();
   return true;
 }
@@ -330,13 +330,13 @@ const ballbar=$("#ballbar");
   };
   b.addEventListener("pointerup",e=>end(e));b.addEventListener("pointercancel",e=>end(e,true));ballbar.appendChild(b)
 });
-$(".tool[data-tool]").forEach(b=>b.onclick=()=>{$(".tool[data-tool]").forEach(x=>x.classList.remove("active"));b.classList.add("active");tool=b.dataset.tool});
-$("#typeArrow").onclick=()=>{tool="arrow";$(".tool[data-tool]").forEach(x=>x.classList.toggle("active",x.dataset.tool==="arrow"));$("#typeArrow").classList.add("active");$("#typeLine").classList.remove("active")};
-$("#typeLine").onclick=()=>{tool="line";$(".tool[data-tool]").forEach(x=>x.classList.toggle("active",x.dataset.tool==="line"));$("#typeLine").classList.add("active");$("#typeArrow").classList.remove("active")};
+$$(".tool[data-tool]").forEach(b=>b.onclick=()=>{$$(".tool[data-tool]").forEach(x=>x.classList.remove("active"));b.classList.add("active");tool=b.dataset.tool});
+$("#typeArrow").onclick=()=>{tool="arrow";$$(".tool[data-tool]").forEach(x=>x.classList.toggle("active",x.dataset.tool==="arrow"));$("#typeArrow").classList.add("active");$("#typeLine").classList.remove("active")};
+$("#typeLine").onclick=()=>{tool="line";$$(".tool[data-tool]").forEach(x=>x.classList.toggle("active",x.dataset.tool==="line"));$("#typeLine").classList.add("active");$("#typeArrow").classList.remove("active")};
 $("#colorPicker").oninput=e=>lineColor=e.target.value;
 $("#widthRange").oninput=e=>{lineWidth=+e.target.value;$("#widthValue").textContent=e.target.value};
 const swatchColors=["#edbb22","#113d9c","#a91f16","#dc4438","#e9681f","#00583b","#76501b","#171a18"],sw=$("#swatches");
-swatchColors.forEach(col=>{const b=document.createElement("button");b.className="swatch";b.style.background=col;b.onclick=()=>{lineColor=col;$("#colorPicker").value=col;$(".swatch").forEach(x=>x.classList.remove("active"));b.classList.add("active")};sw.appendChild(b)});
+swatchColors.forEach(col=>{const b=document.createElement("button");b.className="swatch";b.style.background=col;b.onclick=()=>{lineColor=col;$("#colorPicker").value=col;$$(".swatch").forEach(x=>x.classList.remove("active"));b.classList.add("active")};sw.appendChild(b)});
 $("#ghostSwitch").onclick=()=>{ghostAuto=!ghostAuto;$("#ghostSwitch").classList.toggle("on",ghostAuto)};
 const cue=$("#cueDiagram"),tipDot=$("#tipDot");
 function moveTip(e){const r=cue.getBoundingClientRect();let x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;const dx=x-.5,dy=y-.5,d=Math.hypot(dx,dy);if(d>.39){x=.5+dx/d*.39;y=.5+dy/d*.39}tip={x,y};tipDot.style.left=x*100+"%";tipDot.style.top=y*100+"%"}
@@ -353,7 +353,7 @@ $("#exportPng").onclick=()=>{const c=document.createElement("canvas");c.width=12
 
 const toolbar=$("#layoutToolbar");let tdrag=null;toolbar.addEventListener("pointerdown",e=>{if(e.target.closest("button"))return;tdrag={x:e.clientX,left:toolbar.scrollLeft}});toolbar.addEventListener("pointermove",e=>{if(tdrag)toolbar.scrollLeft=tdrag.left-(e.clientX-tdrag.x)});toolbar.addEventListener("pointerup",()=>tdrag=null);toolbar.addEventListener("pointercancel",()=>tdrag=null);
 
-let score={p1:0,p2:0};$$("[data-score]").forEach(b=>b.onclick=()=>{const k=b.dataset.score;score[k]=Math.max(0,score[k]+Number(b.dataset.delta));$("#"+k+"score").textContent=score[k]});$("#resetCounter").onclick=()=>{score={p1:0,p2:0};$("#p1score").textContent=$("#p2score").textContent=0};$("#saveCounter").onclick=()=>{const list=store.get("9b_counter");list.unshift({id:Date.now(),date:new Date().toISOString(),p1:$("#p1name").value,p2:$("#p2name").value,s1:score.p1,s2:score.p2,type:$("#raceType").value});store.set("9b_counter",list);renderCounter();renderHome();toast("スコアを記録しました")};$("#clearCounterHistory").onclick=()=>{store.set("9b_counter",[]);renderCounter();renderHome()};
+let score={p1:0,p2:0};$$$("[data-score]").forEach(b=>b.onclick=()=>{const k=b.dataset.score;score[k]=Math.max(0,score[k]+Number(b.dataset.delta));$("#"+k+"score").textContent=score[k]});$("#resetCounter").onclick=()=>{score={p1:0,p2:0};$("#p1score").textContent=$("#p2score").textContent=0};$("#saveCounter").onclick=()=>{const list=store.get("9b_counter");list.unshift({id:Date.now(),date:new Date().toISOString(),p1:$("#p1name").value,p2:$("#p2name").value,s1:score.p1,s2:score.p2,type:$("#raceType").value});store.set("9b_counter",list);renderCounter();renderHome();toast("スコアを記録しました")};$("#clearCounterHistory").onclick=()=>{store.set("9b_counter",[]);renderCounter();renderHome()};
 function renderCounter(){const list=store.get("9b_counter"),el=$("#counterHistory");el.innerHTML=list.length?list.map(x=>`<div class="summary-row"><div><strong>${esc(x.p1)} ${x.s1} - ${x.s2} ${esc(x.p2)}</strong><small>${esc(x.type)} ・ ${new Date(x.date).toLocaleString("ja-JP")}</small></div></div>`).join(""):'<div class="summary-row"><strong>まだ履歴はありません</strong></div>'}
 
 const form=$("#matchForm");function showForm(on){form.classList.toggle("show",on)}$("#newMatchBtn").onclick=$("#newMatchText").onclick=()=>{showForm(!form.classList.contains("show"));$("#matchDate").value ||= new Date().toISOString().slice(0,10)};$("#cancelMatch").onclick=()=>showForm(false);form.onsubmit=e=>{e.preventDefault();const list=store.get("9b_matches");list.unshift({id:Date.now(),date:$("#matchDate").value,status:$("#matchStatus").value,title:$("#matchTitle").value||"無題",venue:$("#matchVenue").value,opponent:$("#matchOpponent").value,result:$("#matchResult").value,race:$("#matchRace").value,fee:$("#matchFee").value,url:$("#matchUrl").value,memo:$("#matchMemo").value});store.set("9b_matches",list);form.reset();showForm(false);renderMatches();renderHome();toast("対戦記録を保存しました")};
