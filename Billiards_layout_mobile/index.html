@@ -64,7 +64,7 @@ button,input,select,textarea{font:inherit}button{border:0;-webkit-appearance:non
 .section-title>span{font-size:12px;color:var(--muted)}
 </style>
 </head>
-<body data-build="2026-09-23-v33">
+<body data-build="2026-09-23-v34">
 <div class="phone">
 <main class="app-view" id="appView">
 <section class="screen active" data-screen="home">
@@ -279,6 +279,7 @@ function ballClass(n,ghost=false){return "ball "+(ghost?"ghost":n===0?"cue":n<=8
 function renderLines(){
   svg.innerHTML="";const ns="http://www.w3.org/2000/svg";
   for(const l of lines){
+    const drawEnd=displayArrowEnd(l);
     let markerId=null;
     if(l.type==="arrow"){
       const defs=document.createElementNS(ns,"defs"),marker=document.createElementNS(ns,"marker"),path=document.createElementNS(ns,"path");
@@ -286,18 +287,18 @@ function renderLines(){
       marker.id=markerId;marker.setAttribute("viewBox","0 0 10 10");marker.setAttribute("refX","8");marker.setAttribute("refY","5");marker.setAttribute("markerWidth","5");marker.setAttribute("markerHeight","5");marker.setAttribute("orient","auto");
       path.setAttribute("d","M0 0 L10 5 L0 10 z");path.setAttribute("fill",l.color||"#fff");marker.appendChild(path);defs.appendChild(marker);svg.appendChild(defs);
     }
-    if(selectedLineId===l.id){
+    if(drag&&(drag.kind==="line"||drag.kind==="line-handle")&&drag.id===l.id){
       const halo=document.createElementNS(ns,"line");halo.classList.add("line-selected-halo");
-      halo.setAttribute("x1",l.x1+"%");halo.setAttribute("y1",l.y1+"%");halo.setAttribute("x2",l.x2+"%");halo.setAttribute("y2",l.y2+"%");
+      halo.setAttribute("x1",l.x1+"%");halo.setAttribute("y1",l.y1+"%");halo.setAttribute("x2",drawEnd.x+"%");halo.setAttribute("y2",drawEnd.y+"%");
       halo.setAttribute("stroke-width",String(Math.max(9,(l.width||1)+8)));svg.appendChild(halo);
     }
     const el=document.createElementNS(ns,"line");
-    for(const [k,v] of [["x1",l.x1+"%"],["y1",l.y1+"%"],["x2",l.x2+"%"],["y2",l.y2+"%"],["stroke",l.color||"#fff"],["stroke-width",String(l.width||1)],["stroke-linecap","round"]])el.setAttribute(k,v);
+    for(const [k,v] of [["x1",l.x1+"%"],["y1",l.y1+"%"],["x2",drawEnd.x+"%"],["y2",drawEnd.y+"%"],["stroke",l.color||"#fff"],["stroke-width",String(l.width||1)],["stroke-linecap","round"]])el.setAttribute(k,v);
     if(markerId)el.setAttribute("marker-end",`url(#${markerId})`);el.style.pointerEvents="none";svg.appendChild(el);
     const hit=document.createElementNS(ns,"line");hit.classList.add("line-hit");hit.dataset.lineId=l.id;
-    hit.setAttribute("x1",l.x1+"%");hit.setAttribute("y1",l.y1+"%");hit.setAttribute("x2",l.x2+"%");hit.setAttribute("y2",l.y2+"%");
+    hit.setAttribute("x1",l.x1+"%");hit.setAttribute("y1",l.y1+"%");hit.setAttribute("x2",drawEnd.x+"%");hit.setAttribute("y2",drawEnd.y+"%");
     hit.addEventListener("pointerdown",lineDown);svg.appendChild(hit);
-    if(selectedLineId===l.id){
+    if(drag&&(drag.kind==="line"||drag.kind==="line-handle")&&drag.id===l.id){
       [["start",l.x1,l.y1],["end",l.x2,l.y2]].forEach(([end,x,y])=>{
         const h=document.createElementNS(ns,"circle");h.classList.add("line-handle-hit");h.dataset.lineId=l.id;h.dataset.handle=end;h.setAttribute("cx",x+"%");h.setAttribute("cy",y+"%");h.setAttribute("r","15");h.addEventListener("pointerdown",lineHandleDown);svg.appendChild(h);
         const d=document.createElementNS(ns,"circle");d.classList.add("line-handle-dot");d.setAttribute("cx",x+"%");d.setAttribute("cy",y+"%");d.setAttribute("r","6");svg.appendChild(d);
@@ -310,6 +311,23 @@ function nearestBallPoint(p,radiusPx=22){
   for(const b of balls){if(b.ghost)continue;const dx=(p.x-b.x)*r.width/100,dy=(p.y-b.y)*r.height/100,d=Math.hypot(dx,dy);if(d<=bestD){best=b;bestD=d}}
   return best;
 }
+function attachLineToNearbyBalls(l,radiusPx=28){
+  if(!l)return;
+  const s=nearestBallPoint({x:l.x1,y:l.y1},radiusPx),e=nearestBallPoint({x:l.x2,y:l.y2},radiusPx);
+  if(s){l.x1=s.x;l.y1=s.y;l.startBallId=s.id}else l.startBallId=null;
+  if(e){l.x2=e.x;l.y2=e.y;l.endBallId=e.id}else l.endBallId=null;
+}
+function endpointDistancePx(l,p,end){
+  const r=felt.getBoundingClientRect(),x=end==="start"?l.x1:l.x2,y=end==="start"?l.y1:l.y2;
+  return Math.hypot((p.x-x)*r.width/100,(p.y-y)*r.height/100);
+}
+function displayArrowEnd(l){
+  if(l.type!=="arrow"||!l.endBallId)return{x:l.x2,y:l.y2};
+  const r=felt.getBoundingClientRect(),dx=(l.x2-l.x1)*r.width/100,dy=(l.y2-l.y1)*r.height/100,len=Math.hypot(dx,dy);
+  if(len<1)return{x:l.x2,y:l.y2};
+  const inset=8;
+  return{x:l.x2-(dx/len)*(inset/r.width)*100,y:l.y2-(dy/len)*(inset/r.height)*100};
+}
 function markSnapBall(id=null){$$(".ball.snap-target").forEach(el=>el.classList.remove("snap-target"));if(id!=null)ballsLayer.querySelector(`.ball[data-id="${id}"]`)?.classList.add("snap-target")}
 function setMoveTool(){tool="move";$$(".tool[data-tool]").forEach(x=>x.classList.toggle("active",x.dataset.tool==="move"))}
 function syncLinesForBall(ball){
@@ -321,8 +339,8 @@ function syncLinesForBall(ball){
   return changed;
 }
 function confirmLineEditFromTableTap(e){
-  if(selectedLineId==null)return;
-  if(e.target.closest?.(".line-hit,.line-handle-hit"))return;
+  if(!drag&&(selectedLineId==null))return;
+  if(drag&&(drag.kind==="line"||drag.kind==="line-handle"))return;
   selectedLineId=null;markSnapBall();renderLines();
 }
 felt.addEventListener("pointerdown",confirmLineEditFromTableTap,true);
@@ -330,19 +348,24 @@ function lineDown(e){
   e.stopPropagation();e.preventDefault();const id=e.currentTarget.dataset.lineId,l=lines.find(x=>String(x.id)===String(id));if(!l)return;
   if(tool==="erase"){lines=lines.filter(x=>String(x.id)!==String(id));selectedLineId=null;commit();renderLayout();return}
   if(tool!=="move")return;
-  selectedLineId=l.id;drag={kind:"line",id:l.id,last:point(e),startX:e.clientX,startY:e.clientY,moved:false};renderLines();
+  const p=point(e),ds=endpointDistancePx(l,p,"start"),de=endpointDistancePx(l,p,"end");
+  if(Math.min(ds,de)<=28){
+    const handle=ds<=de?"start":"end";
+    drag={kind:"line-handle",id:l.id,handle,snapBallId:handle==="start"?(l.startBallId||null):(l.endBallId||null)};
+  }else{
+    drag={kind:"line",id:l.id,last:p,startX:e.clientX,startY:e.clientY,moved:false};
+  }
+  selectedLineId=null;svg.setPointerCapture?.(e.pointerId);renderLines();
 }
 function lineHandleDown(e){
   e.stopPropagation();e.preventDefault();const id=e.currentTarget.dataset.lineId,l=lines.find(x=>String(x.id)===String(id));if(!l||tool!=="move")return;
-  selectedLineId=l.id;const handle=e.currentTarget.dataset.handle;drag={kind:"line-handle",id:l.id,handle,snapBallId:handle==="start"?(l.startBallId||null):(l.endBallId||null)};renderLines();
+  const handle=e.currentTarget.dataset.handle;selectedLineId=null;drag={kind:"line-handle",id:l.id,handle,snapBallId:handle==="start"?(l.startBallId||null):(l.endBallId||null)};svg.setPointerCapture?.(e.pointerId);renderLines();
 }
 function finalizeLineDrag(){
   if(!drag||(drag.kind!=="line"&&drag.kind!=="line-handle"))return false;
   const d=drag,l=lines.find(x=>x.id===d.id);
-  if(l&&d.kind==="line-handle"){
-    if(d.handle==="start")l.startBallId=d.snapBallId||null;else l.endBallId=d.snapBallId||null;
-  }
-  drag=null;markSnapBall();hideAim();commit();renderLines();return true;
+  if(l)attachLineToNearbyBalls(l,28);
+  drag=null;selectedLineId=null;markSnapBall();hideAim();commit();renderLines();return true;
 }
 function renderLayout(){ballsLayer.innerHTML="";notesLayer.innerHTML="";renderLines();for(const b of balls){const el=document.createElement("div");el.className=ballClass(b.n,!!b.ghost)+(drag&&drag.kind==="ball"&&drag.id===b.id?" dragging":"");el.dataset.id=b.id;el.style.left=b.x+"%";el.style.top=b.y+"%";if(!b.ghost&&b.n)el.style.setProperty("--ball-color",colors[b.n]);if(!b.ghost){const sp=document.createElement("span");sp.textContent=b.n||"";el.appendChild(sp)}el.addEventListener("pointerdown",ballDown);ballsLayer.appendChild(el)}for(const m of memos){const el=document.createElement("div");el.className="table-memo";el.dataset.id=m.id;el.style.left=m.x+"%";el.style.top=m.y+"%";el.textContent=m.text;el.addEventListener("pointerdown",memoDown);notesLayer.appendChild(el)}}
 function addBall(n,p,ghost=false){
@@ -372,7 +395,7 @@ document.addEventListener("pointermove",e=>{
   }
   if(drag.kind==="line-handle"){
     const l=lines.find(x=>x.id===drag.id);if(!l)return;
-    const snap=nearestBallPoint(p,24),x=snap?snap.x:p.x,y=snap?snap.y:p.y;drag.snapBallId=snap?.id||null;markSnapBall(drag.snapBallId);
+    const snap=nearestBallPoint(p,28),x=snap?snap.x:p.x,y=snap?snap.y:p.y;drag.snapBallId=snap?.id||null;markSnapBall(drag.snapBallId);
     if(drag.handle==="start"){l.x1=x;l.y1=y}else{l.x2=x;l.y2=y}
     renderLines();showAimAt(x,y);e.preventDefault();return;
   }
@@ -395,9 +418,9 @@ document.addEventListener("pointermove",e=>{
   }
   o.x=p.x;o.y=p.y;renderLayout();
 },{passive:false});
-document.addEventListener("pointerup",()=>{if(finishBallDrag())return;if(finalizeLineDrag())return;if(drag){drag=null;hideAim();commit()}});document.addEventListener("pointercancel",()=>{if(finishBallDrag())return;if(finalizeLineDrag())return;drag=null;hideAim()});window.addEventListener("pointerup",finishBallDrag,true);window.addEventListener("pointercancel",finishBallDrag,true);
-felt.addEventListener("pointerdown",e=>{if(e.target!==felt&&e.target!==svg)return;const p=point(e);if(tool==="move"){const near=nearestBall(e,36);if(near){const el=ballsLayer.querySelector(`.ball[data-id="${near.id}"]`);drag={kind:"ball",id:near.id,startX:e.clientX,startY:e.clientY,moved:false,liftPx:28,el};el?.classList.add("dragging");felt.setPointerCapture?.(e.pointerId);showAimAt(near.x,near.y);e.preventDefault();return}if(selectedLineId!=null){selectedLineId=null;renderLines()}}if(tool==="line"||tool==="arrow"){const snap=nearestBallPoint(p,22);drawing={id:Date.now()+Math.random(),type:tool,x1:snap?snap.x:p.x,y1:snap?snap.y:p.y,x2:snap?snap.x:p.x,y2:snap?snap.y:p.y,color:lineColor,width:lineWidth,startBallId:snap?.id||null};felt.setPointerCapture?.(e.pointerId);showAimAt(drawing.x1,drawing.y1)}else if(tool==="memo"){const text=prompt("メモを入力");if(text){memos.push({id:Date.now()+Math.random(),text,x:p.x,y:p.y});commit();renderLayout()}}else if(tool==="moveall")beginAll(e)});
-felt.addEventListener("pointermove",e=>{if(!drawing)return;const p=point(e),snap=nearestBallPoint(p,24);drawing.x2=snap?snap.x:p.x;drawing.y2=snap?snap.y:p.y;drawing.endBallId=snap?.id||null;markSnapBall(drawing.endBallId);showAimAt(drawing.x2,drawing.y2);const tmp=[...lines,drawing];const old=lines;lines=tmp;renderLines();lines=old});
+document.addEventListener("pointerup",()=>{if(finishBallDrag())return;if(finalizeLineDrag())return;if(drag){drag=null;hideAim();commit()}});document.addEventListener("pointercancel",()=>{if(finishBallDrag())return;if(finalizeLineDrag())return;drag=null;hideAim()});window.addEventListener("pointerup",e=>{finishBallDrag();finalizeLineDrag()},true);window.addEventListener("pointercancel",e=>{finishBallDrag();finalizeLineDrag()},true);
+felt.addEventListener("pointerdown",e=>{if(e.target!==felt&&e.target!==svg)return;const p=point(e);if(tool==="move"){const near=nearestBall(e,36);if(near){const el=ballsLayer.querySelector(`.ball[data-id="${near.id}"]`);drag={kind:"ball",id:near.id,startX:e.clientX,startY:e.clientY,moved:false,liftPx:28,el};el?.classList.add("dragging");felt.setPointerCapture?.(e.pointerId);showAimAt(near.x,near.y);e.preventDefault();return}if(selectedLineId!=null){selectedLineId=null;renderLines()}}if(tool==="line"||tool==="arrow"){const snap=nearestBallPoint(p,28);drawing={id:Date.now()+Math.random(),type:tool,x1:snap?snap.x:p.x,y1:snap?snap.y:p.y,x2:snap?snap.x:p.x,y2:snap?snap.y:p.y,color:lineColor,width:lineWidth,startBallId:snap?.id||null};felt.setPointerCapture?.(e.pointerId);showAimAt(drawing.x1,drawing.y1)}else if(tool==="memo"){const text=prompt("メモを入力");if(text){memos.push({id:Date.now()+Math.random(),text,x:p.x,y:p.y});commit();renderLayout()}}else if(tool==="moveall")beginAll(e)});
+felt.addEventListener("pointermove",e=>{if(!drawing)return;const p=point(e),snap=nearestBallPoint(p,28);drawing.x2=snap?snap.x:p.x;drawing.y2=snap?snap.y:p.y;drawing.endBallId=snap?.id||null;markSnapBall(drawing.endBallId);showAimAt(drawing.x2,drawing.y2);const tmp=[...lines,drawing];const old=lines;lines=tmp;renderLines();lines=old});
 function addGhostOppositeArrow(line){
   if(!ghostAuto||line.type!=="arrow"||!line.startBallId)return;
   const source=balls.find(b=>b.id===line.startBallId&&!b.ghost);if(!source)return;
@@ -405,7 +428,7 @@ function addGhostOppositeArrow(line){
   const spacing=15,pos={x:clamp(source.x-(dx/len)*(spacing/r.width)*100,1,99),y:clamp(source.y-(dy/len)*(spacing/r.height)*100,2,98)};
   balls=balls.filter(b=>!b.ghost);balls.push({id:crypto.randomUUID?.()||Date.now()+Math.random(),n:0,x:pos.x,y:pos.y,ghost:true});
 }
-felt.addEventListener("pointerup",e=>{if(drawing){const p=point(e),snap=nearestBallPoint(p,24);if(snap){drawing.x2=snap.x;drawing.y2=snap.y;drawing.endBallId=snap.id}else drawing.endBallId=null;lines.push(drawing);selectedLineId=null;addGhostOppositeArrow(drawing);drawing=null;markSnapBall();setMoveTool();commit();renderLayout()}hideAim()});
+felt.addEventListener("pointerup",e=>{if(drawing){const p=point(e),snap=nearestBallPoint(p,28);if(snap){drawing.x2=snap.x;drawing.y2=snap.y;drawing.endBallId=snap.id}else drawing.endBallId=null;attachLineToNearbyBalls(drawing,28);lines.push(drawing);selectedLineId=null;addGhostOppositeArrow(drawing);drawing=null;markSnapBall();setMoveTool();commit();renderLayout()}hideAim()});
 felt.addEventListener("pointercancel",()=>{drawing=null;markSnapBall();renderLayout();hideAim()});
 
 const ballbar=$("#ballbar");["selectstart","contextmenu","dragstart"].forEach(type=>{felt.addEventListener(type,e=>e.preventDefault());ballbar.addEventListener(type,e=>e.preventDefault())});
