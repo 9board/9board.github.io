@@ -17,14 +17,14 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq imagemagick
-          magick Billiards_layout_mobile/assets/home-20260922-v2.jpg -filter Lanczos -resize 400% -unsharp 0x0.75+0.75+0.008 -quality 96 Billiards_layout_mobile/assets/home-20260922-v2-hq.jpg
+          convert Billiards_layout_mobile/assets/home-20260922-v2.jpg -filter Lanczos -resize 400% -unsharp 0x0.75+0.75+0.008 -quality 96 Billiards_layout_mobile/assets/home-20260922-v2-hq.jpg
       - name: Point Home icon to HQ source only
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p = Path('Billiards_layout_mobile/index.html')
           s = p.read_text(encoding='utf-8')
-          s = s.replace('./assets/home-20260922-v2.jpg?v=20260922-3', './assets/home-20260922-v2-hq.jpg?v=20260930-hq1')
+          s = s.replace('./assets/home-20260922-v2.jpg?v=20260922-3', './assets/home-20260922-v2-hq.jpg?v=20260930-hq2')
           p.write_text(s, encoding='utf-8')
           PY
       - name: Commit only Home icon quality change
@@ -36,4 +36,4 @@ jobs:
             git commit -m "Use high resolution Home nav icon"
             git push
           fi
-# home-icon-source-hq-20260930
+# home-icon-source-hq-20260930-fix
