@@ -63,21 +63,7 @@ button,input,select,textarea{font:inherit}button{border:0;-webkit-appearance:non
 <body data-build="2026-09-23-v37">
 <div class="phone">
 <main class="app-view" id="appView">
-<section class="screen active" data-screen="home">
-<header class="home-header"><img class="brand-logo" src="./assets/9board-logo-20260922-v2.jpg?v=20260922-2" alt="9BOARD"></header>
-<div class="wrap">
-<div class="section-title"><h2>よく使う機能</h2><span>タップして開く</span></div>
-<div class="grid2">
-<button class="feature jump" data-to="layout"><img class="feature-art" src="./assets/layout-20260922-v3.jpg?v=20260922-3" alt=""><b>配置図</b><small>球・線・矢印・メモ</small></button>
-<button class="feature jump" data-to="counter"><img class="feature-art" src="./assets/counter-20260922-v3.jpg?v=20260922-3" alt=""><b>カウンター</b><small>平場のスコア記録</small></button>
-<button class="feature jump" data-to="matches"><img class="feature-art" src="./assets/matches-20260922-v3.jpg?v=20260922-3" alt=""><b>対戦記録</b><small>大会・結果・メモ</small></button>
-<button class="feature jump" data-to="menu"><img class="feature-art" src="./assets/menu-original-20260922.png?v=20260922-8" alt=""><b>その他</b><small>保存データ・設定</small></button>
-</div>
-<div class="section-title"><h2>アプリの状態</h2><button id="refreshSummary">更新</button></div>
-<div class="card" id="homeSummary"></div>
-</div>
-</section>
-<section class="screen" data-screen="layout">
+<section class="screen active" data-screen="layout">
 <header class="topbar"><div><strong>配置図</strong><small>Layout Maker</small></div></header>
 <div class="wrap">
 <div class="page-head"><h1>配置を作る</h1><button id="clearLayout">リセット</button></div>
@@ -98,7 +84,7 @@ button,input,select,textarea{font:inherit}button{border:0;-webkit-appearance:non
 <section class="screen" data-screen="matches"><header class="topbar"><div><strong>対戦記録</strong><small>Match Records</small></div><button id="newMatchBtn" class="circle-btn">＋</button></header><div class="wrap"><div class="page-head"><h1>対戦一覧</h1><button id="newMatchText">新規</button></div><form id="matchForm" class="new-form"><div class="cols"><label>日付<input type="date" id="matchDate" required></label><label>状態<select id="matchStatus"><option>終了</option><option>予定</option></select></label></div><label>大会名 / 対戦名<input id="matchTitle"></label><label>会場名<input id="matchVenue"></label><div class="cols"><label>対戦相手<input id="matchOpponent"></label><label>結果<input id="matchResult" placeholder="4-2"></label></div><div class="cols"><label>セット数<input id="matchRace" placeholder="4先"></label><label>エントリーフィー<input id="matchFee" inputmode="numeric"></label></div><label>URL<input id="matchUrl" type="url" placeholder="https://"></label><label>メモ<textarea id="matchMemo"></textarea></label><div class="save-grid"><button type="submit">保存</button><button type="button" class="alt" id="cancelMatch">閉じる</button></div></form><div class="card" id="matchList"></div></div></section>
 <section class="screen" data-screen="menu"><header class="topbar"><div><strong>メニュー</strong><small>9BOARD Mobile</small></div></header><div class="wrap"><div class="menu-card"><button class="menu-row jump" data-to="layout">保存した配置 <span>›</span></button><button class="menu-row jump" data-to="matches">対戦記録 <span>›</span></button><button class="menu-row jump" data-to="counter">カウンター履歴 <span>›</span></button><div class="menu-row">設定 <span>›</span></div><div class="menu-row">使い方 / ヘルプ <span>›</span></div><div class="menu-row">利用規約 <span>›</span></div><div class="menu-row">プライバシーポリシー <span>›</span></div></div></div></section>
 </main>
-<nav class="bottom-nav"><button class="nav-btn active" data-to="home"><img class="nav-art" src="./assets/home-20260922-v2.jpg?v=20260922-3" alt=""><span>ホーム</span></button><button class="nav-btn" data-to="layout"><img class="nav-art" src="./assets/layout-20260922-v3.jpg?v=20260922-3" alt=""><span>配置図</span></button><button class="nav-btn" data-to="counter"><img class="nav-art" src="./assets/counter-20260922-v3.jpg?v=20260922-3" alt=""><span>カウンター</span></button><button class="nav-btn" data-to="matches"><img class="nav-art" src="./assets/matches-20260922-v3.jpg?v=20260922-3" alt=""><span>対戦記録</span></button><button class="nav-btn" data-to="menu"><img class="nav-art" src="./assets/menu-original-20260922.png?v=20260922-8" alt=""><span>メニュー</span></button></nav><div class="toast" id="toast"></div>
+<nav class="bottom-nav"><button class="nav-btn" data-to="counter"><img class="nav-art" src="./assets/counter-20260922-v3.jpg?v=20260922-3" alt=""><span>カウンター</span></button><button class="nav-btn" data-to="matches"><img class="nav-art" src="./assets/matches-20260922-v3.jpg?v=20260922-3" alt=""><span>対戦記録</span></button><button class="nav-btn" data-to="menu"><img class="nav-art" src="./assets/menu-original-20260922.png?v=20260922-8" alt=""><span>メニュー</span></button></nav><div class="toast" id="toast"></div>
 </div>
 <script>(()=>{"use strict";
 const $=(s,p=document)=>p.querySelector(s),$$=(s,p=document)=>[...p.querySelectorAll(s)];
@@ -106,8 +92,8 @@ const store={get(k,d=[]){try{return JSON.parse(localStorage.getItem(k))??d}catch
 const toast=m=>{const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove("show"),1300)};
 function makeBrandLogoTransparent(){const img=$(".brand-logo");if(!img)return;const run=()=>{const w=img.naturalWidth,h=img.naturalHeight;if(!w||!h)return;const cv=document.createElement("canvas");cv.width=w;cv.height=h;const x=cv.getContext("2d",{willReadFrequently:true});x.drawImage(img,0,0);const im=x.getImageData(0,0,w,h),d=im.data,seen=new Uint8Array(w*h),q=new Int32Array(w*h);let head=0,tail=0;const bg=p=>{const i=p*4,r=d[i],g=d[i+1],b=d[i+2],mx=Math.max(r,g,b),mn=Math.min(r,g,b);return r>210&&g>210&&b>210&&(mx-mn)<24};const add=p=>{if(p<0||p>=w*h||seen[p]||!bg(p))return;seen[p]=1;q[tail++]=p};for(let xx=0;xx<w;xx++){add(xx);add((h-1)*w+xx)}for(let yy=0;yy<h;yy++){add(yy*w);add(yy*w+w-1)}while(head<tail){const p=q[head++],i=p*4;d[i+3]=0;const px=p%w;if(px>0)add(p-1);if(px<w-1)add(p+1);if(p>=w)add(p-w);if(p<w*(h-1))add(p+w)}x.putImageData(im,0,0);img.style.background="transparent";img.src=cv.toDataURL("image/png")};if(img.complete)run();else img.addEventListener("load",run,{once:true})}
 makeBrandLogoTransparent();
-function go(name,updateUrl=true){const valid=["home","layout","counter","matches","menu"];if(!valid.includes(name))name="home";$$(".screen").forEach(s=>s.classList.toggle("active",s.dataset.screen===name));$$(".nav-btn").forEach(b=>b.classList.toggle("active",b.dataset.to===name));$("#appView").scrollTo({top:0});if(name==="home")renderHome();if(updateUrl&&location.hash!=="#"+name)window.history.pushState(null,"","#"+name)}
-$$("[data-to],.jump").forEach(b=>{b.type="button";b.addEventListener("click",e=>{e.preventDefault();go(b.dataset.to)})});window.addEventListener("hashchange",()=>go((location.hash||"#home").slice(1),false));$$(".bottom-nav .nav-btn").forEach(b=>b.addEventListener("pointerdown",()=>{if(!b.querySelector(".nav-art"))return;b.classList.remove("nav-tap");void b.offsetWidth;b.classList.add("nav-tap");setTimeout(()=>b.classList.remove("nav-tap"),320)}));
+function go(name,updateUrl=true){const valid=["layout","counter","matches","menu"];if(!valid.includes(name))name="layout";$$(".screen").forEach(s=>s.classList.toggle("active",s.dataset.screen===name));$$(".nav-btn").forEach(b=>b.classList.toggle("active",b.dataset.to===name));$("#appView").scrollTo({top:0});if(updateUrl&&location.hash!=="#"+name)window.history.pushState(null,"","#"+name)}
+$$("[data-to],.jump").forEach(b=>{b.type="button";b.addEventListener("click",e=>{e.preventDefault();go(b.dataset.to)})});window.addEventListener("hashchange",()=>go((location.hash||"#layout").slice(1),false));$$(".bottom-nav .nav-btn").forEach(b=>b.addEventListener("pointerdown",()=>{if(!b.querySelector(".nav-art"))return;b.classList.remove("nav-tap");void b.offsetWidth;b.classList.add("nav-tap");setTimeout(()=>b.classList.remove("nav-tap"),320)}));
 const colors={1:"#f2b51d",2:"#263f8f",3:"#d92b2e",4:"#2a245c",5:"#f15428",6:"#176341",7:"#7a2f38",8:"#171717",9:"#e2a51a",10:"#24408f",11:"#d62d30",12:"#332764",13:"#f0522d",14:"#1e6945",15:"#7a3038"};
 function isOverFelt(e){const r=felt.getBoundingClientRect();return e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom}
 const felt=$("#felt"),svg=$("#svgLayer"),ballsLayer=$("#ballsLayer"),notesLayer=$("#notesLayer"),tableViewport=$("#tableViewport"),tableStage=$("#tableStage");
@@ -166,6 +152,6 @@ const form=$("#matchForm");function showForm(on){form.classList.toggle("show",on
 function renderMatches(){const list=store.get("9b_matches"),el=$("#matchList");el.innerHTML=list.length?list.map(x=>`<div class="summary-row"><div><strong>${esc(x.title)}</strong><small>${esc(x.date||"")} ${x.venue?"・"+esc(x.venue):""}${x.opponent?" ・ vs "+esc(x.opponent):""}</small></div><span class="badge">${esc(x.result||x.status)}</span></div>`).join(""):'<div class="summary-row"><strong>まだ対戦記録はありません</strong></div>'}
 function renderHome(){const l=store.get("9b_layouts"),c=store.get("9b_counter"),m=store.get("9b_matches");$("#homeSummary").innerHTML=`<div class="summary-row"><strong>保存した配置</strong><span class="badge">${l.length}件</span></div><div class="summary-row"><strong>カウンター履歴</strong><span class="badge">${c.length}件</span></div><div class="summary-row"><strong>対戦記録</strong><span class="badge">${m.length}件</span></div>`}
 function esc(s=""){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-renderLayout();renderSaved();renderCounter();renderMatches();renderHome();applyZoom();go((location.hash||"#home").slice(1),false);
+renderLayout();renderSaved();renderCounter();renderMatches();renderHome();applyZoom();go((location.hash||"#layout").slice(1),false);
 })();</script>
 </body></html>
