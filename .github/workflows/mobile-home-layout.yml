@@ -23,29 +23,21 @@ jobs:
           # Keep the layout app itself as the first/active screen.
           s = s.replace('<section class="screen" data-screen="layout">', '<section class="screen active" data-screen="layout">', 1)
 
-          # Bottom navigation must be exactly four items:
-          # Home / Counter / Match Records / Menu. No separate Layout tab.
+          # Bottom navigation: Home / Counter / Match Records / Menu only.
           nav_start = s.find('<nav class="bottom-nav">')
           nav_end = s.find('</nav>', nav_start)
           if nav_start != -1 and nav_end != -1:
               new_nav = '''<nav class="bottom-nav"><button class="nav-btn active" data-to="home"><img class="nav-art" src="./assets/home-20260922-v2.jpg?v=20260922-3" alt=""><span>ホーム</span></button><button class="nav-btn" data-to="counter"><img class="nav-art" src="./assets/counter-20260922-v3.jpg?v=20260922-3" alt=""><span>カウンター</span></button><button class="nav-btn" data-to="matches"><img class="nav-art" src="./assets/matches-20260922-v3.jpg?v=20260922-3" alt=""><span>対戦記録</span></button><button class="nav-btn" data-to="menu"><img class="nav-art" src="./assets/menu-original-20260922.png?v=20260922-8" alt=""><span>メニュー</span></button></nav>'''
               s = s[:nav_start] + new_nav + s[nav_end + len('</nav>'):]
 
-          # Four equal-width bottom tabs.
           s = s.replace('grid-template-columns:repeat(5,1fr)', 'grid-template-columns:repeat(4,1fr)')
+          s = s.replace('grid-template-columns:repeat(3,1fr)', 'grid-template-columns:repeat(4,1fr)')
 
-          # Home is a navigation alias for the layout screen.
           old = 'function go(name,updateUrl=true){const valid=["layout","counter","matches","menu"];if(!valid.includes(name))name="layout";$$(".screen").forEach(s=>s.classList.toggle("active",s.dataset.screen===name));$$(".nav-btn").forEach(b=>b.classList.toggle("active",b.dataset.to===name));$("#appView").scrollTo({top:0});if(updateUrl&&location.hash!=="#"+name)window.history.pushState(null,"","#"+name)}'
           new = 'function go(name,updateUrl=true){const valid=["home","counter","matches","menu","layout"];if(!valid.includes(name))name="home";const screen=name==="home"?"layout":name;$$(".screen").forEach(s=>s.classList.toggle("active",s.dataset.screen===screen));$$(".nav-btn").forEach(b=>b.classList.toggle("active",b.dataset.to===(name==="layout"?"home":name)));$("#appView").scrollTo({top:0});const route=name==="layout"?"home":name;if(updateUrl&&location.hash!=="#"+route)window.history.pushState(null,"","#"+route)}'
-          if old in s:
-              s = s.replace(old, new)
-          else:
-              import re
-              s = re.sub(r'function go\(name,updateUrl=true\)\{.*?\}\n\$\$\("\[data-to\],\.jump"\)', new + '\n$$("[data-to],.jump")', s, count=1)
-
+          s = s.replace(old, new)
           s = s.replace('(location.hash||"#layout").slice(1)', '(location.hash||"#home").slice(1)')
           s = s.replace('go((location.hash||"#layout").slice(1),false)', 'go((location.hash||"#home").slice(1),false)')
-
           p.write_text(s, encoding='utf-8')
           PY
       - name: Commit changes
@@ -54,6 +46,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add Billiards_layout_mobile/index.html
           if ! git diff --cached --quiet; then
-            git commit -m "Restore Home tab and open layout from Home"
+            git commit -m "Restore four-tab mobile nav with Home opening layout"
             git push
           fi
+# run-20260930-1
