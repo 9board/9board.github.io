@@ -1,4 +1,4 @@
-name: Mobile home opens layout
+name: Sharpen mobile Home icon
 
 on:
   push:
@@ -13,14 +13,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Rename mobile navigation labels only
+      - name: Sharpen Home icon rendering only
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p = Path('Billiards_layout_mobile/index.html')
           s = p.read_text(encoding='utf-8')
-          s = s.replace('<span>カウンター</span>', '<span>スコア</span>')
-          s = s.replace('<span>メニュー</span>', '<span>設定</span>')
+          marker = '.nav-btn.active .nav-art{outline:2px solid rgba(7,132,95,.18);outline-offset:1px}'
+          addition = '.nav-btn[data-to="home"] .nav-art{image-rendering:-webkit-optimize-contrast;image-rendering:high-quality;transform:translateZ(0);backface-visibility:hidden}'
+          if addition not in s:
+              s = s.replace(marker, marker + addition, 1)
           p.write_text(s, encoding='utf-8')
           PY
       - name: Commit changes
@@ -29,7 +31,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add Billiards_layout_mobile/index.html
           if ! git diff --cached --quiet; then
-            git commit -m "Rename Counter to Score and Menu to Settings"
+            git commit -m "Improve Home nav icon rendering quality only"
             git push
           fi
-# labels-only-20260930
+# home-icon-quality-only-20260930
