@@ -1,4 +1,4 @@
-name: Repair and upscale mobile Home icon
+name: Upscale mobile Home icon from valid source
 
 on:
   push:
@@ -13,29 +13,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Repair JPEG and upscale Home icon only
+      - name: Upscale valid Home artwork only
         run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          src = Path('Billiards_layout_mobile/assets/home-20260922-v2.jpg').read_bytes()
-          end = src.find(b'\xff\xd9')
-          if end < 0:
-              raise SystemExit('JPEG EOI not found')
-          Path('/tmp/home-repaired.jpg').write_bytes(src[:end+2])
-          PY
           sudo apt-get update -qq
           sudo apt-get install -y -qq imagemagick
-          identify /tmp/home-repaired.jpg
-          convert /tmp/home-repaired.jpg -filter Lanczos -resize 400% -unsharp 0x0.75+0.75+0.008 -quality 96 Billiards_layout_mobile/assets/home-20260922-v2-hq.jpg
+          identify Billiards_layout_mobile/assets/home-20260922.jpg
+          convert Billiards_layout_mobile/assets/home-20260922.jpg -filter Lanczos -resize 800% -unsharp 0x0.8+0.8+0.008 -quality 98 Billiards_layout_mobile/assets/home-20260922-v2-hq.jpg
           identify Billiards_layout_mobile/assets/home-20260922-v2-hq.jpg
-      - name: Point Home icon to repaired HQ source only
+      - name: Point Home icon to HQ source only
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p = Path('Billiards_layout_mobile/index.html')
           s = p.read_text(encoding='utf-8')
-          s = s.replace('./assets/home-20260922-v2.jpg?v=20260922-3', './assets/home-20260922-v2-hq.jpg?v=20260930-hq3')
-          s = s.replace('./assets/home-20260922-v2-hq.jpg?v=20260930-hq2', './assets/home-20260922-v2-hq.jpg?v=20260930-hq3')
+          s = s.replace('./assets/home-20260922-v2.jpg?v=20260922-3', './assets/home-20260922-v2-hq.jpg?v=20260930-hq4')
+          s = s.replace('./assets/home-20260922-v2-hq.jpg?v=20260930-hq2', './assets/home-20260922-v2-hq.jpg?v=20260930-hq4')
+          s = s.replace('./assets/home-20260922-v2-hq.jpg?v=20260930-hq3', './assets/home-20260922-v2-hq.jpg?v=20260930-hq4')
           p.write_text(s, encoding='utf-8')
           PY
       - name: Commit Home icon quality change only
@@ -43,9 +36,8 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add Billiards_layout_mobile/assets/home-20260922-v2-hq.jpg Billiards_layout_mobile/index.html
-          git diff --cached -- Billiards_layout_mobile/index.html
           if ! git diff --cached --quiet; then
-            git commit -m "Repair and use high resolution Home nav icon"
+            git commit -m "Use high resolution Home nav icon from valid artwork"
             git push
           fi
-# repair-home-icon-hq3
+# valid-home-source-hq4
