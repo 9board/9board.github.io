@@ -1,0 +1,57 @@
+name: Mobile layout as home
+
+on:
+  push:
+    paths:
+      - '.github/workflows/mobile-home-layout.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  update-mobile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update mobile home and navigation
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('Billiards_layout_mobile/index.html')
+          s = p.read_text(encoding='utf-8')
+
+          # Remove the old home screen completely.
+          start = s.find('<section class="screen active" data-screen="home">')
+          end_marker = '<section class="screen" data-screen="layout">'
+          end = s.find(end_marker, start)
+          if start != -1 and end != -1:
+              s = s[:start] + '<section class="screen active" data-screen="layout">' + s[end + len(end_marker):]
+          else:
+              s = s.replace('<section class="screen" data-screen="layout">', '<section class="screen active" data-screen="layout">', 1)
+
+          # Bottom navigation: remove both Home and Layout buttons; Layout itself is now the home screen.
+          old_home = '<button class="nav-btn active" data-to="home"><img class="nav-art" src="./assets/home-20260922-v2.jpg?v=20260922-3" alt=""><span>ホーム</span></button>'
+          old_layout = '<button class="nav-btn" data-to="layout"><img class="nav-art" src="./assets/layout-20260922-v3.jpg?v=20260922-3" alt=""><span>配置図</span></button>'
+          s = s.replace(old_home, '')
+          s = s.replace(old_layout, '')
+
+          # Make layout the default route and fallback route.
+          s = s.replace('const valid=["home","layout","counter","matches","menu"];if(!valid.includes(name))name="home";', 'const valid=["layout","counter","matches","menu"];if(!valid.includes(name))name="layout";')
+          s = s.replace('if(name==="home")renderHome();', '')
+          s = s.replace('(location.hash||"#home").slice(1)', '(location.hash||"#layout").slice(1)')
+          s = s.replace('go((location.hash||"#home").slice(1),false)', 'go((location.hash||"#layout").slice(1),false)')
+
+          # Catch any remaining initial-home route at startup.
+          s = s.replace('go((location.hash||"#home").slice(1)', 'go((location.hash||"#layout").slice(1)')
+
+          p.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Billiards_layout_mobile/index.html
+          if ! git diff --cached --quiet; then
+            git commit -m "Make mobile layout the home screen"
+            git push
+          fi
