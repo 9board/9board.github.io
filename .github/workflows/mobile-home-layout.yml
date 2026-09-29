@@ -1,4 +1,4 @@
-name: Sharpen mobile Home icon
+name: Upscale mobile Home icon
 
 on:
   push:
@@ -9,29 +9,31 @@ permissions:
   contents: write
 
 jobs:
-  update-mobile:
+  update-home-icon:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Sharpen Home icon rendering only
+      - name: Upscale Home icon source only
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq imagemagick
+          magick Billiards_layout_mobile/assets/home-20260922-v2.jpg -filter Lanczos -resize 400% -unsharp 0x0.75+0.75+0.008 -quality 96 Billiards_layout_mobile/assets/home-20260922-v2-hq.jpg
+      - name: Point Home icon to HQ source only
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p = Path('Billiards_layout_mobile/index.html')
           s = p.read_text(encoding='utf-8')
-          marker = '.nav-btn.active .nav-art{outline:2px solid rgba(7,132,95,.18);outline-offset:1px}'
-          addition = '.nav-btn[data-to="home"] .nav-art{image-rendering:-webkit-optimize-contrast;image-rendering:high-quality;transform:translateZ(0);backface-visibility:hidden}'
-          if addition not in s:
-              s = s.replace(marker, marker + addition, 1)
+          s = s.replace('./assets/home-20260922-v2.jpg?v=20260922-3', './assets/home-20260922-v2-hq.jpg?v=20260930-hq1')
           p.write_text(s, encoding='utf-8')
           PY
-      - name: Commit changes
+      - name: Commit only Home icon quality change
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add Billiards_layout_mobile/index.html
+          git add Billiards_layout_mobile/assets/home-20260922-v2-hq.jpg Billiards_layout_mobile/index.html
           if ! git diff --cached --quiet; then
-            git commit -m "Improve Home nav icon rendering quality only"
+            git commit -m "Use high resolution Home nav icon"
             git push
           fi
-# home-icon-quality-only-20260930
+# home-icon-source-hq-20260930
