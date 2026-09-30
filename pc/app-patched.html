@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+<style>html,body{margin:0;width:100%;height:100%;background:#f5faf7}</style>
+</head>
+<body>
+<script>
+(async()=>{
+  const sourceUrl='./app.html?v=20261001-pcfix1';
+  let html=await fetch(sourceUrl,{cache:'no-store'}).then(r=>{
+    if(!r.ok)throw new Error('app.html fetch failed: '+r.status);
+    return r.text();
+  });
+
+  function replaceExact(oldText,newText,expected=1,label='patch'){
+    const count=html.split(oldText).length-1;
+    if(count!==expected)throw new Error(`${label}: expected ${expected}, got ${count}`);
+    html=html.split(oldText).join(newText);
+  }
+
+  replaceExact(
+    '<button class="tool active" data-tool="move"><span class="ico">✋</span><span class="text">移動</span></button>',
+    '<button class="tool" data-tool="move"><span class="ico">✋</span><span class="text">移動</span></button>',
+    1,'default move button'
+  );
+
+  replaceExact(
+    '<div><strong>配置編集</strong><div class="status" id="status">縦向き・移動モード</div></div>',
+    '<div><strong>配置編集</strong><div class="status" id="status">横向き・ツール未選択</div></div>',
+    1,'initial status'
+  );
+
+  replaceExact(
+    'orientation:"landscape", tool:"move", lineType:"arrow", lineColor:"#ffffff", lineWidth:1,',
+    'orientation:"landscape", tool:"none", lineType:"arrow", lineColor:"#ffffff", lineWidth:1,',
+    1,'neutral default tool'
+  );
+
+  replaceExact(
+    'function removeBall(id){ snap(); state.balls=state.balls.filter(b=>b.id!==id); renderBalls(); }',
+`function removeBall(id){
+  const target=state.balls.find(b=>b.id===id);
+  if(!target)return;
+  snap();
+  // Delete only the clicked ball. Attached line endpoints stay exactly where they were and are detached.
+  state.lines.forEach(l=>{
+    if(l.startBallId===id){l.x1=target.x;l.y1=target.y;delete l.startBallId}
+    if(l.endBallId===id){l.x2=target.x;l.y2=target.y;delete l.endBallId}
+  });
+  pointerAction=null;
+  state.balls=state.balls.filter(b=>b.id!==id);
+  renderBalls();
+  renderLines();
+}`,
+    1,'isolated delete'
+  );
+
+  replaceExact(
+`        state.lines.push(line);pointerAction={type:"draw",id:line.id};renderLines();el.setPointerCapture(e.pointerId);e.preventDefault();e.stopPropagation();return;
+      }
+      moved=false; el.setPointerCapture(e.pointerId); snap();showAim(e);`,
+`        state.lines.push(line);pointerAction={type:"draw",id:line.id};renderLines();el.setPointerCapture(e.pointerId);e.preventDefault();e.stopPropagation();return;
+      }
+      // Do not move a ball unless Move is explicitly selected.
+      if(state.tool!=="move"){e.preventDefault();e.stopPropagation();return;}
+      moved=false; el.setPointerCapture(e.pointerId); snap();showAim(e);`,
+    1,'ball movement gate'
+  );
+
+  replaceExact(
+`function nearestBall(x,y){
+  const r=cloth.getBoundingClientRect();let best=null,bestPx=Infinity;
+  state.balls.filter(b=>!b.ghost).forEach(b=>{
+    const d=Math.hypot((b.x-x)*r.width,(b.y-y)*r.height);
+    if(d<bestPx){best=b;bestPx=d}
+  });
+  return bestPx<=24*state.zoom?best:null;
+}`,
+`function nearestBall(x,y){
+  const r=cloth.getBoundingClientRect();let best=null,bestPx=Infinity;
+  state.balls.filter(b=>!b.ghost).forEach(b=>{
+    const d=Math.hypot((b.x-x)*r.width,(b.y-y)*r.height);
+    if(d<bestPx){best=b;bestPx=d}
+  });
+  return bestPx<=24*state.zoom?best:null;
+}
+function nearestCueBall(x,y){
+  const r=cloth.getBoundingClientRect();let best=null,bestPx=Infinity;
+  state.balls.filter(b=>!b.ghost&&b.n===0).forEach(b=>{
+    const d=Math.hypot((b.x-x)*r.width,(b.y-y)*r.height);
+    if(d<bestPx){best=b;bestPx=d}
+  });
+  return bestPx<=28*state.zoom?best:null;
+}`,
+    1,'cue snap helper'
+  );
+
+  replaceExact(
+    '  const a=nearestBall(l.x1,l.y1),b=nearestBall(l.x2,l.y2);',
+    '  const a=nearestCueBall(l.x1,l.y1)||nearestBall(l.x1,l.y1),b=nearestBall(l.x2,l.y2);',
+    1,'cue-first start attachment'
+  );
+
+  replaceExact(
+`      if(startAttached||endAttached){
+        const r=cloth.getBoundingClientRect();
+        const dx=(l.x2-l.x1)*r.width;
+        const dy=(l.y2-l.y1)*r.height;
+        const len=Math.hypot(dx,dy);
+        if(len>0){
+          const ux=dx/len,uy=dy/len;
+          const handleOffset=10*state.zoom;
+          if(startAttached){
+            hx1=l.x1+ux*(handleOffset/r.width);
+            hy1=l.y1+uy*(handleOffset/r.height);
+          }
+          if(endAttached){
+            hx2=l.x2-ux*(handleOffset/r.width);
+            hy2=l.y2-uy*(handleOffset/r.height);
+          }
+        }
+      }`,
+`      if(startAttached||endAttached||l.type==="arrow"){
+        const r=cloth.getBoundingClientRect();
+        const dx=(l.x2-l.x1)*r.width;
+        const dy=(l.y2-l.y1)*r.height;
+        const len=Math.hypot(dx,dy);
+        if(len>0){
+          const ux=dx/len,uy=dy/len;
+          const handleOffset=10*state.zoom;
+          if(startAttached){
+            hx1=l.x1+ux*(handleOffset/r.width);
+            hy1=l.y1+uy*(handleOffset/r.height);
+          }
+          if(endAttached){
+            hx2=l.x2-ux*(handleOffset/r.width);
+            hy2=l.y2-uy*(handleOffset/r.height);
+          }else if(l.type==="arrow"){
+            const tipHandleOffset=8*state.zoom;
+            hx2=l.x2-ux*(tipHandleOffset/r.width);
+            hy2=l.y2-uy*(tipHandleOffset/r.height);
+          }
+        }
+      }`,
+    1,'arrow tip grab area'
+  );
+
+  replaceExact(
+`    [h1,h2].forEach(h=>{
+      h.setAttribute("r","12");
+      h.setAttribute("fill","rgba(0,0,0,0.001)");
+      h.setAttribute("stroke","rgba(0,0,0,0.001)");
+      h.setAttribute("stroke-width","6");
+      h.classList.add("line-end-hit");
+      h.style.pointerEvents=state.tool==="move"?"all":"none";
+      h.style.cursor="grab";
+    });`,
+`    [h1,h2].forEach(h=>{
+      h.setAttribute("r",h===h2&&l.type==="arrow"?"18":"14");
+      h.setAttribute("fill","rgba(0,0,0,0.001)");
+      h.setAttribute("stroke","rgba(0,0,0,0.001)");
+      h.setAttribute("stroke-width","8");
+      h.classList.add("line-end-hit");
+      // Resize endpoints in neutral mode; moving the whole line still requires Move.
+      h.style.pointerEvents=(state.tool==="move"||state.tool==="none")?"all":"none";
+      h.style.cursor="grab";
+    });`,
+    1,'endpoint handles'
+  );
+
+  replaceExact(
+`    function startResize(which,h,e){
+      if(state.tool!=="move")return;`,
+`    function startResize(which,h,e){
+      if(state.tool!=="move"&&state.tool!=="none")return;`,
+    1,'neutral resize'
+  );
+
+  replaceExact(
+`      const p=normPoint(e);
+
+      if(which==="start"){
+        l.x1=p.x;
+        l.y1=p.y;
+      }else{
+        l.x2=p.x;
+        l.y2=p.y;
+      }
+
+      // If the other end is attached, keep it locked while length changes.
+      syncLineAttachments(l);
+      setCoords();`,
+`      const p=normPoint(e);
+      // Start/base endpoint prefers the cue ball and snaps to the exact center, like mobile.
+      const snapBall=which==="start"?(nearestCueBall(p.x,p.y)||nearestBall(p.x,p.y)):nearestBall(p.x,p.y);
+
+      if(which==="start"){
+        if(snapBall){l.startBallId=snapBall.id;l.x1=snapBall.x;l.y1=snapBall.y}
+        else{delete l.startBallId;l.x1=p.x;l.y1=p.y}
+      }else{
+        if(snapBall){l.endBallId=snapBall.id;l.x2=snapBall.x;l.y2=snapBall.y}
+        else{delete l.endBallId;l.x2=p.x;l.y2=p.y}
+      }
+
+      // Keep the opposite attached end locked while only this endpoint changes.
+      syncLineAttachments(l);
+      setCoords();`,
+    1,'live endpoint snap'
+  );
+
+  replaceExact('if(completedLine)setTool("move");','if(completedLine)setTool("none");',2,'neutral after line draw');
+
+  replaceExact(
+    '  const names={move:"移動",group:"全部まとめて移動",arrow:"矢印",line:"線",erase:"削除",memo:"メモ"};',
+    '  const names={none:"ツール未選択",move:"移動",group:"全部まとめて移動",arrow:"矢印",line:"線",erase:"削除",memo:"メモ"};',
+    1,'status names'
+  );
+  replaceExact(
+    '  status.textContent=`${o}・${names[state.tool]||state.tool}モード`;',
+    '  status.textContent=state.tool==="none"?`${o}・ツール未選択`:`${o}・${names[state.tool]||state.tool}モード`;',
+    1,'neutral status'
+  );
+  replaceExact(
+    '  const msgs={move:"球をドラッグして動かせます",arrow:"台の上をドラッグして矢印を描けます",line:"台の上をドラッグして線を描けます",memo:"台をクリックするとメモを追加できます",erase:"球や線をクリックすると削除できます",group:"台の余白をドラッグすると全部まとめて移動します"};',
+    '  const msgs={none:"操作するツールを選んでください",move:"球をドラッグして動かせます",arrow:"台の上をドラッグして矢印を描けます",line:"台の上をドラッグして線を描けます",memo:"台をクリックするとメモを追加できます",erase:"球や線をクリックすると削除できます",group:"台の余白をドラッグすると全部まとめて移動します"};',
+    1,'neutral help'
+  );
+
+  document.open();
+  document.write(html);
+  document.close();
+})().catch(async err=>{
+  console.error('9BOARD PC patch loader failed',err);
+  try{
+    const html=await fetch('./app.html?v=20261001-fallback',{cache:'no-store'}).then(r=>r.text());
+    document.open();document.write(html);document.close();
+  }catch(_){
+    document.body.textContent='ページを読み込めませんでした。再読み込みしてください。';
+  }
+});
+</script>
+</body>
+</html>
