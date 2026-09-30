@@ -10,44 +10,83 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Patch zoomed ball dragging
+      - name: Patch arrow resize and move mode
         shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          p=Path('Billiards_layout_mobile/index.html')
-          s=p.read_text()
-          marker='/* 9BOARD_ZOOM_BALL_DRAG_FIX_V2 */'
-          if marker in s: raise SystemExit(0)
-          patch=r'''<script>
-          /* 9BOARD_ZOOM_BALL_DRAG_FIX_V2 */
-          (()=>{
-            const vp=document.getElementById('tableViewport'), felt=document.getElementById('felt');
-            if(!vp||!felt)return;
-            let bd=null;
-            const point=e=>{const r=felt.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*100,y:(e.clientY-r.top)/r.height*100}};
-            vp.addEventListener('pointerdown',e=>{
-              if(typeof tool==='undefined'||tool!=='move')return;
-              const el=e.target.closest?.('.ball'); if(!el)return;
-              const o=balls.find(b=>String(b.id)===String(el.dataset.id)); if(!o)return;
-              const q=point(e); bd={id:o.id,el,pid:e.pointerId,dx:o.x-q.x,dy:o.y-q.y};
-              el.classList.add('dragging'); try{el.setPointerCapture(e.pointerId)}catch(_){}
-              e.preventDefault();e.stopImmediatePropagation();
-            },true);
-            vp.addEventListener('pointermove',e=>{
-              if(!bd||e.pointerId!==bd.pid)return;
-              const o=balls.find(b=>String(b.id)===String(bd.id));if(!o)return;
-              const q=point(e),b=ballEdgeBounds(11);
-              o.x=Math.max(b.minX,Math.min(b.maxX,q.x+bd.dx));o.y=Math.max(b.minY,Math.min(b.maxY,q.y+bd.dy));
-              bd.el.style.left=o.x+'%';bd.el.style.top=o.y+'%';
-              if(syncLinesForBall(o))renderLines();showAimAt(o.x,o.y);
-              e.preventDefault();e.stopImmediatePropagation();
-            },true);
-            const end=e=>{if(!bd||e.pointerId!==bd.pid)return;bd.el.classList.remove('dragging');hideAim();commit();renderLayout();bd=null;e.preventDefault();e.stopImmediatePropagation()};
-            vp.addEventListener('pointerup',end,true);vp.addEventListener('pointercancel',end,true);
-          })();
-          </script>'''
-          s=s.replace('</body>',patch+'\n</body>');p.write_text(s)
+          import re
+
+          p = Path('Billiards_layout_mobile/index.html')
+          s = p.read_text()
+          marker = '<!-- 9BOARD_ARROW_TIP_ANCHOR_V1 -->'
+          if marker in s:
+              raise SystemExit(0)
+
+          def replace_once(old, new, label):
+              global s
+              if old not in s:
+                  raise SystemExit(f'Patch target not found: {label}')
+              s = s.replace(old, new, 1)
+
+          # 移動ボタンは初期状態OFF。内部ツールも neutral から開始。
+          replace_once(
+              '<button class="tool active" data-tool="move">',
+              '<button class="tool" data-tool="move">',
+              'move button default active'
+          )
+          replace_once(
+              'let tool="move",balls=[]',
+              'let tool="none",balls=[]',
+              'default tool'
+          )
+
+          # neutral 状態でも矢印の先端調整だけはできるようにする。
+          replace_once(
+              'if(tool!=="move"||selectedLineId==null||!selectedLineEndpoint||pinch||(drag&&drag.kind==="all"))return;',
+              'if((tool!=="move"&&tool!=="none")||selectedLineId==null||!selectedLineEndpoint||pinch||(drag&&drag.kind==="all"))return;',
+              'endpoint handle neutral mode'
+          )
+          replace_once(
+              'if(tool!=="move"||drag||(selectedBallId==null&&selectedLineId==null))return;',
+              'if((tool!=="move"&&tool!=="none")||drag||(selectedBallId==null&&selectedLineId==null))return;',
+              'clear selection neutral mode'
+          )
+
+          # 矢印を選ぶとき、球に接続済みなら始点ではなく先端だけを編集対象にする。
+          replace_once(
+              'if(tool!=="move")return;const p=point(e),r=felt.getBoundingClientRect()',
+              'if(tool!=="move"&&tool!=="none")return;const p=point(e),r=felt.getBoundingClientRect()',
+              'line select neutral mode'
+          )
+          replace_once(
+              'let endpoint=null;if(depx<=endpointThreshold||ds<=endpointThreshold)endpoint=depx<=ds?"end":"start";selectLine(l.id,endpoint)',
+              'let endpoint=null;if(l.type==="arrow"&&l.startBallId)endpoint="end";else if(depx<=endpointThreshold||ds<=endpointThreshold)endpoint=depx<=ds?"end":"start";selectLine(l.id,endpoint)',
+              'arrow endpoint selection'
+          )
+
+          # 接続済み矢印の始点ハンドルは動かさない。手玉側の接続を保持する。
+          replace_once(
+              'if(tool!=="move"||selectedLineId==null)return;selectedLineEndpoint=end;const l=lines.find(x=>String(x.id)===String(selectedLineId));if(!l)return;const ep=endpointOf(l,end),hp=point(e);clearLineAttachment(l,end);',
+              'if((tool!=="move"&&tool!=="none")||selectedLineId==null)return;const l=lines.find(x=>String(x.id)===String(selectedLineId));if(!l)return;if(l.type==="arrow"&&l.startBallId&&end==="start")return;selectedLineEndpoint=end;const ep=endpointOf(l,end),hp=point(e);clearLineAttachment(l,end);',
+              'lock attached arrow start'
+          )
+
+          # 矢印作成後に自動で移動モードへ戻さない。
+          replace_once(
+              'function setMoveTool(){tool="move";$$(".tool[data-tool]").forEach(x=>x.classList.toggle("active",x.dataset.tool==="move"));updateMoveHandle()}\nfunction syncLinesForBall',
+              'function setMoveTool(){tool="move";$$(".tool[data-tool]").forEach(x=>x.classList.toggle("active",x.dataset.tool==="move"));updateMoveHandle()}\nfunction setNeutralTool(){tool="none";$$(".tool[data-tool]").forEach(x=>x.classList.remove("active"));moveHandle.classList.remove("visible");aimDragLayer.classList.remove("visible")}\nfunction syncLinesForBall',
+              'neutral tool helper'
+          )
+          replace_once(
+              'markSnapBall();setMoveTool();selectedLineId=finished.id;selectedLineEndpoint=null;selectedBallId=null;',
+              'markSnapBall();setNeutralTool();selectedLineId=finished.id;selectedLineEndpoint=finished.type==="arrow"?"end":null;selectedBallId=null;',
+              'do not auto enable move after drawing'
+          )
+
+          s = re.sub(r'data-build="[^"]+"', 'data-build="2026-10-01-arrow-tip-anchor-v1"', s, count=1)
+          s = s.replace('</body>', marker + '\n</body>', 1)
+          p.write_text(s)
           PY
       - name: Commit fix
         run: |
@@ -55,5 +94,5 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add Billiards_layout_mobile/index.html
           git diff --cached --quiet && exit 0
-          git commit -m 'Fix zoomed ball dragging on mobile'
+          git commit -m 'Keep attached arrow anchored while resizing on mobile'
           git push
