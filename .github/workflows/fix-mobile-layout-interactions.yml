@@ -1,0 +1,100 @@
+name: Fix mobile layout interactions
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-mobile-layout-interactions.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch mobile layout interactions
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('Billiards_layout_mobile/index.html')
+          s=p.read_text()
+          marker='/* 9BOARD_MOBILE_INTERACTION_FIX_V1 */'
+          if marker in s:
+              raise SystemExit(0)
+          patch=r'''<script>
+          /* 9BOARD_MOBILE_INTERACTION_FIX_V1 */
+          (()=>{
+            const vp=document.getElementById('tableViewport');
+            const stage=document.getElementById('tableStage');
+            const feltEl=document.getElementById('felt');
+            if(!vp||!stage||!feltEl)return;
+
+            // Delete mode: capture first so ball/line/memo handlers cannot swallow the tap.
+            vp.addEventListener('pointerdown',e=>{
+              if(typeof tool==='undefined'||tool!=='erase')return;
+              const ball=e.target.closest?.('.ball');
+              const memo=e.target.closest?.('.table-memo');
+              const line=e.target.closest?.('.line-hit,.line-handle-hit');
+              if(!ball&&!memo&&!line)return;
+              e.preventDefault();e.stopImmediatePropagation();
+              if(ball){
+                const id=ball.dataset.id;
+                balls=balls.filter(x=>String(x.id)!==String(id));
+                lines.forEach(l=>{if(String(l.startBallId)===String(id))clearLineAttachment(l,'start');if(String(l.endBallId)===String(id))clearLineAttachment(l,'end')});
+              }else if(memo){
+                const id=memo.dataset.id;memos=memos.filter(x=>String(x.id)!==String(id));
+              }else if(line){
+                const id=line.dataset.lineId;lines=lines.filter(x=>String(x.id)!==String(id));selectedLineId=null;
+              }
+              commit();renderLayout();
+            },true);
+
+            // One-finger pan while zoomed. Empty table area pans; objects remain draggable.
+            let pan=null;
+            const isObject=t=>!!t.closest?.('.ball,.table-memo,.line-hit,.line-handle-hit,button');
+            vp.addEventListener('touchstart',e=>{
+              if(e.touches.length!==1||zoom.scale<=1||tool!=='move'||isObject(e.target))return;
+              const t=e.touches[0];
+              pan={x:t.clientX,y:t.clientY,tx:zoom.tx,ty:zoom.ty};
+              hideAim();e.preventDefault();e.stopPropagation();
+            },{passive:false,capture:true});
+            vp.addEventListener('touchmove',e=>{
+              if(!pan||e.touches.length!==1)return;
+              const t=e.touches[0];
+              zoom.tx=pan.tx+(t.clientX-pan.x);zoom.ty=pan.ty+(t.clientY-pan.y);
+              applyZoom();e.preventDefault();e.stopPropagation();
+            },{passive:false,capture:true});
+            const endPan=()=>{pan=null};
+            vp.addEventListener('touchend',endPan,true);vp.addEventListener('touchcancel',endPan,true);
+
+            // Keep object dragging smooth under zoom by mapping directly through the transformed felt rect.
+            document.addEventListener('pointermove',e=>{
+              if(!drag||zoom.scale<=1)return;
+              if(drag.kind!=='ball'&&drag.kind!=='memo')return;
+              const r=feltEl.getBoundingClientRect();
+              const px=Math.max(0,Math.min(100,(e.clientX-r.left)/r.width*100));
+              const py=Math.max(0,Math.min(100,(e.clientY-r.top)/r.height*100));
+              const arr=drag.kind==='ball'?balls:memos,o=arr.find(x=>String(x.id)===String(drag.id));
+              if(!o)return;
+              if(drag.kind==='ball'){
+                const b=ballEdgeBounds(11),lift=((drag.liftPx||28)/r.height)*100;
+                o.x=Math.max(b.minX,Math.min(b.maxX,px));o.y=Math.max(b.minY,Math.min(b.maxY,py-lift));
+                if(syncLinesForBall(o))renderLines();
+                const el=drag.el||ballsLayer.querySelector(`.ball[data-id="${o.id}"]`);
+                if(el){drag.el=el;el.classList.add('dragging');el.style.left=o.x+'%';el.style.top=o.y+'%'}
+                showAimAt(o.x,o.y);
+              }else{o.x=px;o.y=py;renderLayout()}
+              e.preventDefault();
+            },{passive:false,capture:true});
+          })();
+          </script>'''
+          s=s.replace('</body>',patch+'\n</body>')
+          p.write_text(s)
+          PY
+      - name: Commit fix
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add Billiards_layout_mobile/index.html
+          git diff --cached --quiet && exit 0
+          git commit -m 'Repair mobile delete, zoom dragging and one-finger pan'
+          git push
