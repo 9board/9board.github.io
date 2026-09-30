@@ -221,4 +221,32 @@ renderLayout();renderSaved();renderCounter();renderMatches();renderHome();applyZ
   },{passive:false,capture:true});
 })();
 </script>
+<script>
+/* 9BOARD_ZOOM_BALL_DRAG_FIX_V2 */
+(()=>{
+  const vp=document.getElementById('tableViewport'), felt=document.getElementById('felt');
+  if(!vp||!felt)return;
+  let bd=null;
+  const point=e=>{const r=felt.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*100,y:(e.clientY-r.top)/r.height*100}};
+  vp.addEventListener('pointerdown',e=>{
+    if(typeof tool==='undefined'||tool!=='move')return;
+    const el=e.target.closest?.('.ball'); if(!el)return;
+    const o=balls.find(b=>String(b.id)===String(el.dataset.id)); if(!o)return;
+    const q=point(e); bd={id:o.id,el,pid:e.pointerId,dx:o.x-q.x,dy:o.y-q.y};
+    el.classList.add('dragging'); try{el.setPointerCapture(e.pointerId)}catch(_){}
+    e.preventDefault();e.stopImmediatePropagation();
+  },true);
+  vp.addEventListener('pointermove',e=>{
+    if(!bd||e.pointerId!==bd.pid)return;
+    const o=balls.find(b=>String(b.id)===String(bd.id));if(!o)return;
+    const q=point(e),b=ballEdgeBounds(11);
+    o.x=Math.max(b.minX,Math.min(b.maxX,q.x+bd.dx));o.y=Math.max(b.minY,Math.min(b.maxY,q.y+bd.dy));
+    bd.el.style.left=o.x+'%';bd.el.style.top=o.y+'%';
+    if(syncLinesForBall(o))renderLines();showAimAt(o.x,o.y);
+    e.preventDefault();e.stopImmediatePropagation();
+  },true);
+  const end=e=>{if(!bd||e.pointerId!==bd.pid)return;bd.el.classList.remove('dragging');hideAim();commit();renderLayout();bd=null;e.preventDefault();e.stopImmediatePropagation()};
+  vp.addEventListener('pointerup',end,true);vp.addEventListener('pointercancel',end,true);
+})();
+</script>
 </body></html>
