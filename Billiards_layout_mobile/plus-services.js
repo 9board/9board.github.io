@@ -208,7 +208,21 @@
 
       window.NineBoardAuth = Object.freeze({
         getUser: () => auth.currentUser,
-        signOut: () => authSdk.signOut(auth)
+        signOut: () => authSdk.signOut(auth),
+        deleteAccount: async () => {
+          const user = auth.currentUser;
+          if (!user) return;
+          try {
+            await authSdk.deleteUser(user);
+          } catch (error) {
+            if (error && error.code === 'auth/requires-recent-login') {
+              await authSdk.reauthenticateWithPopup(user, provider);
+              await authSdk.deleteUser(user);
+              return;
+            }
+            throw error;
+          }
+        }
       });
     } catch (error) {
       console.error('9BOARD Firebase init:', error);
@@ -271,6 +285,90 @@
       document.body.append(dialog); dialog.showModal();
     });
   }
+
+  function wirePrivacyLink() {
+    const row = [...document.querySelectorAll('.menu-row')].find(el => el.textContent.includes('プライバシーポリシー'));
+    if (!row || row.dataset.nineboardPrivacyLinked === '1') return;
+    row.dataset.nineboardPrivacyLinked = '1';
+    row.setAttribute('role', 'link');
+    row.setAttribute('tabindex', '0');
+    row.style.cursor = 'pointer';
+    const openPrivacy = () => { window.location.href = 'https://9board.jp/#privacy'; };
+    row.addEventListener('click', openPrivacy);
+    row.addEventListener('keydown', event => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        openPrivacy();
+      }
+    });
+  }
+
+  function renderAccountControls(settings) {
+    const user = window.NineBoardAuth?.getUser?.() || window.NineBoardAuthUser || null;
+    if (!user) return;
+
+    const divider = document.createElement('div');
+    divider.style.cssText = 'height:1px;background:#e5e8eb;margin:14px -16px 12px';
+    settings.append(divider);
+
+    const title = document.createElement('p');
+    title.textContent = 'アカウント';
+    title.style.cssText = 'margin:0 0 8px;font-size:13px;font-weight:900;color:#34404c';
+    settings.append(title);
+
+    const name = document.createElement('p');
+    name.textContent = user.displayName || user.email || 'Googleユーザー';
+    name.style.cssText = 'margin:0;font-size:15px;font-weight:800;color:#1e2126;word-break:break-word';
+    settings.append(name);
+
+    if (user.email && user.displayName) {
+      const email = document.createElement('p');
+      email.textContent = user.email;
+      email.style.cssText = 'margin:3px 0 10px;font-size:11px;color:#7d838b;word-break:break-all';
+      settings.append(email);
+    } else {
+      name.style.marginBottom = '10px';
+    }
+
+    const actions = document.createElement('div');
+    actions.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap';
+
+    const logout = document.createElement('button');
+    logout.type = 'button';
+    logout.textContent = 'ログアウト';
+    logout.style.cssText = 'padding:9px 12px;border:1px solid #d8dde3;border-radius:10px;background:#fff;color:#34404c;font-weight:800';
+    logout.onclick = async () => {
+      logout.disabled = true;
+      try {
+        await window.NineBoardAuth?.signOut?.();
+      } catch (error) {
+        console.error('9BOARD logout:', error);
+        alert('ログアウトできませんでした。もう一度お試しください。');
+        logout.disabled = false;
+      }
+    };
+    actions.append(logout);
+
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.textContent = 'アカウント削除';
+    remove.style.cssText = 'padding:9px 12px;border:1px solid #efb7b7;border-radius:10px;background:#fff;color:#c23038;font-weight:800';
+    remove.onclick = async () => {
+      if (!confirm('9BOARDのログインアカウントを削除しますか？\nこの操作は取り消せません。')) return;
+      remove.disabled = true;
+      try {
+        await window.NineBoardAuth?.deleteAccount?.();
+        alert('アカウントを削除しました。');
+      } catch (error) {
+        console.error('9BOARD account delete:', error);
+        alert('アカウントを削除できませんでした。もう一度お試しください。');
+        remove.disabled = false;
+      }
+    };
+    actions.append(remove);
+    settings.append(actions);
+  }
+
   function refresh() {
     const state = plan.getState(), plus = state.isPlus;
     const usage = document.getElementById('planUsage');
@@ -285,17 +383,20 @@
     const settings = document.getElementById('plusSettings');
     if (settings) {
       settings.replaceChildren();
-      const info = document.createElement('p'); info.textContent = plus ? 'Plus：保存無制限' : 'Free：ログイン不要・配置5件／対戦記録10件／スコア履歴10件まで'; settings.append(info);
+      const info = document.createElement('p'); info.textContent = plus ? 'Plus：保存無制限' : 'Free：配置5件／対戦記録10件／スコア履歴10件まで'; settings.append(info);
       const note = document.createElement('p'); note.style.fontSize = '12px'; note.textContent = 'クラウド保存・端末間同期・Android共有は接続準備中です。'; settings.append(note);
       [['backup', 'バックアップを保存'], ['cloudSave', 'クラウド保存'], ['deviceSync', '端末間同期'], ['androidShare', 'Android共有']].forEach(([key, title]) => {
         const button = document.createElement('button'); button.textContent = title; button.disabled = !plan.can(key); button.style.cssText = 'padding:8px;margin:4px;border:1px solid #ddd;border-radius:8px';
         button.onclick = async () => { try { if (key === 'backup') backup(); else await run(key); } catch (e) { note.textContent = e.message; } }; settings.append(button);
       });
+      renderAccountControls(settings);
     }
+    wirePrivacyLink();
   }
   window.NineBoardServices = Object.freeze({ connect, run, backup, snapshot, selectedLink, askSaveName });
   window.addEventListener('9board:planchange', refresh);
   window.addEventListener('9board:datachange', refresh);
+  window.addEventListener('9board:authchange', refresh);
   window.addEventListener('storage', refresh);
   document.addEventListener('DOMContentLoaded', () => {
     // Demo controls cannot be enabled on the production host or persisted as purchases.
@@ -303,6 +404,7 @@
       document.getElementById('plusPreviewBar').hidden = false;
       document.querySelectorAll('[data-preview-plan]').forEach(button => { button.onclick = () => plan.setSession(button.dataset.previewPlan === 'plus' ? { uid: 'preview-only' } : null, button.dataset.previewPlan); });
     }
+    wirePrivacyLink();
     refresh();
   });
 })();
