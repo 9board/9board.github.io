@@ -11,7 +11,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f5faf7}
 </style>
 </head>
 <body>
-<iframe id="appFrame" src="./app-patched.html?v=20261001-pcfix1" title="9BOARD 配置図"></iframe>
+<iframe id="appFrame" src="./app-patched.html?v=20261001-pcfix2" title="9BOARD 配置図"></iframe>
 <script>
 const HOME='https://9board.jp/';
 const frame=document.getElementById('appFrame');
@@ -23,7 +23,6 @@ function decorateFrame(){
 
     const logo=doc.getElementById('brandLogo');
     if(logo&&!logo.dataset.homeBound){
-      // Clone once so the original app-side "clear layout" click handler is removed.
       const fresh=logo.cloneNode(true);
       fresh.dataset.homeBound='true';
       fresh.title='9BOARD トップページ';
