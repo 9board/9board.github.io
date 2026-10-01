@@ -1,3 +1,231 @@
+/* 9BOARD Mobile - Google login gate for the paid mobile version.
+ * Loaded before the existing editor script so the current billiards UI can stay untouched.
+ */
+(function () {
+  'use strict';
+
+  const firebaseConfig = {
+    apiKey: 'AIzaSyAVnFfyN--P82r6bsepeQaM5pEUDIbQt0E',
+    authDomain: 'board-53117.firebaseapp.com',
+    projectId: 'board-53117',
+    storageBucket: 'board-53117.firebasestorage.app',
+    messagingSenderId: '1071728475403',
+    appId: '1:1071728475403:web:fd0be70b5569164a47760e'
+  };
+
+  const FIREBASE_VERSION = '12.19.0';
+  let authInstance = null;
+
+  function createLoginGate() {
+    if (document.getElementById('nineboardLoginGate')) return document.getElementById('nineboardLoginGate');
+
+    const style = document.createElement('style');
+    style.id = 'nineboardLoginGateStyle';
+    style.textContent = `
+      #nineboardLoginGate {
+        position: fixed;
+        inset: 0;
+        z-index: 2147483647;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
+        background: #f4f5f7;
+        color: #1e2126;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+      }
+      #nineboardLoginGate[hidden] { display: none !important; }
+      #nineboardLoginCard {
+        width: min(100%, 430px);
+        padding: 28px 22px 24px;
+        border-radius: 26px;
+        background: #fff;
+        box-shadow: 0 14px 40px rgba(20, 28, 38, .10);
+        text-align: center;
+      }
+      #nineboardLoginLogo {
+        display: block;
+        width: min(100%, 360px);
+        height: auto;
+        margin: 0 auto 18px;
+      }
+      #nineboardLoginCard h1 {
+        margin: 0 0 8px;
+        font-size: 22px;
+        line-height: 1.35;
+      }
+      #nineboardLoginCard p {
+        margin: 0 auto 20px;
+        color: #68717b;
+        font-size: 14px;
+        line-height: 1.75;
+      }
+      #nineboardGoogleLogin {
+        width: 100%;
+        min-height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        border: 1px solid #dfe3e8;
+        border-radius: 14px;
+        background: #fff;
+        color: #25282d;
+        font-weight: 800;
+        font-size: 15px;
+        box-shadow: 0 3px 10px rgba(20, 28, 38, .06);
+        cursor: pointer;
+      }
+      #nineboardGoogleLogin:disabled { opacity: .58; cursor: default; }
+      #nineboardGoogleMark {
+        width: 22px;
+        height: 22px;
+        display: grid;
+        place-items: center;
+        font: 800 21px/1 Arial, sans-serif;
+        color: #4285f4;
+      }
+      #nineboardLoginStatus {
+        min-height: 20px;
+        margin: 14px 0 0;
+        font-size: 12px;
+        line-height: 1.5;
+        color: #7b838c;
+      }
+      #nineboardLoginBack {
+        display: inline-block;
+        margin-top: 12px;
+        color: #65717d;
+        font-size: 12px;
+        text-decoration: none;
+      }
+    `;
+    document.head.appendChild(style);
+
+    const gate = document.createElement('div');
+    gate.id = 'nineboardLoginGate';
+    gate.setAttribute('role', 'dialog');
+    gate.setAttribute('aria-modal', 'true');
+    gate.setAttribute('aria-label', '9BOARD ログイン');
+    gate.innerHTML = `
+      <div id="nineboardLoginCard">
+        <img id="nineboardLoginLogo" src="/assets/original-logo.png" alt="9BOARD">
+        <h1>有料版にログイン</h1>
+        <p>スマホ版を利用するには<br>Googleアカウントでログインしてください。</p>
+        <button id="nineboardGoogleLogin" type="button" hidden>
+          <span id="nineboardGoogleMark" aria-hidden="true">G</span>
+          <span>Googleでログイン</span>
+        </button>
+        <div id="nineboardLoginStatus" aria-live="polite">ログイン状態を確認しています…</div>
+        <a id="nineboardLoginBack" href="https://9board.jp/">9BOARDトップへ戻る</a>
+      </div>
+    `;
+    document.body.appendChild(gate);
+    return gate;
+  }
+
+  function showAuthError(message) {
+    const status = document.getElementById('nineboardLoginStatus');
+    if (status) status.textContent = message;
+  }
+
+  function showLoginButton() {
+    const button = document.getElementById('nineboardGoogleLogin');
+    const status = document.getElementById('nineboardLoginStatus');
+    if (button) button.hidden = false;
+    if (status) status.textContent = '';
+  }
+
+  function unlockApp(user) {
+    const gate = document.getElementById('nineboardLoginGate');
+    if (gate) gate.hidden = true;
+    document.documentElement.classList.add('nineboard-authenticated');
+    window.NineBoardAuthUser = user || null;
+    window.dispatchEvent(new CustomEvent('9board:authchange', { detail: { user: user || null } }));
+  }
+
+  function lockApp() {
+    const gate = createLoginGate();
+    gate.hidden = false;
+    document.documentElement.classList.remove('nineboard-authenticated');
+    window.NineBoardAuthUser = null;
+    showLoginButton();
+    window.dispatchEvent(new CustomEvent('9board:authchange', { detail: { user: null } }));
+  }
+
+  async function startFirebaseAuth() {
+    createLoginGate();
+
+    try {
+      const [appSdk, authSdk] = await Promise.all([
+        import(`https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}/firebase-app.js`),
+        import(`https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}/firebase-auth.js`)
+      ]);
+
+      const app = appSdk.getApps().length ? appSdk.getApp() : appSdk.initializeApp(firebaseConfig);
+      const auth = authSdk.getAuth(app);
+      authInstance = auth;
+
+      try {
+        await authSdk.setPersistence(auth, authSdk.browserLocalPersistence);
+      } catch (error) {
+        console.warn('9BOARD auth persistence:', error);
+      }
+
+      const provider = new authSdk.GoogleAuthProvider();
+      const loginButton = document.getElementById('nineboardGoogleLogin');
+
+      if (loginButton) {
+        loginButton.addEventListener('click', async () => {
+          if (loginButton.disabled) return;
+          loginButton.disabled = true;
+          showAuthError('Googleログインを開いています…');
+          try {
+            await authSdk.signInWithPopup(auth, provider);
+          } catch (error) {
+            console.error('9BOARD Google login:', error);
+            if (error && error.code === 'auth/popup-blocked') {
+              showAuthError('ポップアップがブロックされました。ブラウザのポップアップを許可して、もう一度お試しください。');
+            } else if (error && error.code === 'auth/popup-closed-by-user') {
+              showAuthError('ログインがキャンセルされました。');
+            } else {
+              showAuthError('ログインできませんでした。もう一度お試しください。');
+            }
+          } finally {
+            loginButton.disabled = false;
+          }
+        });
+      }
+
+      authSdk.onAuthStateChanged(auth, user => {
+        if (user) unlockApp(user);
+        else lockApp();
+      }, error => {
+        console.error('9BOARD auth state:', error);
+        showLoginButton();
+        showAuthError('ログイン状態を確認できませんでした。ページを再読み込みしてください。');
+      });
+
+      window.NineBoardAuth = Object.freeze({
+        getUser: () => auth.currentUser,
+        signOut: () => authSdk.signOut(auth)
+      });
+    } catch (error) {
+      console.error('9BOARD Firebase init:', error);
+      showLoginButton();
+      const button = document.getElementById('nineboardGoogleLogin');
+      if (button) button.disabled = true;
+      showAuthError('ログイン機能を読み込めませんでした。通信状態を確認してページを再読み込みしてください。');
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startFirebaseAuth, { once: true });
+  } else {
+    startFirebaseAuth();
+  }
+})();
+
 (function () {
   'use strict';
   const plan = window.NineBoardPlan;
