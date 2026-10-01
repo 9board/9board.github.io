@@ -17,7 +17,8 @@
       cloudSave: false,
       deviceSync: false,
       layoutMatchLink: false,
-      backup: false
+      backup: false,
+      androidShare: false
     }),
     plus: Object.freeze({
       localLayouts: Infinity,
@@ -25,7 +26,8 @@
       cloudSave: true,
       deviceSync: true,
       layoutMatchLink: true,
-      backup: true
+      backup: true,
+      androidShare: true
     })
   });
 
@@ -58,7 +60,7 @@
     const limits = LIMITS[currentPlan];
     return Object.prototype.hasOwnProperty.call(limits, feature)
       ? limits[feature]
-      : true;
+      : false;
   }
 
   function canAddLocalLayout(currentCount) {
