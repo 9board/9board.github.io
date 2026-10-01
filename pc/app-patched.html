@@ -9,77 +9,41 @@
 <body>
 <script>
 (async()=>{
-  const sourceUrl='./app.html?v=20261001-pcfix1';
-  let html=await fetch(sourceUrl,{cache:'no-store'}).then(r=>{
-    if(!r.ok)throw new Error('app.html fetch failed: '+r.status);
-    return r.text();
-  });
+  const sourceUrl='./app.html?v=20261001-pcfix2';
+  let html=await fetch(sourceUrl,{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('app.html fetch failed: '+r.status);return r.text()});
+  function rep(a,b,n=1,label='patch'){const c=html.split(a).length-1;if(c!==n)throw new Error(`${label}: expected ${n}, got ${c}`);html=html.split(a).join(b)}
 
-  function replaceExact(oldText,newText,expected=1,label='patch'){
-    const count=html.split(oldText).length-1;
-    if(count!==expected)throw new Error(`${label}: expected ${expected}, got ${count}`);
-    html=html.split(oldText).join(newText);
-  }
+  rep('<button class="tool active" data-tool="move"><span class="ico">✋</span><span class="text">移動</span></button>','<button class="tool" data-tool="move"><span class="ico">✋</span><span class="text">移動</span></button>',1,'move default off');
+  rep('<div><strong>配置編集</strong><div class="status" id="status">縦向き・移動モード</div></div>','<div><strong>配置編集</strong><div class="status" id="status">横向き・ツール未選択</div></div>',1,'initial status');
+  rep('orientation:"landscape", tool:"move", lineType:"arrow", lineColor:"#ffffff", lineWidth:1,','orientation:"landscape", tool:"none", lineType:"arrow", lineColor:"#ffffff", lineWidth:1,',1,'neutral default');
 
-  replaceExact(
-    '<button class="tool active" data-tool="move"><span class="ico">✋</span><span class="text">移動</span></button>',
-    '<button class="tool" data-tool="move"><span class="ico">✋</span><span class="text">移動</span></button>',
-    1,'default move button'
-  );
-
-  replaceExact(
-    '<div><strong>配置編集</strong><div class="status" id="status">縦向き・移動モード</div></div>',
-    '<div><strong>配置編集</strong><div class="status" id="status">横向き・ツール未選択</div></div>',
-    1,'initial status'
-  );
-
-  replaceExact(
-    'orientation:"landscape", tool:"move", lineType:"arrow", lineColor:"#ffffff", lineWidth:1,',
-    'orientation:"landscape", tool:"none", lineType:"arrow", lineColor:"#ffffff", lineWidth:1,',
-    1,'neutral default tool'
-  );
-
-  replaceExact(
-    'function removeBall(id){ snap(); state.balls=state.balls.filter(b=>b.id!==id); renderBalls(); }',
-`function removeBall(id){
-  const target=state.balls.find(b=>b.id===id);
-  if(!target)return;
+  rep('function removeBall(id){ snap(); state.balls=state.balls.filter(b=>b.id!==id); renderBalls(); }',`function removeBall(id){
+  const target=state.balls.find(b=>b.id===id);if(!target)return;
   snap();
-  // Delete only the clicked ball. Attached line endpoints stay exactly where they were and are detached.
   state.lines.forEach(l=>{
     if(l.startBallId===id){l.x1=target.x;l.y1=target.y;delete l.startBallId}
     if(l.endBallId===id){l.x2=target.x;l.y2=target.y;delete l.endBallId}
   });
   pointerAction=null;
   state.balls=state.balls.filter(b=>b.id!==id);
-  renderBalls();
-  renderLines();
-}`,
-    1,'isolated delete'
-  );
+  renderBalls();renderLines();
+}`,1,'isolated delete');
 
-  replaceExact(
-`        state.lines.push(line);pointerAction={type:"draw",id:line.id};renderLines();el.setPointerCapture(e.pointerId);e.preventDefault();e.stopPropagation();return;
+  rep(`        state.lines.push(line);pointerAction={type:"draw",id:line.id};renderLines();el.setPointerCapture(e.pointerId);e.preventDefault();e.stopPropagation();return;
       }
-      moved=false; el.setPointerCapture(e.pointerId); snap();showAim(e);`,
-`        state.lines.push(line);pointerAction={type:"draw",id:line.id};renderLines();el.setPointerCapture(e.pointerId);e.preventDefault();e.stopPropagation();return;
+      moved=false; el.setPointerCapture(e.pointerId); snap();showAim(e);`,`        state.lines.push(line);pointerAction={type:"draw",id:line.id};renderLines();el.setPointerCapture(e.pointerId);e.preventDefault();e.stopPropagation();return;
       }
-      // Do not move a ball unless Move is explicitly selected.
       if(state.tool!=="move"){e.preventDefault();e.stopPropagation();return;}
-      moved=false; el.setPointerCapture(e.pointerId); snap();showAim(e);`,
-    1,'ball movement gate'
-  );
+      moved=false; el.setPointerCapture(e.pointerId); snap();showAim(e);`,1,'move gate');
 
-  replaceExact(
-`function nearestBall(x,y){
+  rep(`function nearestBall(x,y){
   const r=cloth.getBoundingClientRect();let best=null,bestPx=Infinity;
   state.balls.filter(b=>!b.ghost).forEach(b=>{
     const d=Math.hypot((b.x-x)*r.width,(b.y-y)*r.height);
     if(d<bestPx){best=b;bestPx=d}
   });
   return bestPx<=24*state.zoom?best:null;
-}`,
-`function nearestBall(x,y){
+}`,`function nearestBall(x,y){
   const r=cloth.getBoundingClientRect();let best=null,bestPx=Infinity;
   state.balls.filter(b=>!b.ghost).forEach(b=>{
     const d=Math.hypot((b.x-x)*r.width,(b.y-y)*r.height);
@@ -94,62 +58,36 @@ function nearestCueBall(x,y){
     if(d<bestPx){best=b;bestPx=d}
   });
   return bestPx<=28*state.zoom?best:null;
-}`,
-    1,'cue snap helper'
-  );
+}
+function attachEndpoint(l,which){
+  const x=which==="start"?l.x1:l.x2,y=which==="start"?l.y1:l.y2;
+  const b=which==="start"?(nearestCueBall(x,y)||nearestBall(x,y)):nearestBall(x,y);
+  if(which==="start"){
+    if(b){l.startBallId=b.id;l.x1=b.x;l.y1=b.y}else delete l.startBallId;
+  }else{
+    if(b){l.endBallId=b.id;l.x2=b.x;l.y2=b.y}else delete l.endBallId;
+  }
+  return b;
+}`,1,'mobile-style endpoint helper');
 
-  replaceExact(
-    '  const a=nearestBall(l.x1,l.y1),b=nearestBall(l.x2,l.y2);',
-    '  const a=nearestCueBall(l.x1,l.y1)||nearestBall(l.x1,l.y1),b=nearestBall(l.x2,l.y2);',
-    1,'cue-first start attachment'
-  );
+  rep('  const a=nearestBall(l.x1,l.y1),b=nearestBall(l.x2,l.y2);','  const a=nearestCueBall(l.x1,l.y1)||nearestBall(l.x1,l.y1),b=nearestBall(l.x2,l.y2);',1,'cue first attachment');
 
-  replaceExact(
-`      if(startAttached||endAttached){
-        const r=cloth.getBoundingClientRect();
-        const dx=(l.x2-l.x1)*r.width;
-        const dy=(l.y2-l.y1)*r.height;
-        const len=Math.hypot(dx,dy);
-        if(len>0){
-          const ux=dx/len,uy=dy/len;
-          const handleOffset=10*state.zoom;
-          if(startAttached){
-            hx1=l.x1+ux*(handleOffset/r.width);
-            hy1=l.y1+uy*(handleOffset/r.height);
-          }
-          if(endAttached){
-            hx2=l.x2-ux*(handleOffset/r.width);
-            hy2=l.y2-uy*(handleOffset/r.height);
-          }
-        }
-      }`,
-`      if(startAttached||endAttached||l.type==="arrow"){
-        const r=cloth.getBoundingClientRect();
-        const dx=(l.x2-l.x1)*r.width;
-        const dy=(l.y2-l.y1)*r.height;
-        const len=Math.hypot(dx,dy);
-        if(len>0){
-          const ux=dx/len,uy=dy/len;
-          const handleOffset=10*state.zoom;
-          if(startAttached){
-            hx1=l.x1+ux*(handleOffset/r.width);
-            hy1=l.y1+uy*(handleOffset/r.height);
-          }
-          if(endAttached){
-            hx2=l.x2-ux*(handleOffset/r.width);
-            hy2=l.y2-uy*(handleOffset/r.height);
-          }else if(l.type==="arrow"){
-            const tipHandleOffset=8*state.zoom;
-            hx2=l.x2-ux*(tipHandleOffset/r.width);
-            hy2=l.y2-uy*(tipHandleOffset/r.height);
-          }
-        }
-      }`,
-    1,'arrow tip grab area'
-  );
+  rep('  svg.querySelectorAll(".draw-line,.line-hit,.line-end-hit").forEach(e=>e.remove());','  svg.querySelectorAll(".draw-line,.line-hit,.line-end-hit,.line-color-marker").forEach(e=>e.remove());',1,'marker cleanup');
+  rep('    if(l.type==="arrow")ln.setAttribute("marker-end","url(#arrowHead)");',`    if(l.type==="arrow"){
+      const defs=svg.querySelector("defs");
+      const marker=document.createElementNS("http://www.w3.org/2000/svg","marker");
+      const poly=document.createElementNS("http://www.w3.org/2000/svg","polygon");
+      marker.id="arrowHeadLine"+l.id;
+      marker.classList.add("line-color-marker");
+      marker.setAttribute("markerWidth","12");marker.setAttribute("markerHeight","12");
+      marker.setAttribute("refX","10");marker.setAttribute("refY","5");
+      marker.setAttribute("orient","auto");marker.setAttribute("markerUnits","userSpaceOnUse");
+      poly.setAttribute("points","0 0, 10 5, 0 10");poly.setAttribute("fill",l.color);
+      marker.appendChild(poly);defs.appendChild(marker);
+      ln.setAttribute("marker-end",`url(#${marker.id})`);
+    }`,1,'arrow tip original shape and line color');
 
-  replaceExact(
-`    [h1,h2].forEach(h=>{
+  rep(`    [h1,h2].forEach(h=>{
       h.setAttribute("r","12");
       h.setAttribute("fill","rgba(0,0,0,0.001)");
       h.setAttribute("stroke","rgba(0,0,0,0.001)");
@@ -157,30 +95,28 @@ function nearestCueBall(x,y){
       h.classList.add("line-end-hit");
       h.style.pointerEvents=state.tool==="move"?"all":"none";
       h.style.cursor="grab";
-    });`,
-`    [h1,h2].forEach(h=>{
+    });`,`    [h1,h2].forEach(h=>{
       h.setAttribute("r",h===h2&&l.type==="arrow"?"18":"14");
       h.setAttribute("fill","rgba(0,0,0,0.001)");
       h.setAttribute("stroke","rgba(0,0,0,0.001)");
       h.setAttribute("stroke-width","8");
       h.classList.add("line-end-hit");
-      // Resize endpoints in neutral mode; moving the whole line still requires Move.
-      h.style.pointerEvents=(state.tool==="move"||state.tool==="none")?"all":"none";
+      const editable=state.tool==="move"||state.tool==="none";
+      const lockedStart=h===h1&&l.type==="arrow"&&!!l.startBallId;
+      h.style.pointerEvents=editable&&!lockedStart?"all":"none";
       h.style.cursor="grab";
-    });`,
-    1,'endpoint handles'
-  );
+    });`,1,'mobile endpoint handles');
 
-  replaceExact(
-`    function startResize(which,h,e){
-      if(state.tool!=="move")return;`,
-`    function startResize(which,h,e){
-      if(state.tool!=="move"&&state.tool!=="none")return;`,
-    1,'neutral resize'
-  );
+  rep(`    function startResize(which,h,e){
+      if(state.tool!=="move")return;
 
-  replaceExact(
-`      const p=normPoint(e);
+      snap();`,`    function startResize(which,h,e){
+      if(state.tool!=="move"&&state.tool!=="none")return;
+      if(which==="start"&&l.type==="arrow"&&l.startBallId)return;
+
+      snap();`,1,'lock attached arrow base');
+
+  rep(`      const p=normPoint(e);
 
       if(which==="start"){
         l.x1=p.x;
@@ -192,11 +128,8 @@ function nearestCueBall(x,y){
 
       // If the other end is attached, keep it locked while length changes.
       syncLineAttachments(l);
-      setCoords();`,
-`      const p=normPoint(e);
-      // Start/base endpoint prefers the cue ball and snaps to the exact center, like mobile.
+      setCoords();`,`      const p=normPoint(e);
       const snapBall=which==="start"?(nearestCueBall(p.x,p.y)||nearestBall(p.x,p.y)):nearestBall(p.x,p.y);
-
       if(which==="start"){
         if(snapBall){l.startBallId=snapBall.id;l.x1=snapBall.x;l.y1=snapBall.y}
         else{delete l.startBallId;l.x1=p.x;l.y1=p.y}
@@ -204,43 +137,21 @@ function nearestCueBall(x,y){
         if(snapBall){l.endBallId=snapBall.id;l.x2=snapBall.x;l.y2=snapBall.y}
         else{delete l.endBallId;l.x2=p.x;l.y2=p.y}
       }
+      syncLineAttachments(l);setCoords();`,1,'live cue snap');
 
-      // Keep the opposite attached end locked while only this endpoint changes.
-      syncLineAttachments(l);
-      setCoords();`,
-    1,'live endpoint snap'
-  );
+  rep(`      // Reattach resized end if released on a ball.
+      attachLine(l);
+      pointerAction=null;`,`      // Mobile behavior: only the endpoint being edited may reattach.
+      attachEndpoint(l,which);
+      pointerAction=null;`,1,'endpoint-only reattach');
 
-  replaceExact('if(completedLine)setTool("move");','if(completedLine)setTool("none");',2,'neutral after line draw');
+  rep('if(completedLine)setTool("move");','if(completedLine)setTool("none");',2,'neutral after draw');
+  rep('  const names={move:"移動",group:"全部まとめて移動",arrow:"矢印",line:"線",erase:"削除",memo:"メモ"};','  const names={none:"ツール未選択",move:"移動",group:"全部まとめて移動",arrow:"矢印",line:"線",erase:"削除",memo:"メモ"};',1,'status names');
+  rep('  status.textContent=`${o}・${names[state.tool]||state.tool}モード`;','  status.textContent=state.tool==="none"?`${o}・ツール未選択`:`${o}・${names[state.tool]||state.tool}モード`;',1,'neutral status');
+  rep('  const msgs={move:"球をドラッグして動かせます",arrow:"台の上をドラッグして矢印を描けます",line:"台の上をドラッグして線を描けます",memo:"台をクリックするとメモを追加できます",erase:"球や線をクリックすると削除できます",group:"台の余白をドラッグすると全部まとめて移動します"};','  const msgs={none:"操作するツールを選んでください",move:"球をドラッグして動かせます",arrow:"台の上をドラッグして矢印を描けます",line:"台の上をドラッグして線を描けます",memo:"台をクリックするとメモを追加できます",erase:"球や線をクリックすると削除できます",group:"台の余白をドラッグすると全部まとめて移動します"};',1,'neutral help');
 
-  replaceExact(
-    '  const names={move:"移動",group:"全部まとめて移動",arrow:"矢印",line:"線",erase:"削除",memo:"メモ"};',
-    '  const names={none:"ツール未選択",move:"移動",group:"全部まとめて移動",arrow:"矢印",line:"線",erase:"削除",memo:"メモ"};',
-    1,'status names'
-  );
-  replaceExact(
-    '  status.textContent=`${o}・${names[state.tool]||state.tool}モード`;',
-    '  status.textContent=state.tool==="none"?`${o}・ツール未選択`:`${o}・${names[state.tool]||state.tool}モード`;',
-    1,'neutral status'
-  );
-  replaceExact(
-    '  const msgs={move:"球をドラッグして動かせます",arrow:"台の上をドラッグして矢印を描けます",line:"台の上をドラッグして線を描けます",memo:"台をクリックするとメモを追加できます",erase:"球や線をクリックすると削除できます",group:"台の余白をドラッグすると全部まとめて移動します"};',
-    '  const msgs={none:"操作するツールを選んでください",move:"球をドラッグして動かせます",arrow:"台の上をドラッグして矢印を描けます",line:"台の上をドラッグして線を描けます",memo:"台をクリックするとメモを追加できます",erase:"球や線をクリックすると削除できます",group:"台の余白をドラッグすると全部まとめて移動します"};',
-    1,'neutral help'
-  );
-
-  document.open();
-  document.write(html);
-  document.close();
-})().catch(async err=>{
-  console.error('9BOARD PC patch loader failed',err);
-  try{
-    const html=await fetch('./app.html?v=20261001-fallback',{cache:'no-store'}).then(r=>r.text());
-    document.open();document.write(html);document.close();
-  }catch(_){
-    document.body.textContent='ページを読み込めませんでした。再読み込みしてください。';
-  }
-});
+  document.open();document.write(html);document.close();
+})().catch(async err=>{console.error('9BOARD PC patch loader failed',err);try{const html=await fetch('./app.html?v=20261001-fallback2',{cache:'no-store'}).then(r=>r.text());document.open();document.write(html);document.close()}catch(_){document.body.textContent='ページを読み込めませんでした。再読み込みしてください。'}});
 </script>
 </body>
 </html>
