@@ -1,0 +1,36 @@
+name: Fix hero buttons once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/fix-hero-buttons-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Change only hero button text and links
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          old = '<a class="hero-layout-link" href="/guides/pc-layout/"><span aria-hidden="true">▶</span><span>無料版の使い方を見る</span><span aria-hidden="true">›</span></a><a class="hero-score-link" href="/guides/pc-score/"><span aria-hidden="true">▥</span><span>有料版の使い方を見る</span><span aria-hidden="true">›</span></a>'
+          new = '<a class="hero-layout-link" href="https://9board.jp/guides/pc-layout/"><span>無料版を使う</span><span aria-hidden="true">›</span></a><a class="hero-score-link" href="https://9board.jp/Billiards_layout_mobile/"><span>有料版を使う<br>（スマホ限定）</span><span aria-hidden="true">›</span></a>'
+          if old not in s:
+              raise SystemExit('hero button target not found')
+          p.write_text(s.replace(old, new, 1), encoding='utf-8')
+      - name: Commit fix and remove one-off workflow
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git rm .github/workflows/fix-hero-buttons-once.yml
+          git commit -m "Restore requested hero button text and links only"
+          git push
