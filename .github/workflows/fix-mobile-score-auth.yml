@@ -21,15 +21,18 @@ jobs:
           p=Path('Billiards_layout_mobile/index.html')
           s=p.read_text()
 
-          # 1) Add the score clock directly so it does not depend on a cached plus-config.js.
-          clock='<script src="score-clock.js?v=20261002-clock2"></script>'
-          if clock not in s:
+          # Keep the score clock loaded directly from the score page and refresh only its cache key.
+          old='<script src="score-clock.js?v=20261002-clock2"></script>'
+          new='<script src="score-clock.js?v=20261002-clock3"></script>'
+          if old in s:
+              s=s.replace(old,new,1)
+          elif new not in s:
               anchor='<script src="plus-config.js?v=20261001"></script>'
               if anchor not in s:
                   raise SystemExit('plus-config anchor not found')
-              s=s.replace(anchor, clock+anchor, 1)
+              s=s.replace(anchor,new+anchor,1)
 
-          # 2) Prevent the login card itself from flashing while Firebase restores an existing session.
+          # Keep the existing auth flash guard unchanged.
           guard='''<style id="nineboardAuthFlashGuard">html:not(.nineboard-auth-checked) #nineboardLoginCard{visibility:hidden!important}</style><script id="nineboardAuthFlashGuardScript">window.addEventListener('9board:authchange',function(){document.documentElement.classList.add('nineboard-auth-checked')});</script>'''
           if 'nineboardAuthFlashGuard' not in s:
               head='</head>'
@@ -45,5 +48,5 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add Billiards_layout_mobile/index.html
           git diff --cached --quiet && exit 0
-          git commit -m 'Show mobile chess clock and prevent auth flash'
+          git commit -m 'Refresh mobile chess clock controls'
           git push
