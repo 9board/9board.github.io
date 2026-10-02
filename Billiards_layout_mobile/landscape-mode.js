@@ -38,6 +38,40 @@
     document.head.appendChild(style);
   }
 
+  function addTouchScroll(){
+    const view=document.querySelector('.app-view');
+    if(!view) return;
+    let swipe=null;
+    view.addEventListener('touchstart',e=>{
+      swipe=null;
+      if(!matchMedia('(orientation:landscape)').matches || e.touches.length!==1) return;
+      const target=e.target, layout=target.closest('.screen[data-screen="layout"].active');
+      if(!layout || !target.closest('.table-viewport')) return;
+      if(target.closest('.ball,.table-memo,.line-hit,.object-move-handle,.endpoint-control-handle,.aim-drag-hit,button')) return;
+      const touch=e.touches[0];
+      if([...layout.querySelectorAll('.ball')].some(ball=>{
+        const r=ball.getBoundingClientRect();
+        return Math.hypot(touch.clientX-r.left-r.width/2,touch.clientY-r.top-r.height/2)<36;
+      })) return;
+      // Keep the existing editing gestures; the empty rail remains scrollable.
+      if(target.closest('.cloth') && layout.querySelector('.tool[data-tool].active')) return;
+      swipe={id:touch.identifier,x:touch.clientX,y:touch.clientY,top:view.scrollTop};
+    },{passive:true});
+    view.addEventListener('touchmove',e=>{
+      if(!swipe) return;
+      if(e.touches.length!==1 || e.defaultPrevented || !matchMedia('(orientation:landscape)').matches){swipe=null;return;}
+      const touch=e.touches[0];
+      if(touch.identifier!==swipe.id) return;
+      const dy=touch.clientY-swipe.y;
+      if(Math.abs(dy)<8 || Math.abs(dy)<Math.abs(touch.clientX-swipe.x)) return;
+      e.preventDefault();
+      view.scrollTop=swipe.top-dy;
+    },{passive:false});
+    const stop=()=>{swipe=null;};
+    view.addEventListener('touchend',stop,{passive:true});
+    view.addEventListener('touchcancel',stop,{passive:true});
+  }
+
   async function enterLandscape(){
     const root=document.documentElement;
     try{
@@ -68,6 +102,7 @@
 
   function init(){
     addStyle();
+    addTouchScroll();
     if(addButton()) return;
     const observer=new MutationObserver(()=>{if(addButton()) observer.disconnect();});
     observer.observe(document.body,{childList:true,subtree:true});
