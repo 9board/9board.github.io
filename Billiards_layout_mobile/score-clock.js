@@ -23,7 +23,8 @@
       #mobileChessClock .clock-face.active{background:#e9f7f1;border-color:#9bcfbd;box-shadow:inset 0 0 0 1px rgba(11,165,119,.08)}
       #mobileChessClock .clock-face b{display:block;font-size:14px;margin-bottom:8px;color:#34404c}
       #mobileChessClock .clock-face strong{display:block;font-size:42px;line-height:1;font-weight:950;color:#1d4e42;font-variant-numeric:tabular-nums}
-      #mobileChessClock .clock-stop{width:100%;min-height:46px;border:1px solid var(--line);border-radius:13px;background:#fff;color:#34404c;margin-top:10px;font-size:14px;font-weight:900}
+      #mobileChessClock .clock-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
+      #mobileChessClock .clock-action{min-height:46px;border:1px solid var(--line);border-radius:13px;background:#fff;color:#34404c;font-size:14px;font-weight:900}
       #mobileChessClock .clock-note{margin:8px 2px 0;font-size:10px;color:var(--muted);text-align:center}
     `;
     document.head.appendChild(style);
@@ -40,8 +41,11 @@
         <button type="button" class="clock-face" id="mobileLeftClockFace"><b id="mobileLeftClockName">自分</b><strong id="mobileLeftClock">10:00</strong></button>
         <button type="button" class="clock-face" id="mobileRightClockFace"><b id="mobileRightClockName">相手</b><strong id="mobileRightClock">10:00</strong></button>
       </div>
-      <button type="button" class="clock-stop" id="mobileClockStopReset">停止 / リセット</button>
-      <div class="clock-note">1回タップで停止・すばやく2回タップでリセット</div>
+      <div class="clock-actions">
+        <button type="button" class="clock-action" id="mobileClockStop">停止</button>
+        <button type="button" class="clock-action" id="mobileClockReset">リセット</button>
+      </div>
+      <div class="clock-note">スコアの↻はスコアだけ、ここのリセットはチェスクロックだけをリセットします</div>
     `;
     scoreCard.insertAdjacentElement('afterend',box);
 
@@ -56,25 +60,26 @@
     const rightValue=box.querySelector('#mobileRightClock');
     const leftName=box.querySelector('#mobileLeftClockName');
     const rightName=box.querySelector('#mobileRightClockName');
-    const stopReset=box.querySelector('#mobileClockStopReset');
+    const stopButton=box.querySelector('#mobileClockStop');
+    const resetButton=box.querySelector('#mobileClockReset');
 
-    let run=null,timer=null,last=0,left=600,right=600,lastStopTap=0;
+    let run=null,timer=null,last=0,left=600,right=600;
     const fmt=s=>{s=Math.max(0,Math.floor(Number(s)||0));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
     const syncNames=()=>{leftName.textContent=document.getElementById('p1name')?.value.trim()||'自分';rightName.textContent=document.getElementById('p2name')?.value.trim()||'相手'};
     function render(){leftValue.textContent=fmt(left);rightValue.textContent=fmt(right);leftFace.classList.toggle('active',run==='left');rightFace.classList.toggle('active',run==='right');syncNames();}
     function tick(){const now=Date.now(),d=(now-last)/1000;last=now;if(run==='left')left=Math.max(0,left-d);if(run==='right')right=Math.max(0,right-d);if(left<=0||right<=0){run=null;clearInterval(timer);timer=null;}render();}
     function start(side){run=side;last=Date.now();if(!timer)timer=setInterval(tick,250);render();}
     function stop(){run=null;render();}
-    function reset(){run=null;left=Number(leftSelect.value)*60;right=Number(rightSelect.value)*60;render();}
+    function reset(){run=null;if(timer){clearInterval(timer);timer=null;}left=Number(leftSelect.value)*60;right=Number(rightSelect.value)*60;render();}
 
     leftFace.addEventListener('click',()=>start('left'));
     rightFace.addEventListener('click',()=>start('right'));
-    stopReset.addEventListener('click',()=>{const now=Date.now();if(now-lastStopTap<650)reset();else stop();lastStopTap=now;});
+    stopButton.addEventListener('click',stop);
+    resetButton.addEventListener('click',reset);
     leftSelect.addEventListener('change',()=>{left=Number(leftSelect.value)*60;render();});
     rightSelect.addEventListener('change',()=>{right=Number(rightSelect.value)*60;render();});
     document.getElementById('p1name')?.addEventListener('input',syncNames);
     document.getElementById('p2name')?.addEventListener('input',syncNames);
-    document.getElementById('resetCounter')?.addEventListener('click',reset);
     render();
   }
 
