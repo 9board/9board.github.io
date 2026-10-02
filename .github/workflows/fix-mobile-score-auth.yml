@@ -1,0 +1,49 @@
+name: Fix mobile score clock and auth flash
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-mobile-score-auth.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch mobile index only
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('Billiards_layout_mobile/index.html')
+          s=p.read_text()
+
+          # 1) Add the score clock directly so it does not depend on a cached plus-config.js.
+          clock='<script src="score-clock.js?v=20261002-clock2"></script>'
+          if clock not in s:
+              anchor='<script src="plus-config.js?v=20261001"></script>'
+              if anchor not in s:
+                  raise SystemExit('plus-config anchor not found')
+              s=s.replace(anchor, clock+anchor, 1)
+
+          # 2) Prevent the login card itself from flashing while Firebase restores an existing session.
+          guard='''<style id="nineboardAuthFlashGuard">html:not(.nineboard-auth-checked) #nineboardLoginCard{visibility:hidden!important}</style><script id="nineboardAuthFlashGuardScript">window.addEventListener('9board:authchange',function(){document.documentElement.classList.add('nineboard-auth-checked')});</script>'''
+          if 'nineboardAuthFlashGuard' not in s:
+              head='</head>'
+              if head not in s:
+                  raise SystemExit('head close not found')
+              s=s.replace(head, guard+'\n'+head, 1)
+
+          p.write_text(s)
+          PY
+      - name: Commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add Billiards_layout_mobile/index.html
+          git diff --cached --quiet && exit 0
+          git commit -m 'Show mobile chess clock and prevent auth flash'
+          git push
