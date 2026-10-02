@@ -13,19 +13,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Load landscape add-on only
+      - name: Refresh landscape add-on version only
         shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p=Path('Billiards_layout_mobile/index.html')
           s=p.read_text()
-          tag='<script src="landscape-mode.js?v=20261002-landscape1"></script>'
-          if tag not in s:
+          s=s.replace('landscape-mode.js?v=20261002-landscape1','landscape-mode.js?v=20261002-landscape2')
+          if 'landscape-mode.js?v=20261002-landscape2' not in s:
               anchor='<script src="plus-config.js?v=20261001"></script>'
               if anchor not in s:
                   raise SystemExit('plus-config anchor not found')
-              s=s.replace(anchor,tag+anchor,1)
+              s=s.replace(anchor,'<script src="landscape-mode.js?v=20261002-landscape2"></script>'+anchor,1)
           p.write_text(s)
           PY
       - name: Commit
@@ -34,5 +34,5 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add Billiards_layout_mobile/index.html
           git diff --cached --quiet && exit 0
-          git commit -m 'Load mobile landscape add-on'
+          git commit -m 'Refresh mobile landscape layout cache'
           git push
