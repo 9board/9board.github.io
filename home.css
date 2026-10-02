@@ -1,4 +1,5 @@
-@import url("/home-base.css?v=20261002-bird-table-fix");
+@import url("/home-base.css?v=20261002-bird-table-fix-2");
 
-/* Hero illustration fix: only the bird / billiard-table area is overlaid. */
-.reference-hero::after{content:"";position:absolute;right:0;top:0;width:33.75%;height:100%;background:url("/assets/hero-bird-fix.webp?v=20261002-1") right top/100% 100% no-repeat;pointer-events:none;z-index:1}
+/* Keep the supplied hero intact; only correct the bird/table overlap area. */
+.reference-hero::after{content:"";position:absolute;right:0;top:0;width:33.75%;height:100%;background:url("/assets/hero-bird-fix-v3.svg?v=20261002-2126") right top/100% 100% no-repeat;pointer-events:none;z-index:1}
+.hero-layout-link,.hero-score-link{z-index:2}
