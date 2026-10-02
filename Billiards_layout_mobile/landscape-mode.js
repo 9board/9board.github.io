@@ -11,13 +11,29 @@
       @media (orientation:landscape){
         html,body{width:100%;height:100%;overflow:hidden;background:var(--bg)!important}
         .phone{width:100vw!important;max-width:none!important;height:100dvh!important;min-height:100dvh!important;margin:0!important;border-radius:0!important;box-shadow:none!important;overflow:hidden!important}
-        .app-view{width:100vw!important;height:100dvh!important;max-width:none!important;padding-bottom:calc(76px + env(safe-area-inset-bottom))!important}
-        .bottom-nav{position:absolute!important;left:0!important;right:0!important;bottom:0!important;width:100%!important;height:calc(68px + env(safe-area-inset-bottom))!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;display:grid!important;gap:0!important}
-        .nav-btn{min-width:0!important;flex-direction:row!important;gap:8px!important;font-size:17px!important}
+        .app-view{width:100vw!important;height:100dvh!important;max-width:none!important;padding-bottom:calc(64px + env(safe-area-inset-bottom))!important}
+        .bottom-nav{position:absolute!important;left:0!important;right:0!important;bottom:0!important;width:100%!important;height:calc(58px + env(safe-area-inset-bottom))!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;display:grid!important;gap:0!important;padding-top:4px!important}
+        .nav-btn{min-width:0!important;flex-direction:row!important;gap:7px!important;font-size:16px!important}
         .nav-btn span{font-size:11px!important;white-space:nowrap!important}
-        .nav-art{width:38px!important;height:38px!important;flex:0 0 38px!important}
+        .nav-art{width:34px!important;height:34px!important;flex:0 0 34px!important}
         .wrap{max-width:none!important;width:100%!important}
-        .table-viewport{max-height:calc(100dvh - 250px)}
+
+        /* 配置図だけを横向き専用に調整。他画面のレイアウトには触れない。 */
+        .screen[data-screen="layout"].active{height:calc(100dvh - 58px - env(safe-area-inset-bottom))!important;overflow:hidden!important}
+        .screen[data-screen="layout"] .topbar{display:none!important}
+        .screen[data-screen="layout"] .wrap{height:100%!important;padding:6px 10px 0!important;display:flex!important;flex-direction:column!important;align-items:center!important;overflow:hidden!important}
+        .screen[data-screen="layout"] .page-head{display:none!important}
+        .screen[data-screen="layout"] .layout-card{width:100%!important;max-width:calc((100dvh - 150px) * 650 / 365)!important;padding:6px!important;border-radius:16px!important;flex:0 0 auto!important}
+        .screen[data-screen="layout"] .table-viewport{width:100%!important;height:auto!important;max-height:none!important;aspect-ratio:650/365!important;border-radius:16px!important}
+        .screen[data-screen="layout"] .table-stage{border-radius:16px!important}
+        .screen[data-screen="layout"] .toolbar{width:100%!important;margin-top:4px!important;padding:3px 0 2px!important;gap:6px!important;flex-wrap:nowrap!important;overflow-x:auto!important}
+        .screen[data-screen="layout"] .tool{min-width:58px!important;height:44px!important;border-radius:11px!important;font-size:16px!important;gap:1px!important}
+        .screen[data-screen="layout"] .tool span{font-size:8px!important}
+        .screen[data-screen="layout"] .ballbar-title{display:none!important}
+        .screen[data-screen="layout"] .ballbar{width:100%!important;padding:2px 0 3px!important;gap:5px!important;flex-wrap:nowrap!important;overflow-x:auto!important}
+        .screen[data-screen="layout"] .ballbar button{flex:0 0 36px!important;width:36px!important;height:36px!important;border-radius:10px!important;padding:4px!important}
+        .screen[data-screen="layout"] .palette-ball{width:24px!important;height:24px!important;min-width:24px!important;min-height:24px!important}
+        .screen[data-screen="layout"] .layout-settings{display:none!important}
       }
     `;
     document.head.appendChild(style);
