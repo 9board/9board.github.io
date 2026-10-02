@@ -985,6 +985,8 @@ dialog::backdrop{background:rgba(11,39,31,.34);backdrop-filter:blur(3px)}
   border-width:2px!important;
 }
 
+/* Placed balls share an absolute coordinate system with the SVG. */
+#diagram #cloth .ball{position:absolute!important}
 </style>
 </head>
 <body>
@@ -1389,13 +1391,19 @@ function syncLineAttachments(l){
   const a=state.balls.find(b=>b.id===l.startBallId),b=state.balls.find(b=>b.id===l.endBallId);
   if(a){l.x1=a.x;l.y1=a.y}if(b){l.x2=b.x;l.y2=b.y}
 }
+function nearestCueBall(x,y){
+  const r=cloth.getBoundingClientRect();
+  return state.balls.filter(b=>b.n===0&&!b.ghost)
+    .map(b=>({b,d:Math.hypot((b.x-x)*r.width,(b.y-y)*r.height)}))
+    .filter(v=>v.d<=24*state.zoom).sort((a,b)=>a.d-b.d)[0]?.b||null;
+}
 function attachLine(l){
-  const a=nearestBall(l.x1,l.y1),b=nearestBall(l.x2,l.y2);
+  const a=state.balls.find(b=>b.id===l.startBallId)||nearestCueBall(l.x1,l.y1)||nearestBall(l.x1,l.y1),b=nearestBall(l.x2,l.y2);
   if(a){l.startBallId=a.id;l.x1=a.x;l.y1=a.y}else delete l.startBallId;
   if(b){l.endBallId=b.id;l.x2=b.x;l.y2=b.y}else delete l.endBallId;
 }
 function renderLines(){
-  svg.querySelectorAll(".draw-line,.line-hit,.line-end-hit").forEach(e=>e.remove());
+  svg.querySelectorAll(".draw-line,.line-hit,.line-end-hit,.line-color-marker").forEach(e=>e.remove());
 
   state.lines.forEach(l=>{
     syncLineAttachments(l);
@@ -1440,6 +1448,16 @@ function renderLines(){
         el.setAttribute("y2",l.y2*100+"%");
       }
 
+      // Keep stored endpoints at ball centers, but draw the arrow tip at the surface.
+      if(l.type==="arrow"&&state.balls.some(b=>b.id===l.endBallId)){
+        const r=cloth.getBoundingClientRect();
+        const dx=(l.x2-l.x1)*r.width,dy=(l.y2-l.y1)*r.height,len=Math.hypot(dx,dy);
+        if(len>0){
+          const offset=Math.min(9*state.zoom,len);
+          ln.setAttribute("x2",(l.x2-dx/len*offset/r.width)*100+"%");
+          ln.setAttribute("y2",(l.y2-dy/len*offset/r.height)*100+"%");
+        }
+      }
       // Resize hit areas sit just outside an attached ball so the ball does not cover them.
       const h=getHandleCoords();
       h1.setAttribute("cx",h.hx1*100+"%");
@@ -1458,7 +1476,15 @@ function renderLines(){
     ln.setAttribute("stroke",l.color);
     ln.setAttribute("stroke-width",l.width);
     ln.setAttribute("stroke-linecap","round");
-    if(l.type==="arrow")ln.setAttribute("marker-end","url(#arrowHead)");
+    if(l.type==="arrow"){
+      const marker=document.createElementNS("http://www.w3.org/2000/svg","marker");
+      marker.id="arrowHeadLine"+l.id;marker.classList.add("line-color-marker");
+      for(const [k,v] of Object.entries({markerWidth:12,markerHeight:12,refX:10,refY:5,orient:"auto",markerUnits:"userSpaceOnUse"}))marker.setAttribute(k,v);
+      const poly=document.createElementNS("http://www.w3.org/2000/svg","polygon");
+      poly.setAttribute("points","0 0,10 5,0 10");poly.setAttribute("fill",l.color);
+      marker.appendChild(poly);svg.querySelector("defs").appendChild(marker);
+      ln.setAttribute("marker-end","url(#"+marker.id+")");
+    }
     ln.classList.add("draw-line");
     ln.dataset.id=l.id;
     ln.style.pointerEvents="none";
@@ -1557,6 +1583,11 @@ function renderLines(){
       if(!pointerAction||pointerAction.type!=="lineResize"||pointerAction.id!==l.id||pointerAction.which!==which)return;
 
       const p=normPoint(e);
+      const b=which==="start"?(nearestCueBall(p.x,p.y)||nearestBall(p.x,p.y)):nearestBall(p.x,p.y);
+      if(b){
+        if(which==="start"){l.startBallId=b.id;p.x=b.x;p.y=b.y}
+        else{l.endBallId=b.id;p.x=b.x;p.y=b.y}
+      }else if(which==="start")delete l.startBallId;else delete l.endBallId;
 
       if(which==="start"){
         l.x1=p.x;
@@ -1639,7 +1670,9 @@ function normPoint(e){
 cloth.addEventListener("pointerdown",e=>{
   if(e.target!==cloth && e.target!==svg)return;
   if(state.tool==="arrow"||state.tool==="line"){
-    snap();const p=normPoint(e);const l={id:state.nextId++,type:state.tool==="arrow"?"arrow":"line",x1:p.x,y1:p.y,x2:p.x,y2:p.y,color:state.lineColor,width:state.lineWidth};
+    snap();const p=normPoint(e),a=nearestCueBall(p.x,p.y)||nearestBall(p.x,p.y);
+    const l={id:state.nextId++,type:state.tool==="arrow"?"arrow":"line",x1:a?.x??p.x,y1:a?.y??p.y,x2:p.x,y2:p.y,color:state.lineColor,width:state.lineWidth};
+    if(a)l.startBallId=a.id;
     state.lines.push(l);pointerAction={type:"draw",id:l.id};renderLines();cloth.setPointerCapture(e.pointerId);e.preventDefault();
   }else if(state.tool==="memo"){
     pendingMemoPos=normPoint(e);$("#memoText").value="";memoDialog.showModal();
@@ -1651,7 +1684,10 @@ cloth.addEventListener("pointerdown",e=>{
 cloth.addEventListener("pointermove",e=>{
   if(!pointerAction)return;
   if(pointerAction.type==="draw"){
-    const l=state.lines.find(x=>x.id===pointerAction.id);if(!l)return;const p=normPoint(e);l.x2=p.x;l.y2=p.y;renderLines();
+    const l=state.lines.find(x=>x.id===pointerAction.id);if(!l)return;const p=normPoint(e),b=nearestBall(p.x,p.y);
+    if(b&&b.id!==l.startBallId){l.endBallId=b.id;l.x2=b.x;l.y2=b.y}
+    else{delete l.endBallId;l.x2=p.x;l.y2=p.y}
+    renderLines();
   }else if(pointerAction.type==="group"){
     const p=normPoint(e),rawDx=p.x-pointerAction.p.x,rawDy=p.y-pointerAction.p.y;
     const bounds=pointerAction.bounds;if(!bounds)return;
@@ -1782,7 +1818,12 @@ async function exportImage(sourceState=state,format="png",title="billiards-layou
   }
   sourceState.lines.forEach(l=>{
     g.strokeStyle=l.color;g.lineWidth=l.width*2;g.lineCap="round";
-    const X1=cx+l.x1*cw,Y1=cy+l.y1*ch,X2=cx+l.x2*cw,Y2=cy+l.y2*ch;
+    const X1=cx+l.x1*cw,Y1=cy+l.y1*ch;
+    let X2=cx+l.x2*cw,Y2=cy+l.y2*ch;
+    if(l.type==="arrow"&&sourceState.balls.some(b=>b.id===l.endBallId)){
+      const dx=X2-X1,dy=Y2-Y1,len=Math.hypot(dx,dy);
+      if(len){const offset=Math.min(9,len);X2-=dx/len*offset;Y2-=dy/len*offset}
+    }
     g.beginPath();g.moveTo(X1,Y1);g.lineTo(X2,Y2);g.stroke();
     if(l.type==="arrow"){const angle=Math.atan2(Y2-Y1,X2-X1),size=16;g.beginPath();g.moveTo(X2,Y2);g.lineTo(X2-Math.cos(angle-.55)*size,Y2-Math.sin(angle-.55)*size);g.moveTo(X2,Y2);g.lineTo(X2-Math.cos(angle+.55)*size,Y2-Math.sin(angle+.55)*size);g.stroke()}
   });
