@@ -81,3 +81,11 @@
     canAddMatchRecord
   });
 })();
+
+/* Score-screen add-on only: load the chess clock without changing existing layout/editor code. */
+(function(){
+  const s=document.createElement('script');
+  s.src='./score-clock.js?v=20261002-clock1';
+  s.defer=true;
+  document.head.appendChild(s);
+})();
