@@ -1,5 +1,10 @@
 @import url("/home-base.css?v=20261002-bird-table-fix-2");
 
-/* Keep the supplied hero intact; only correct the bird/table overlap area. */
-.reference-hero::after{content:"";position:absolute;right:0;top:0;width:33.75%;height:100%;background:url("/assets/hero-bird-fix-v3.svg?v=20261002-2126") right top/100% 100% no-repeat;pointer-events:none;z-index:1}
-.hero-layout-link,.hero-score-link{z-index:2}
+/* Selected scene, with the supplied heading and editable controls preserved. */
+.reference-hero::after{content:"";position:absolute;right:0;top:0;width:53%;height:100%;background:url("/assets/hero-selected.webp?v=20261002-selected") right top/103% 104% no-repeat;mask-image:linear-gradient(90deg,transparent 0%,#000 5%);pointer-events:none;z-index:1}
+.reference-hero::before{content:"";position:absolute;left:0;top:0;width:55%;height:36.5%;clip-path:polygon(0 0,100% 0,100% 65%,78% 65%,78% 100%,0 100%);background:url("/assets/original-home-design.png") left -6.15cqw/181.8182% auto no-repeat;pointer-events:none;z-index:2}
+.hero-copy,.hero-layout-link,.hero-score-link{z-index:3}
+
+
+
+
