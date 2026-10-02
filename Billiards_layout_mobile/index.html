@@ -62,6 +62,7 @@ button,input,select,textarea{font:inherit}button{border:0;-webkit-appearance:non
 .home-gear{position:absolute;right:16px;top:calc(18px + env(safe-area-inset-top));width:48px;height:48px;border-radius:50%;background:#fff;border:1px solid var(--line);box-shadow:0 4px 14px rgba(0,0,0,.06);font-size:22px;color:#40484e}
 @media(max-width:390px){.brand-logo{height:104px;width:98vw}.feature{min-height:152px}.feature-art{height:88px}.nav-art{width:44px;height:44px}.tool{min-width:64px}.score{font-size:48px}}
 </style>
+<style id="nineboardAuthFlashGuard">html:not(.nineboard-auth-checked) #nineboardLoginCard{visibility:hidden!important}</style><script id="nineboardAuthFlashGuardScript">window.addEventListener('9board:authchange',function(){document.documentElement.classList.add('nineboard-auth-checked')});</script>
 </head>
 <body data-build="2026-10-01-arrow-tip-anchor-v1">
 <div class="phone">
@@ -89,7 +90,7 @@ button,input,select,textarea{font:inherit}button{border:0;-webkit-appearance:non
 </main><div id="plusPreviewBar" hidden style="position:fixed;top:0;right:0;z-index:10000;background:#fff;padding:6px;border:1px solid #ddd;border-radius:8px;font-size:12px">検証用 <button data-preview-plan="free">Free</button> <button data-preview-plan="plus">Plus</button><span id="previewPlanLabel"></span></div>
 <nav class="bottom-nav"><button class="nav-btn active" data-to="home"><img class="nav-art" src="./assets/home-20260922-v2-hq.jpg?v=20260930-hq4" alt=""><span>ホーム</span></button><button class="nav-btn" data-to="counter"><img class="nav-art" src="./assets/counter-20260922-v3.jpg?v=20260922-3" alt=""><span>スコア</span></button><button class="nav-btn" data-to="matches"><img class="nav-art" src="./assets/matches-20260922-v3.jpg?v=20260922-3" alt=""><span>対戦記録</span></button><button class="nav-btn" data-to="menu"><img class="nav-art" src="./assets/menu-original-20260922.png?v=20260922-8" alt=""><span>設定</span></button></nav><div class="toast" id="toast"></div>
 </div>
-<script src="plus-config.js?v=20261001"></script><script src="plus-services.js?v=20261001"></script>
+<script src="score-clock.js?v=20261002-clock2"></script><script src="plus-config.js?v=20261001"></script><script src="plus-services.js?v=20261001"></script>
 <script>(()=>{"use strict";
 const $=(s,p=document)=>p.querySelector(s),$$=(s,p=document)=>[...p.querySelectorAll(s)];
 const store={get(k,d=[]){try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set(k,v){localStorage.setItem(k,JSON.stringify(v))}};
