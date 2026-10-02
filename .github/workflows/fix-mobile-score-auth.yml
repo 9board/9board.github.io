@@ -13,33 +13,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Patch mobile index only
+      - name: Refresh score add-on version only
         shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p=Path('Billiards_layout_mobile/index.html')
           s=p.read_text()
-
-          # Keep the score clock loaded directly from the score page and refresh only its cache key.
-          old='<script src="score-clock.js?v=20261002-clock2"></script>'
-          new='<script src="score-clock.js?v=20261002-clock3"></script>'
-          if old in s:
-              s=s.replace(old,new,1)
-          elif new not in s:
-              anchor='<script src="plus-config.js?v=20261001"></script>'
-              if anchor not in s:
-                  raise SystemExit('plus-config anchor not found')
-              s=s.replace(anchor,new+anchor,1)
-
-          # Keep the existing auth flash guard unchanged.
-          guard='''<style id="nineboardAuthFlashGuard">html:not(.nineboard-auth-checked) #nineboardLoginCard{visibility:hidden!important}</style><script id="nineboardAuthFlashGuardScript">window.addEventListener('9board:authchange',function(){document.documentElement.classList.add('nineboard-auth-checked')});</script>'''
-          if 'nineboardAuthFlashGuard' not in s:
-              head='</head>'
-              if head not in s:
-                  raise SystemExit('head close not found')
-              s=s.replace(head, guard+'\n'+head, 1)
-
+          for old in ['score-clock.js?v=20261002-clock2','score-clock.js?v=20261002-clock3']:
+              s=s.replace(old,'score-clock.js?v=20261002-clock4')
           p.write_text(s)
           PY
       - name: Commit
@@ -48,5 +30,5 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add Billiards_layout_mobile/index.html
           git diff --cached --quiet && exit 0
-          git commit -m 'Refresh mobile chess clock controls'
+          git commit -m 'Refresh mobile score add-on cache'
           git push
