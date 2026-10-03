@@ -6,54 +6,53 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#ffffff">
 <title>9BOARD 配置図</title>
+<link rel="stylesheet" href="/home.css?v=20261002-selected">
 <style>
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f5faf7}
+body{display:flex;flex-direction:column}
+.header{flex:0 0 auto;position:relative;z-index:1000;background:#fff}
+.app-shell{flex:1 1 auto;min-height:0;width:100%;background:#f5faf7}
 #appFrame{display:block;width:100%;height:100%;border:0;background:#f5faf7}
+@media(max-width:760px){.app-shell{min-height:0}}
 </style>
 </head>
 <body>
-<iframe id="appFrame" src="./app-patched.html?v=20261001-pcfix2" title="9BOARD 配置図"></iframe>
+<header class="header">
+  <div class="wrap head">
+    <a href="https://9board.jp/" aria-label="9BOARD ホーム"><img class="logo" src="/assets/original-logo.png" width="2156" height="729" alt="9BOARD"></a>
+    <button class="menu" aria-expanded="false" aria-controls="navigation">☰ メニュー</button>
+    <nav class="nav" id="navigation" aria-label="メインナビゲーション">
+      <a href="https://9board.jp/">トップ</a>
+      <a href="https://9board.jp/pc/" aria-current="page">配置図</a>
+      <a href="https://9board.jp/guides/pc-score/">スコア</a>
+      <a href="https://9board.jp/guides/pc-records/">対戦記録</a>
+      <a href="https://9board.jp/#terms">利用規約</a>
+      <a href="https://9board.jp/#privacy">プライバシー</a>
+      <a href="https://waraka2026.github.io/">warakaについて</a>
+      <a class="contact" href="https://waraka2026.github.io/#contact">✉ お問い合わせ</a>
+    </nav>
+  </div>
+</header>
+<main class="app-shell">
+  <iframe id="appFrame" src="./app-patched.html?v=20261003-site-header" title="9BOARD 配置図"></iframe>
+</main>
 <script>
-const HOME='https://9board.jp/';
-const frame=document.getElementById('appFrame');
-
-function decorateFrame(){
-  try{
-    const doc=frame.contentDocument;
-    if(!doc)return false;
-
-    const logo=doc.getElementById('brandLogo');
-    if(logo&&!logo.dataset.homeBound){
-      const fresh=logo.cloneNode(true);
-      fresh.dataset.homeBound='true';
-      fresh.title='9BOARD トップページ';
-      fresh.alt='9BOARD';
-      fresh.style.cursor='pointer';
-      logo.replaceWith(fresh);
-      fresh.addEventListener('click',()=>{window.top.location.href=HOME});
-    }
-
-    const nav=doc.querySelector('.topnav');
-    if(nav&&!nav.querySelector('[data-home-link]')){
-      const btn=doc.createElement('button');
-      btn.type='button';
-      btn.dataset.homeLink='true';
-      btn.textContent='⌂ トップ';
-      btn.addEventListener('click',()=>{window.top.location.href=HOME});
-      nav.insertBefore(btn,nav.firstChild);
-    }
-
-    return !!(doc.getElementById('brandLogo')&&doc.querySelector('.topnav'));
-  }catch(_){
-    return false;
+const button=document.querySelector('.menu');
+const nav=document.querySelector('.nav');
+button.addEventListener('click',()=>{
+  const open=button.getAttribute('aria-expanded')!=='true';
+  button.setAttribute('aria-expanded',String(open));
+  nav.classList.toggle('open',open);
+});
+nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{
+  button.setAttribute('aria-expanded','false');
+  nav.classList.remove('open');
+}));
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    button.setAttribute('aria-expanded','false');
+    nav.classList.remove('open');
   }
-}
-
-frame.addEventListener('load',()=>{
-  decorateFrame();
-  setTimeout(decorateFrame,80);
-  setTimeout(decorateFrame,250);
-  setTimeout(decorateFrame,700);
 });
 </script>
 </body>
