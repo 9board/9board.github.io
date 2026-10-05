@@ -1,0 +1,11 @@
+// Merge into the existing rules. Never overwrite existing rules blindly.
+// Firestore allows access if ANY matching allow is true; remove broad wildcard
+// grants that would otherwise allow client writes to these server-only collections.
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /mobileEntitlements/{document=**} { allow read, write: if false; }
+    match /mobileCheckoutAttempts/{document=**} { allow read, write: if false; }
+    match /mobilePaymentReceipts/{document=**} { allow read, write: if false; }
+  }
+}
