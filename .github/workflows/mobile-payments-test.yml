@@ -1,0 +1,18 @@
+name: Mobile payments checks
+on:
+  pull_request:
+    paths: ['functions/**', 'Billiards_layout_mobile/plus-services.js', 'Billiards_layout_mobile/index.html', '.github/workflows/mobile-payments-test.yml']
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --prefix functions
+      - run: npm test --prefix functions
+      - run: npm run check --prefix functions
+      - run: node --check Billiards_layout_mobile/plus-services.js

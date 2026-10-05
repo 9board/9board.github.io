@@ -15,6 +15,50 @@
 
   const FIREBASE_VERSION = '12.19.0';
   let authInstance = null;
+  let accessGeneration = 0;
+  let accessTimer = null;
+  const apiBase = 'https://asia-northeast1-board-53117.cloudfunctions.net';
+  async function paymentApi(name, user) {
+    const response = await fetch(apiBase + '/' + name, {
+      method: 'POST', headers: { Authorization: 'Bearer ' + await user.getIdToken(), 'Content-Type': 'application/json' },
+      body: '{}', signal: AbortSignal.timeout(20000)
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || '通信に失敗しました。');
+    return result;
+  }
+  function paymentControls(user) {
+    document.getElementById('nineboardGoogleLogin').hidden = !!user;
+    document.getElementById('nineboardBuy').hidden = !user;
+    document.getElementById('nineboardRetry').hidden = !user;
+    document.getElementById('nineboardSwitchAccount').hidden = !user;
+  }
+  async function checkAccess(user) {
+    const generation = ++accessGeneration;
+    clearTimeout(accessTimer);
+    lockApp();
+    paymentControls(user);
+    if (!user) return;
+    const buy = document.getElementById('nineboardBuy');
+    buy.disabled = true;
+    showAuthError('購入情報を確認しています…');
+    try {
+      const result = await paymentApi('mobileAccess', user);
+      if (generation !== accessGeneration || authInstance.currentUser?.uid !== user.uid) return;
+      if (result.access === true) {
+        unlockApp(user);
+        if (new URLSearchParams(location.search).has('payment')) history.replaceState(null, '', location.pathname + location.hash);
+        return;
+      }
+      const waiting = new URLSearchParams(location.search).get('payment') === 'success';
+      buy.disabled = waiting;
+      showAuthError(waiting ? '決済の確認待ちです。確認できると自動で開きます。' : 'スマホ版は300円の買い切りです。購入済みの場合は購入したGoogleアカウントでログインしてください。');
+      if (waiting) accessTimer = setTimeout(() => checkAccess(user), 5000);
+    } catch (error) {
+      if (generation === accessGeneration) showAuthError(error.message);
+    }
+    document.documentElement.classList.add('nineboard-auth-checked');
+  }
 
   function createLoginGate() {
     if (document.getElementById('nineboardLoginGate')) return document.getElementById('nineboardLoginGate');
@@ -116,6 +160,9 @@
           <span id="nineboardGoogleMark" aria-hidden="true">G</span>
           <span>Googleでログイン</span>
         </button>
+        <button id="nineboardBuy" type="button" hidden style="width:100%;min-height:52px;border:0;border-radius:14px;background:#08a77a;color:#fff;font-weight:800">300円で購入（買い切り）</button>
+        <button id="nineboardRetry" type="button" hidden style="margin-top:12px;padding:10px">購入情報を再確認</button>
+        <button id="nineboardSwitchAccount" type="button" hidden style="margin-top:12px;padding:10px">別のアカウントでログイン</button>
         <div id="nineboardLoginStatus" aria-live="polite">ログイン状態を確認しています…</div>
         <a id="nineboardLoginBack" href="https://9board.jp/">9BOARDトップへ戻る</a>
       </div>
@@ -141,6 +188,8 @@
     if (gate) gate.hidden = true;
     document.documentElement.classList.add('nineboard-authenticated');
     window.NineBoardAuthUser = user || null;
+    window.NineBoardPlan?.setSession(user, 'plus');
+    document.querySelector('.phone').inert = false;
     window.dispatchEvent(new CustomEvent('9board:authchange', { detail: { user: user || null } }));
   }
 
@@ -149,12 +198,14 @@
     gate.hidden = false;
     document.documentElement.classList.remove('nineboard-authenticated');
     window.NineBoardAuthUser = null;
+    window.NineBoardPlan?.setSession(null, 'free');
+    document.querySelector('.phone').inert = true;
     showLoginButton();
     window.dispatchEvent(new CustomEvent('9board:authchange', { detail: { user: null } }));
   }
 
   async function startFirebaseAuth() {
-    createLoginGate();
+    lockApp();
 
     try {
       const [appSdk, authSdk] = await Promise.all([
@@ -197,10 +248,31 @@
         });
       }
 
-      authSdk.onAuthStateChanged(auth, user => {
-        if (user) unlockApp(user);
-        else lockApp();
-      }, error => {
+      document.getElementById('nineboardBuy').onclick = async () => {
+        const user = auth.currentUser;
+        if (!user) return;
+        const button = document.getElementById('nineboardBuy');
+        button.disabled = true;
+        try {
+          const result = await paymentApi('mobileCheckout', user);
+          if (auth.currentUser?.uid !== user.uid) return;
+          if (result.pending) history.replaceState(null, '', location.pathname + '?payment=success' + location.hash);
+          if (result.access || result.pending) { await checkAccess(user); return; }
+          const url = new URL(result.url);
+          if (url.protocol !== 'https:' || url.hostname !== 'checkout.stripe.com') throw new Error('決済URLを確認できませんでした。');
+          location.assign(url.href);
+        } catch (error) { showAuthError(error.message); }
+        finally { button.disabled = false; }
+      };
+      document.getElementById('nineboardRetry').onclick = () => checkAccess(auth.currentUser);
+      document.getElementById('nineboardSwitchAccount').onclick = () => authSdk.signOut(auth).catch(() => showAuthError('ログアウトできませんでした。'));
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') checkAccess(auth.currentUser);
+      });
+      authSdk.onAuthStateChanged(auth, user => { checkAccess(user); }, error => {
+        ++accessGeneration;
+        clearTimeout(accessTimer);
+        lockApp();
         console.error('9BOARD auth state:', error);
         showLoginButton();
         showAuthError('ログイン状態を確認できませんでした。ページを再読み込みしてください。');
@@ -354,7 +426,7 @@
     remove.textContent = 'アカウント削除';
     remove.style.cssText = 'padding:9px 12px;border:1px solid #efb7b7;border-radius:10px;background:#fff;color:#c23038;font-weight:800';
     remove.onclick = async () => {
-      if (!confirm('9BOARDのログインアカウントを削除しますか？\nこの操作は取り消せません。')) return;
+      if (!confirm('9BOARDのログインアカウントを削除しますか？\n購入権限はこのアカウントのUIDに紐づくため、再作成しても購入は引き継がれません。自動返金はされません。\nこの操作は取り消せません。')) return;
       remove.disabled = true;
       try {
         await window.NineBoardAuth?.deleteAccount?.();

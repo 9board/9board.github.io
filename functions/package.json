@@ -1,0 +1,20 @@
+{
+  "name": "9board-mobile-payments",
+  "private": true,
+  "main": "index.js",
+  "engines": {
+    "node": "22"
+  },
+  "scripts": {
+    "test": "node --test",
+    "check": "node --check index.js"
+  },
+  "overrides": {
+    "gaxios@6.7.1": { "uuid": "11.1.1" }
+  },
+  "dependencies": {
+    "firebase-admin": "14.5.0",
+    "firebase-functions": "7.4.0",
+    "stripe": "23.0.0"
+  }
+}
