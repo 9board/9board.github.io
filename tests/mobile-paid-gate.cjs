@@ -1,7 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const assert = require('node:assert/strict');
-const { chromium } = require('C:/Users/7jkha/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const { chromium } = require('playwright');
 const sdk = {
   app: 'export const getApps=()=>[]; export const initializeApp=()=>({});',
   auth: `export const auth={currentUser:null};
@@ -94,9 +94,17 @@ export function onSnapshot(ref,options,next,error){
   assert(await p.evaluate(()=>oldListener.closed));
   assert.deepEqual(await p.evaluate(()=>testListeners.at(-1).ref),{collection:'users',uid:'other'});
   await p.evaluate(()=>testPurchase(false));
+  assert(await p.locator('#ballsLayer').evaluate(el=>!!el.closest('[inert]')));
+  await p.setViewportSize({width:844,height:390});
+  assert(await p.locator('#nineboardLoginCard').evaluate(el=>el.getBoundingClientRect().top>=0),'Landscape gate starts within viewport');
+  await p.setViewportSize({width:390,height:844});
   await p.screenshot({path:path.join(__dirname,'unpaid-mobile.png')});
   assert.equal(await p.locator('#nineboardPurchaseLink').getAttribute('href'),'https://buy.stripe.com/cNidR3cP862p8Fn4Nnasg00');
   await p.locator('#nineboardAccountSwitch').click();
+  assert((await locked()).login);
+  await p.evaluate(()=>testAuth({uid:'paid-user'}));
+  await p.evaluate(()=>testPurchase(true));
+  await p.evaluate(()=>NineBoardAuth.signOut());
   assert((await locked()).login);
   await p.evaluate(()=>testAuth({uid:'paid-user'}));
   await p.evaluate(()=>testPurchase(true));
