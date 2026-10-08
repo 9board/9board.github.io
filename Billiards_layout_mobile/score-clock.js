@@ -48,7 +48,7 @@
       extra.innerHTML=`
         <div class="score-rule-group"><b>何先</b><div class="score-two-cols"><label class="score-extra-field"><span data-score-name="1">名前1</span><select id="scoreP1Race"></select><input id="scoreP1RaceFree" placeholder="例：35先・2セット先取" hidden></label><label class="score-extra-field"><span data-score-name="2">名前2</span><select id="scoreP2Race"></select><input id="scoreP2RaceFree" placeholder="例：35先・2セット先取" hidden></label></div></div>
 
-        <div class="score-rule-group"><b>JPAルール</b><div class="score-two-cols"><label class="score-extra-field"><span data-score-name="1">名前1</span><select id="scoreP1SL"></select></label><label class="score-extra-field"><span data-score-name="2">名前2</span><select id="scoreP2SL"></select></label></div></div>
+        <div class="score-rule-group"><b>JPAルール</b><div class="score-two-cols"><label class="score-extra-field"><span data-score-name="1">名前1</span><select id="scoreP1SL"></select><input id="scoreP1SLFree" placeholder="JPAルールを入力" hidden></label><label class="score-extra-field"><span data-score-name="2">名前2</span><select id="scoreP2SL"></select><input id="scoreP2SLFree" placeholder="JPAルールを入力" hidden></label></div></div>
         <label class="score-extra-field">ゲーム形式<select id="scoreGameType"><option>9ボール</option><option>8ボール</option><option>10ボール</option><option value="free">自由入力</option></select><input id="scoreGameFree" placeholder="ゲーム形式を入力" hidden><button type="button" id="scoreGameSave">保存</button></label>
       `;
       scoreCard.appendChild(extra);

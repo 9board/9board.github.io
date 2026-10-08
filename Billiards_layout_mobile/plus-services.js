@@ -357,6 +357,17 @@
 
       window.NineBoardAuth = Object.freeze({
         getUser: () => auth.currentUser,
+        authorizeCalendar: async () => {
+          const user=auth.currentUser;
+          if(!user)throw new Error('Googleにログインしてから同期してください');
+          const calendarProvider=new authSdk.GoogleAuthProvider();
+          calendarProvider.addScope('https://www.googleapis.com/auth/calendar.events');
+          const result=await authSdk.reauthenticateWithPopup(user,calendarProvider);
+          const credential=authSdk.GoogleAuthProvider.credentialFromResult(result);
+          if(auth.currentUser?.uid!==user.uid)throw new Error('ログイン中のアカウントが変わりました。再確認してください');
+          if(!credential?.accessToken)throw new Error('Googleカレンダーへのアクセス許可が必要です');
+          return {token:credential.accessToken,uid:user.uid};
+        },
         signOut: explicitSignOut,
         deleteAccount: async () => {
           const user = auth.currentUser;
@@ -417,10 +428,19 @@
     return adapter[feature]({ user: plan.getState().user, data: snapshot() });
   }
   function backup() {
-    if (!plan.can('backup')) throw new Error('バックアップはPlusで利用できます。');
     const url = URL.createObjectURL(new Blob([JSON.stringify({ version: 1, createdAt: new Date().toISOString(), data: snapshot() }, null, 2)], { type: 'application/json' }));
-    const a = document.createElement('a'); a.href = url; a.download = '9board-backup.json'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+    const a = document.createElement('a'); a.href = url; a.download = '9board-backup.json'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 60000);
   }
+  function saveAllCsv() {
+    const data=snapshot(),rows=[];
+    const labels={'9b_layouts':'保存配置','9b_matches':'対戦記録','9b_counter':'スコア履歴'};
+    for(const key of keys)for(const item of data[key])rows.push({dataKey:key,kind:labels[key],...item});
+    const columns=['dataKey','kind',...new Set(rows.flatMap(row=>Object.keys(row).filter(key=>!['dataKey','kind'].includes(key))))];
+    const cell=value=>{let text=value==null?'':typeof value==='object'?JSON.stringify(value):String(value);if(typeof value==='string'&&/^[\s]*[=+@-]/.test(text))text="'"+text;return '"'+text.replace(/"/g,'""')+'"'};
+    const csv='\uFEFF'+[columns.map(cell).join(','),...rows.map(row=>columns.map(key=>cell(row[key])).join(','))].join('\r\n');
+    const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download='9board-all-data.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+  }
+
   function selectedLink() {
     if (!plan.can('layoutMatchLink')) return {};
     const id = document.getElementById('plusLayoutLink')?.value;
@@ -535,12 +555,12 @@
     const settings = document.getElementById('plusSettings');
     if (settings) {
       settings.replaceChildren();
-      const info = document.createElement('p'); info.textContent = plus ? 'Plus：保存無制限' : 'Free：配置5件／対戦記録10件／スコア履歴10件まで'; settings.append(info);
       const note = document.createElement('p'); note.style.fontSize = '12px'; note.textContent = 'クラウド保存・端末間同期・Android共有は接続準備中です。'; settings.append(note);
       [['backup', 'バックアップを保存'], ['cloudSave', 'クラウド保存'], ['deviceSync', '端末間同期'], ['androidShare', 'Android共有']].forEach(([key, title]) => {
-        const button = document.createElement('button'); button.textContent = title; button.disabled = !plan.can(key); button.style.cssText = 'padding:8px;margin:4px;border:1px solid #ddd;border-radius:8px';
+        const button = document.createElement('button'); button.textContent = title; button.disabled = key !== 'backup' && !plan.can(key); button.style.cssText = 'padding:8px;margin:4px;border:1px solid #ddd;border-radius:8px';
         button.onclick = async () => { try { if (key === 'backup') backup(); else await run(key); } catch (e) { note.textContent = e.message; } }; settings.append(button);
       });
+      const csvButton=document.createElement('button');csvButton.textContent='全てをCSVで保存';csvButton.id='nineboardAllCsv';csvButton.style.cssText='padding:8px;margin:4px;border:1px solid #ddd;border-radius:8px';csvButton.onclick=saveAllCsv;settings.appendChild(csvButton);
       renderAccountControls(settings);
     }
     wirePrivacyLink();
