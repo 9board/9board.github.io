@@ -180,6 +180,60 @@ button,input,select,textarea{font:inherit}button{border:0;-webkit-appearance:non
 [data-screen="matches"] #matchCalendar .match-days button{padding:5px 1px!important}
 [data-screen="matches"] .match-calendar-event{font-size:clamp(7px,2vw,10px)}
 [data-screen="matches"] .match-calendar-event>span{white-space:nowrap;overflow:hidden}
+
+/* Adapt mobile controls without changing the established icons or table design. */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+.phone{min-height:100vh;min-height:100dvh;width:min(100%,520px)}
+.app-view{height:100vh;height:100dvh;min-width:0}
+.wrap,.layout-card,.counter-card,.card,.menu-card,.player,.screen,.score-rule-group{min-width:0;max-width:100%}
+.grid2,.cols{grid-template-columns:repeat(2,minmax(0,1fr))}
+.counter-row{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:clamp(6px,2.5vw,10px)}
+.player input{min-width:0;max-width:100%;width:100%}
+input,select,textarea{min-width:0;max-width:100%}
+.page-head,.section-title,.topbar,.setting-row,.summary-row,.menu-row{min-width:0}
+.page-head{gap:8px;flex-wrap:wrap}
+.section-title{gap:8px;flex-wrap:wrap}
+.section-title h2{min-width:0;overflow-wrap:anywhere}
+.menu-row,.summary-row{overflow-wrap:anywhere}
+.summary-row>div{min-width:0}
+.cue-side{min-width:0;overflow-wrap:anywhere}
+.setting-row input[type="range"]{width:0;min-width:0}
+.save-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.save-grid button{min-width:0;overflow-wrap:anywhere}
+.toast{max-width:calc(100% - 24px);width:max-content;text-align:center;white-space:normal;overflow-wrap:anywhere}
+[data-screen="matches"] .match-title-row{flex-wrap:wrap;row-gap:4px}
+[data-screen="matches"] .match-name-place{min-width:min(110px,100%)}
+[data-screen="matches"] .match-name-place strong{max-width:100%;overflow-wrap:anywhere}
+[data-screen="matches"] .match-actions{margin-left:auto}
+[data-screen="counter"] #mobileChessClock .clock-presets,[data-screen="counter"] #mobileChessClock .clock-faces{grid-template-columns:repeat(2,minmax(0,1fr))}
+[data-screen="counter"] #mobileChessClock .clock-face{min-width:0;padding:12px 3px}
+[data-screen="counter"] #mobileChessClock .clock-face strong{font-size:clamp(28px,9vw,42px)}
+[data-screen="counter"] #mobileChessClock .clock-head{flex-wrap:wrap}
+[data-screen="counter"] #mobileChessClock .clock-head h2{white-space:nowrap;flex-shrink:0}
+[data-screen="counter"] #mobileChessClock .clock-head span{min-width:0}
+[data-screen="counter"] #mobileChessClock .clock-preset select{min-width:0}
+[data-screen="counter"] .score-history-actions{flex-shrink:0;margin-left:auto}
+[data-screen="counter"] .score-history-summary{flex-basis:120px}
+[data-screen="counter"] .score-history-summary strong{max-width:100%;overflow-wrap:anywhere}
+#plusSettings{overflow-wrap:anywhere}
+#plusSettings button{max-width:100%;white-space:normal}
+#nineboardLoginCard{min-width:0;max-width:100%;overflow-wrap:anywhere}
+dialog{max-width:calc(100vw - 24px);max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px);box-sizing:border-box;overflow:auto}
+dialog input,dialog select,dialog textarea{max-width:100%;min-width:0;box-sizing:border-box}
+@media(max-width:360px){
+ .wrap{padding:12px 12px 0}.layout-card{padding:10px}.counter-card{padding:14px}
+ .score{font-size:44px}.score-controls{gap:5px}.score-controls button{font-size:22px}
+ .topbar{padding-left:12px;padding-right:12px}.cue-card{gap:10px}
+ [data-screen="counter"] #mobileChessClock{padding:14px}
+ [data-screen="counter"] .score-two-cols{gap:8px}
+ [data-screen="counter"] .score-rule-group{padding:10px}
+ [data-screen="counter"] .score-extra-field select,[data-screen="counter"] .score-meta input{padding-left:8px;padding-right:8px}
+ [data-screen="matches"] .match-days{gap:2px}
+}
+@media(min-width:400px){.wrap{padding-left:18px;padding-right:18px}.counter-row{gap:12px}}
+
+[data-screen="counter"] [data-score-name],[data-screen="counter"] #mobileChessClock .clock-face b{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+[data-screen="counter"] .score-extra-field{min-width:0}
 </style></head>
 <body data-build="2026-10-01-arrow-tip-anchor-v1">
 <div class="phone">
@@ -380,7 +434,7 @@ function matchViewLabel(){$('#matchView').innerHTML=calendarMode?'☷':matchCale
 $('#matchView').onclick=()=>{calendarMode=!calendarMode;selectedMatchDate='';selectedMatchMonth='';matchViewLabel();matchPage('list');renderMatches()};
 function showMatchFiltered(date,month){calendarMode=false;selectedMatchDate=date;selectedMatchMonth=month;matchViewLabel();matchPage('list');renderMatches()}
 function renderMatches(){const list=store.get('9b_matches'),el=$('#matchList');const visible=selectedMatchDate?list.filter(x=>x.date===selectedMatchDate):selectedMatchMonth?list.filter(x=>String(x.date||'').slice(0,7)===selectedMatchMonth):list;$('#matchCount').textContent=`${visible.length}件`;if(calendarMode)renderMatchCalendar(list);el.hidden=calendarMode||form.classList.contains('show')||!$('#matchDetail').hidden;el.innerHTML=((selectedMatchDate||selectedMatchMonth)?`<div class="match-month"><strong>${esc(selectedMatchDate||selectedMatchMonth)} の対戦記録</strong><button type="button" id="matchClearFilter">すべて</button></div>`:'')+(visible.length?visible.map(x=>`<div class="summary-row"><small class="match-date">${esc(x.date||'日付未登録')}</small><div class="match-title-row"><div class="match-name-place"><strong>${esc(x.title)}</strong>${x.venue?`<span class="match-venue">${esc(x.venue)}</span>`:''}</div><div class="match-actions">${['detail','edit','delete'].map((a,i)=>`<button type="button" data-match-action="${a}" data-id="${esc(x.id)}">${['詳細','編集','削除'][i]}</button>`).join('')}</div></div></div>`).join(''):'<div class="summary-row"><strong>対戦記録はありません</strong></div>');$$('[data-match-action]',el).forEach(b=>b.onclick=()=>matchAction(b.dataset.matchAction,b.dataset.id));const clear=$('#matchClearFilter');if(clear)clear.onclick=()=>showMatchFiltered('','')}
-function renderMatchCalendar(list){const el=$('#matchCalendar'),y=matchMonth.getFullYear(),m=matchMonth.getMonth(),days=new Date(y,m+1,0).getDate(),offset=new Date(y,m,1).getDay(),byDate={};list.forEach(x=>{(byDate[x.date]||=[]).push(x)});const short=s=>Array.from(String(s||'')).slice(0,4).join('');el.innerHTML=`<label class="match-calendar-date">日付<input type="date" id="matchCalendarDate" value="${selectedMatchDate||localMatchDate(new Date(y,m,1))}"></label><div class="match-month"><button type="button" id="matchPrev" aria-label="前月">‹</button><button type="button" id="matchMonthSelect" title="この月の一覧を表示">${y}年${m+1}月</button><button type="button" id="matchNext" aria-label="翌月">›</button></div><div class="match-days">${['日','月','火','水','木','金','土'].map(d=>`<span>${d}</span>`).join('')}${'<span></span>'.repeat(offset)}${Array.from({length:days},(_,i)=>{const date=localMatchDate(new Date(y,m,i+1)),events=byDate[date]||[];return `<button type="button" data-match-date="${date}" aria-label="${esc(date+' '+events.map(x=>(x.title||'無題')+' '+(x.venue||'')).join('、'))}">${i+1}${events.map(x=>`<span class="match-calendar-event"><span class="event-venue">${esc(short(x.venue))}</span><span class="event-title">${esc(short(x.title||'無題'))}</span></span>`).join('')}</button>`}).join('')}</div><button type="button" id="matchGoogleSync">Googleカレンダーと同期</button><p style="font-size:10px;color:#7d838b">このアプリの対戦記録の登録・更新・削除をGoogleカレンダーに反映します。</p><p id="matchSyncStatus" role="status"></p>`;$('#matchPrev').onclick=()=>{matchMonth=new Date(y,m-1,1);renderMatches()};$('#matchNext').onclick=()=>{matchMonth=new Date(y,m+1,1);renderMatches()};$('#matchMonthSelect').onclick=()=>showMatchFiltered('',`${y}-${String(m+1).padStart(2,'0')}`);$('#matchCalendarDate').onchange=e=>{if(!e.target.value)return;const [year,month]=e.target.value.split('-').map(Number);matchMonth=new Date(year,month-1,1);selectedMatchDate=e.target.value;renderMatches()};$$('[data-match-date]',el).forEach(b=>b.onclick=()=>showMatchFiltered(b.dataset.matchDate,''));$('#matchGoogleSync').onclick=async()=>{const button=$('#matchGoogleSync'),status=$('#matchSyncStatus');button.disabled=true;status.textContent='Googleカレンダーに接続しています…';try{const result=await window.NineBoardCalendar.sync(store.get('9b_matches'));status.textContent=`${result.synced}件を同期しました${result.skipped?'（日付未登録 '+result.skipped+'件）':''}`}catch(error){status.textContent=error.message||'同期できませんでした'}finally{button.disabled=false}}}
+function renderMatchCalendar(list){const el=$('#matchCalendar'),y=matchMonth.getFullYear(),m=matchMonth.getMonth(),days=new Date(y,m+1,0).getDate(),offset=new Date(y,m,1).getDay(),byDate={};list.forEach(x=>{(byDate[x.date]||=[]).push(x)});const short=s=>Array.from(String(s||'')).slice(0,4).join('');el.innerHTML=`<label class="match-calendar-date">日付<input type="date" id="matchCalendarDate" value="${selectedMatchDate||localMatchDate(new Date(y,m,1))}"></label><div class="match-month"><button type="button" id="matchPrev" aria-label="前月">‹</button><button type="button" id="matchMonthSelect" title="この月の一覧を表示">${y}年${m+1}月</button><button type="button" id="matchNext" aria-label="翌月">›</button></div><div class="match-days">${['日','月','火','水','木','金','土'].map(d=>`<span>${d}</span>`).join('')}${'<span></span>'.repeat(offset)}${Array.from({length:days},(_,i)=>{const date=localMatchDate(new Date(y,m,i+1)),events=byDate[date]||[];return `<button type="button" data-match-date="${date}" aria-label="${esc(date+' '+events.map(x=>(x.title||'無題')+' '+(x.venue||'')).join('、'))}">${i+1}${events.map(x=>`<span class="match-calendar-event"><span class="event-venue">${esc(short(x.venue))}</span><span class="event-title">${esc(short(x.title||'無題'))}</span></span>`).join('')}</button>`}).join('')}</div><button type="button" id="matchGoogleSync">Googleカレンダーと同期</button><p style="font-size:10px;color:#7d838b">このアプリの対戦記録の登録・更新・削除をGoogleカレンダーに反映します。Googleの「未確認」警告が出る場合は、管理者による連携アプリの審査対応が必要です。</p><p id="matchSyncStatus" role="status"></p>`;$('#matchPrev').onclick=()=>{matchMonth=new Date(y,m-1,1);renderMatches()};$('#matchNext').onclick=()=>{matchMonth=new Date(y,m+1,1);renderMatches()};$('#matchMonthSelect').onclick=()=>showMatchFiltered('',`${y}-${String(m+1).padStart(2,'0')}`);$('#matchCalendarDate').onchange=e=>{if(!e.target.value)return;const [year,month]=e.target.value.split('-').map(Number);matchMonth=new Date(year,month-1,1);selectedMatchDate=e.target.value;renderMatches()};$$('[data-match-date]',el).forEach(b=>b.onclick=()=>showMatchFiltered(b.dataset.matchDate,''));$('#matchGoogleSync').onclick=async()=>{const button=$('#matchGoogleSync'),status=$('#matchSyncStatus');button.disabled=true;status.textContent='Googleカレンダーに接続しています…';try{const result=await window.NineBoardCalendar.sync(store.get('9b_matches'));status.textContent=`${result.synced}件を同期しました${result.skipped?'（日付未登録 '+result.skipped+'件）':''}`}catch(error){status.textContent=error.message||'同期できませんでした'}finally{button.disabled=false}}}
 
 window.addEventListener('storage',e=>{if(e.key==='9b_matches'){matchPage('list');renderMatches()}});
 
