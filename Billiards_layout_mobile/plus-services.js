@@ -169,11 +169,13 @@
           <a id="nineboardPurchaseLink" href="${PAYMENT_LINK}" target="_blank" rel="noopener noreferrer">購入手続きへ</a>
           <button id="nineboardPurchaseRetry" type="button">購入状態を再確認</button>
           <button id="nineboardAccountSwitch" type="button">別のアカウントでログイン</button>
-          <a id="nineboardFreePcLink" href="https://9board.jp/pc/">無料でPC版を使う</a>
+
         </div>
-        <a id="nineboardCommerceDisclosure" href="https://9board.jp/legal/" target="_blank" rel="noopener noreferrer" style="display:block;margin:14px 0;color:#65717d;font-size:13px;text-decoration:underline;text-underline-offset:3px">特定商取引法に基づく表記・返金条件</a>
+
         <div id="nineboardLoginStatus" aria-live="polite">ログイン状態を確認しています…</div>
         <a id="nineboardLoginBack" href="https://9board.jp/">9BOARDトップへ戻る</a>
+        <a id="nineboardFreePcLink" href="https://9board.jp/pc/" style="display:block;margin-top:12px;color:#65717d;font-size:14px;text-decoration:none">無料でPC版を使う</a>
+        <a id="nineboardCommerceDisclosure" href="https://9board.jp/legal/" target="_blank" rel="noopener noreferrer" style="display:block;margin:14px 0;color:#65717d;font-size:13px;text-decoration:underline;text-underline-offset:3px">特定商取引法に基づく表記・返金条件</a>
       </div>
     `;
     document.body.appendChild(gate);
@@ -551,6 +553,7 @@
     refresh();
   });
 })();
+
 
 
 
