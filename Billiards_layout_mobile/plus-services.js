@@ -481,7 +481,7 @@
 
     const divider = document.createElement('div');
     divider.style.cssText = 'height:1px;background:#e5e8eb;margin:14px -16px 12px';
-    settings.append(divider);
+    if(settings.children.length)settings.append(divider);
 
     const title = document.createElement('p');
     title.textContent = 'アカウント';
@@ -555,13 +555,13 @@
     const settings = document.getElementById('plusSettings');
     if (settings) {
       settings.replaceChildren();
-      const note = document.createElement('p'); note.style.fontSize = '12px'; note.textContent = 'クラウド保存・端末間同期・Android共有は接続準備中です。'; settings.append(note);
-      [['backup', 'バックアップを保存'], ['cloudSave', 'クラウド保存'], ['deviceSync', '端末間同期'], ['androidShare', 'Android共有']].forEach(([key, title]) => {
+      renderAccountControls(settings);
+      const note = document.createElement('p'); note.style.fontSize = '12px'; note.textContent = ''; settings.append(note);
+      [['backup', 'バックアップを保存']].forEach(([key, title]) => {
         const button = document.createElement('button'); button.textContent = title; button.disabled = key !== 'backup' && !plan.can(key); button.style.cssText = 'padding:8px;margin:4px;border:1px solid #ddd;border-radius:8px';
         button.onclick = async () => { try { if (key === 'backup') backup(); else await run(key); } catch (e) { note.textContent = e.message; } }; settings.append(button);
       });
       const csvButton=document.createElement('button');csvButton.textContent='全てをCSVで保存';csvButton.id='nineboardAllCsv';csvButton.style.cssText='padding:8px;margin:4px;border:1px solid #ddd;border-radius:8px';csvButton.onclick=saveAllCsv;settings.appendChild(csvButton);
-      renderAccountControls(settings);
     }
     wirePrivacyLink();
   }
