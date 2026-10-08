@@ -171,6 +171,7 @@
           <button id="nineboardAccountSwitch" type="button">別のアカウントでログイン</button>
           <a id="nineboardFreePcLink" href="https://9board.jp/pc/">無料でPC版を使う</a>
         </div>
+        <a id="nineboardCommerceDisclosure" href="https://9board.jp/legal/" target="_blank" rel="noopener noreferrer" style="display:block;margin:14px 0;color:#65717d;font-size:13px;text-decoration:underline;text-underline-offset:3px">特定商取引法に基づく表記・返金条件</a>
         <div id="nineboardLoginStatus" aria-live="polite">ログイン状態を確認しています…</div>
         <a id="nineboardLoginBack" href="https://9board.jp/">9BOARDトップへ戻る</a>
       </div>
@@ -550,4 +551,5 @@
     refresh();
   });
 })();
+
 
