@@ -65,7 +65,7 @@
         const reset=document.getElementById('clearScorePoints');
         if(reset) reset.click();
       });
-      scoreCard.appendChild(btn);
+      scoreCard.querySelector('.score-meta').insertAdjacentElement('afterend',btn);
     }
 
     if(document.getElementById('mobileChessClock')) return;

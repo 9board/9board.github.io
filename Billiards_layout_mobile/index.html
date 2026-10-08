@@ -143,8 +143,6 @@ button,input,select,textarea{font:inherit}button{border:0;-webkit-appearance:non
 #scoreDeleteDialog button{padding:12px 16px;border-radius:10px;background:#eef1f3;color:#34404c}
 #scoreDeleteDialog [data-score-confirm]{background:#dc2626;color:white}
 
-[data-screen="counter"] .score-choice-button{width:100%;min-width:0;min-height:40px;text-align:left;border:1px solid var(--line);border-radius:10px;padding:10px 28px 10px 10px;background:#fff;color:#34404c;font-size:12px;font-weight:800;position:relative}
-[data-screen="counter"] .score-choice-button:after{content:'⌄';position:absolute;right:10px;top:10px}
 [data-screen="counter"] #scoreGameSave{justify-self:end;padding:8px 20px;border-radius:10px;background:var(--green);color:#fff;font-weight:800}
 [data-screen="counter"] .score-history-row{padding:6px 0;line-height:1.35}
 [data-screen="counter"] .score-history-row>small{margin:0 0 2px;font-size:10px}
@@ -160,6 +158,12 @@ button,input,select,textarea{font:inherit}button{border:0;-webkit-appearance:non
 .score-dialog-buttons [data-reset-confirm]{background:#dc2626;color:white}
 
 @media(max-width:380px){[data-screen="counter"] #mobileChessClock .clock-head{flex-direction:column;align-items:flex-start;gap:5px}[data-screen="counter"] #mobileChessClock .clock-head h2{white-space:nowrap}[data-screen="counter"] #mobileChessClock .clock-head span{text-align:left}}
+
+[data-screen="counter"] .score-inline-field{position:relative;min-width:0;width:100%}
+[data-screen="counter"] .score-inline-field select{display:block;width:100%;height:42px}
+[data-screen="counter"] .score-inline-field .score-inline-input{position:absolute;left:1px;top:1px;width:calc(100% - 30px);height:40px;min-height:0;margin:0;padding:9px;border:0;border-radius:9px 0 0 9px;background:#fff;color:#34404c;font:inherit;box-shadow:none;box-sizing:border-box}
+[data-screen="counter"] .score-inline-input:focus{outline:none}
+[data-screen="counter"] #scoreResetOnly{margin:0 0 14px}
 </style></head>
 <body data-build="2026-10-01-arrow-tip-anchor-v1">
 <div class="phone">
@@ -187,7 +191,7 @@ button,input,select,textarea{font:inherit}button{border:0;-webkit-appearance:non
 </main><div id="plusPreviewBar" hidden style="position:fixed;top:0;right:0;z-index:10000;background:#fff;padding:6px;border:1px solid #ddd;border-radius:8px;font-size:12px">検証用 <button data-preview-plan="free">Free</button> <button data-preview-plan="plus">Plus</button><span id="previewPlanLabel"></span></div>
 <nav class="bottom-nav"><button class="nav-btn active" data-to="home"><img class="nav-art" src="./assets/home-20260922-v2-hq.jpg?v=20260930-hq4" alt=""><span>ホーム</span></button><button class="nav-btn" data-to="counter"><img class="nav-art" src="./assets/counter-20260922-v3.jpg?v=20260922-3" alt=""><span>スコア</span></button><button class="nav-btn" data-to="matches"><img class="nav-art" src="./assets/matches-20260922-v3.jpg?v=20260922-3" alt=""><span>対戦記録</span></button><button class="nav-btn" data-to="menu"><img class="nav-art" src="./assets/menu-original-20260922.png?v=20260922-8" alt=""><span>設定</span></button></nav><div class="toast" id="toast"></div>
 </div>
-<script src="vendor/html-to-image-1.11.13.js"></script><script src="score-clock.js?v=20261008-score-refine2"></script><script src="landscape-mode.js?v=20261002-landscape4"></script><script src="plus-config.js?v=20261001"></script><script src="plus-services.js?v=20261008-auth-pending1"></script>
+<script src="vendor/html-to-image-1.11.13.js"></script><script src="score-clock.js?v=20261008-native-dropdown3"></script><script src="landscape-mode.js?v=20261002-landscape4"></script><script src="plus-config.js?v=20261001"></script><script src="plus-services.js?v=20261008-auth-pending1"></script>
 <script>
 /* 9BOARD Stripe Payment Link: purchase entry only; entitlement verification is separate. */
 (function () {
@@ -340,13 +344,9 @@ const game=$('#scoreGameType'),free=$('#scoreGameFree');game.onchange=()=>{free.
 try{const saved=JSON.parse(localStorage.getItem('9b_score_game'));if(saved){game.value=['9ボール','8ボール','10ボール'].includes(saved.type)?saved.type:'free';free.value=saved.custom||(!['9ボール','8ボール','10ボール','free'].includes(saved.type)?saved.type:'');game.dispatchEvent(new Event('change'))}}catch{}
 const names=()=>{for(const [side,id] of [['1','p1name'],['2','p2name']])$$('[data-score-name="'+side+'"]').forEach(e=>e.textContent=$('#'+id).value.trim()||'名前'+side)};$('#p1name').addEventListener('input',names);$('#p2name').addEventListener('input',names);names();
 });
-// Custom choice dialogs avoid the native mobile picker and its previous/next toolbar.
-document.addEventListener('DOMContentLoaded',()=>{
-const root=document.querySelector('[data-screen="counter"]');
-function wireSelects(){for(const select of root.querySelectorAll('select')){if(select.id==='raceType'||select.dataset.choiceWired)continue;select.dataset.choiceWired='1';select.hidden=true;const button=document.createElement('button');button.type='button';button.className='score-choice-button';button.dataset.choiceFor=select.id;button.setAttribute('aria-haspopup','dialog');const refresh=()=>{button.textContent=select.selectedOptions[0]?.textContent||'選択';button.disabled=select.disabled};select.insertAdjacentElement('afterend',button);select.addEventListener('change',refresh);new MutationObserver(refresh).observe(select,{childList:true,subtree:true,attributes:true,attributeFilter:['disabled']});refresh();button.onclick=()=>{const dialog=document.createElement('dialog');dialog.className='score-choice-dialog';dialog.setAttribute('aria-label','選択');const heading=document.createElement('h2');heading.textContent=select.closest('label')?.childNodes[0]?.textContent?.trim()||'選択';dialog.appendChild(heading);for(const option of select.options){const pick=document.createElement('button');pick.type='button';pick.className='score-choice-option';pick.textContent=option.textContent;pick.dataset.choiceValue=option.value;pick.setAttribute('aria-pressed',String(option.selected));pick.onclick=()=>{select.value=option.value;select.dispatchEvent(new Event('change',{bubbles:true}));dialog.close()};dialog.appendChild(pick)}const cancel=document.createElement('button');cancel.type='button';cancel.textContent='閉じる';cancel.className='score-choice-cancel';cancel.onclick=()=>dialog.close();dialog.appendChild(cancel);dialog.addEventListener('close',()=>dialog.remove(),{once:true});document.body.appendChild(dialog);dialog.showModal();dialog.querySelector('[aria-pressed="true"]')?.focus()}}}
-wireSelects();new MutationObserver(wireSelects).observe(root,{childList:true,subtree:true});
-});
-
+// Keep the native dropdown appearance; free text overlays its text area.
+function wireInlineFree(select,input){if(!select||!input||select.dataset.inlineFree)return;select.dataset.inlineFree='1';const field=document.createElement('div');field.className='score-inline-field';select.before(field);field.append(select,input);input.classList.add('score-inline-input');input.setAttribute('aria-label',input.placeholder||'自由入力');const update=(focus=false)=>{input.hidden=select.value!=='free';if(focus&&!input.hidden)input.focus()};select.addEventListener('change',()=>update(true));update()}
+document.addEventListener('DOMContentLoaded',()=>{const root=document.querySelector('[data-screen="counter"]');const wire=()=>{for(const [select,input] of [['scoreP1Race','scoreP1RaceFree'],['scoreP2Race','scoreP2RaceFree'],['scoreGameType','scoreGameFree'],['editScore_p1Race','editScore_p1RaceFree'],['editScore_p2Race','editScore_p2RaceFree'],['editScore_type','editScore_typeFree']])wireInlineFree($('#'+select),$('#'+input))};wire();new MutationObserver(wire).observe(root,{childList:true,subtree:true})});
 window.addEventListener('storage',e=>{if(e.key==='9b_counter'){counterPage(false);renderCounter()}});
 
 const form=$("#matchForm"),matchFields={date:'日付',status:'状態',title:'大会名 / 対戦名',venue:'会場名',opponent:'対戦相手',result:'結果',race:'セット数',fee:'エントリーフィー',url:'URL',memo:'メモ'};
