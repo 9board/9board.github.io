@@ -217,8 +217,15 @@
     window.dispatchEvent(new CustomEvent('9board:authchange', { detail: { user: null } }));
   }
 
+  function awaitAuthCheck() {
+    const gate = createLoginGate();
+    gate.hidden = true;
+    document.documentElement.classList.remove('nineboard-authenticated');
+    setEditorLocked(true);
+  }
+
   async function startFirebaseAuth() {
-    lockApp();
+    awaitAuthCheck();
     document.getElementById('nineboardGoogleLogin').hidden = false;
     showAuthError('ログイン状態を確認しています…');
 
@@ -275,8 +282,8 @@
 
       function watchPurchase(user) {
         stopPurchaseCheck();
-        lockApp();
-        if (!user) return;
+        if (!user) { lockApp(); return; }
+        awaitAuthCheck();
         const generation = entitlementGeneration;
         const isCurrent = () => generation === entitlementGeneration &&
           auth.currentUser?.uid === user.uid;
@@ -302,7 +309,7 @@
             snapshot => {
               if (!isCurrent()) return;
               if (snapshot.metadata.fromCache || snapshot.metadata.hasPendingWrites) {
-                fail();
+                // Wait for a server-confirmed result; cached data never grants access.
                 return;
               }
               clearTimeout(purchaseTimer);
