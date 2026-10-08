@@ -54,16 +54,15 @@
       extra.id='scoreExtraRow';
       extra.className='score-extra-row';
       extra.innerHTML=`
+        <div class="score-rule-group"><b>何先</b><div class="score-two-cols"><label class="score-extra-field">自分<select id="scoreP1Race"></select><input id="scoreP1RaceFree" placeholder="例：35先・2セット先取" hidden></label><label class="score-extra-field">相手<select id="scoreP2Race"></select><input id="scoreP2RaceFree" placeholder="例：35先・2セット先取" hidden></label></div></div>
         <label class="score-extra-field">ゲーム形式<select id="scoreGameType"><option>9ボール</option><option>8ボール</option><option>10ボール</option><option>ローテーション</option></select></label>
-        <label class="score-extra-field">何先<select id="scoreRaceTo"><option value="1">1先</option><option value="2">2先</option><option value="3">3先</option><option value="4">4先</option><option value="5">5先</option><option value="6">6先</option><option value="7">7先</option><option value="8">8先</option><option value="9">9先</option><option value="10">10先</option><option value="free">自由入力</option></select><input id="scoreRaceFree" type="text" placeholder="例：15先・2セット先取" style="display:none"></label>
+        <div class="score-rule-group"><b>JPAルール</b><div class="score-two-cols"><label class="score-extra-field">自分<select id="scoreP1SL"></select></label><label class="score-extra-field">相手<select id="scoreP2SL"></select></label></div></div>
       `;
       scoreCard.appendChild(extra);
       const originalRace=document.getElementById('raceType');
       const gameType=document.getElementById('scoreGameType');
-      if(originalRace&&gameType){gameType.value=originalRace.value;gameType.addEventListener('change',()=>{originalRace.value=gameType.value;originalRace.dispatchEvent(new Event('change',{bubbles:true}));});}
-      const raceSel=document.getElementById('scoreRaceTo');
-      const raceFree=document.getElementById('scoreRaceFree');
-      raceSel.addEventListener('change',()=>{raceFree.style.display=raceSel.value==='free'?'block':'none';});
+      if(originalRace&&gameType){gameType.value=originalRace.value;gameType.addEventListener('change',()=>{originalRace.value=gameType.value;});}
+
     }
 
     if(!document.getElementById('scoreResetOnly')){
