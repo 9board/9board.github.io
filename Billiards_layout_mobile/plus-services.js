@@ -124,6 +124,7 @@
         text-decoration: none; box-sizing: border-box;
       }
       #nineboardPurchaseActions a { background: #07845f; color: #fff; }
+      #nineboardPurchaseActions #nineboardFreePcLink { background: transparent; color: #65717d; border: 0; font-size: 14px; }
       #nineboardGoogleLogin:disabled { opacity: .58; cursor: default; }
       #nineboardGoogleMark {
         width: 22px;
@@ -168,6 +169,7 @@
           <a id="nineboardPurchaseLink" href="${PAYMENT_LINK}" target="_blank" rel="noopener noreferrer" hidden>購入手続きへ</a>
           <button id="nineboardPurchaseRetry" type="button">購入状態を再確認</button>
           <button id="nineboardAccountSwitch" type="button">別のアカウントでログイン</button>
+          <a id="nineboardFreePcLink" href="https://9board.jp/pc/">無料でPC版を使う</a>
         </div>
         <div id="nineboardLoginStatus" aria-live="polite">ログイン状態を確認しています…</div>
         <a id="nineboardLoginBack" href="https://9board.jp/">9BOARDトップへ戻る</a>
