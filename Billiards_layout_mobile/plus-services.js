@@ -18,6 +18,18 @@
   let unsubscribePurchase = null;
   let purchaseTimer = null;
   const PAYMENT_LINK = 'https://buy.stripe.com/cNidR3cP862p8Fn4Nnasg00';
+  const ACCOUNT_CHOICE_KEY = '9board:choose-account-after-logout';
+  let chooseAccount = false;
+  try { chooseAccount = sessionStorage.getItem(ACCOUNT_CHOICE_KEY) === '1'; } catch {}
+  function setAccountChoice(value) {
+    chooseAccount = value;
+    try {
+      if (value) sessionStorage.setItem(ACCOUNT_CHOICE_KEY, '1');
+      else sessionStorage.removeItem(ACCOUNT_CHOICE_KEY);
+    } catch {
+      // Keep the current-page flag when browser storage is unavailable.
+    }
+  }
 
   function stopPurchaseCheck() {
     entitlementGeneration += 1;
@@ -223,6 +235,12 @@
       }
 
       const provider = new authSdk.GoogleAuthProvider();
+      async function explicitSignOut() {
+        stopPurchaseCheck();
+        lockApp();
+        await authSdk.signOut(auth);
+        setAccountChoice(true);
+      }
       const loginButton = document.getElementById('nineboardGoogleLogin');
 
       if (loginButton) {
@@ -231,7 +249,10 @@
           loginButton.disabled = true;
           showAuthError('Googleログインを開いています…');
           try {
-            await authSdk.signInWithPopup(auth, provider);
+            const loginProvider = new authSdk.GoogleAuthProvider();
+            if (chooseAccount) loginProvider.setCustomParameters({ prompt: 'select_account' });
+            await authSdk.signInWithPopup(auth, loginProvider);
+            setAccountChoice(false);
           } catch (error) {
             console.error('9BOARD Google login:', error);
             if (error && error.code === 'auth/popup-blocked') {
@@ -305,10 +326,8 @@
 
       document.getElementById('nineboardPurchaseRetry').onclick = () => watchPurchase(auth.currentUser);
       document.getElementById('nineboardAccountSwitch').onclick = async () => {
-        stopPurchaseCheck();
-        lockApp();
         try {
-          await authSdk.signOut(auth);
+          await explicitSignOut();
         } catch (error) {
           console.error('9BOARD account switch:', error);
           document.getElementById('nineboardGoogleLogin').hidden = true;
@@ -326,11 +345,7 @@
 
       window.NineBoardAuth = Object.freeze({
         getUser: () => auth.currentUser,
-        signOut: () => {
-          stopPurchaseCheck();
-          lockApp();
-          return authSdk.signOut(auth);
-        },
+        signOut: explicitSignOut,
         deleteAccount: async () => {
           const user = auth.currentUser;
           if (!user) return;
