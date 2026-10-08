@@ -49,3 +49,10 @@ References:
 - https://firebase.google.com/docs/firestore/query-data/listen
 - https://firebase.google.com/docs/firestore/security/rules-conditions
 - https://firebase.google.com/docs/functions/get-started
+
+## Account choice after explicit logout
+Successful user-initiated logout (Settings logout or the gate's account-switch action) sets a sessionStorage flag, with an in-memory fallback if storage is unavailable. The next login creates a fresh GoogleAuthProvider and requests prompt=select_account. Normal login and automatic auth state changes do not set this flag. Successful popup sign-in consumes it; cancellation retains it. Session storage preserves the choice request across a same-tab reload. Failed logout does not create a request. Account deletion and reauthentication do not set or inherit the chooser parameter.
+
+Browser tests verify normal/automatic logout behavior, both explicit logout actions, cancellation, same-tab reload, consumption after successful login, and failed logout. Firebase/Google OAuth is mocked; the actual Google chooser UI still requires production verification.
+
+Google provider custom parameters: https://firebase.google.com/docs/auth/web/google-signin
