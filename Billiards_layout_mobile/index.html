@@ -91,6 +91,24 @@ button,input,select,textarea{font:inherit}button{border:0;-webkit-appearance:non
 <nav class="bottom-nav"><button class="nav-btn active" data-to="home"><img class="nav-art" src="./assets/home-20260922-v2-hq.jpg?v=20260930-hq4" alt=""><span>ホーム</span></button><button class="nav-btn" data-to="counter"><img class="nav-art" src="./assets/counter-20260922-v3.jpg?v=20260922-3" alt=""><span>スコア</span></button><button class="nav-btn" data-to="matches"><img class="nav-art" src="./assets/matches-20260922-v3.jpg?v=20260922-3" alt=""><span>対戦記録</span></button><button class="nav-btn" data-to="menu"><img class="nav-art" src="./assets/menu-original-20260922.png?v=20260922-8" alt=""><span>設定</span></button></nav><div class="toast" id="toast"></div>
 </div>
 <script src="score-clock.js?v=20261002-clock4"></script><script src="landscape-mode.js?v=20261002-landscape4"></script><script src="plus-config.js?v=20261001"></script><script src="plus-services.js?v=20261001"></script>
+<script>
+/* 9BOARD Stripe Payment Link: purchase entry only; entitlement verification is separate. */
+(function () {
+  const paymentUrl = 'https://buy.stripe.com/cNidR3cP862p8Fn4Nnasg00';
+  function addPurchaseLink() {
+    const settings = document.getElementById('plusSettings');
+    if (!settings || document.getElementById('nineboardStripePurchase')) return;
+    const link = document.createElement('a');
+    link.id = 'nineboardStripePurchase';
+    link.href = paymentUrl;
+    link.textContent = 'スマホ版を購入する（買い切り300円） ›';
+    link.style.cssText = 'display:block;padding:12px 0;color:#087b61;font-weight:700;text-decoration:none;';
+    settings.appendChild(link);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', addPurchaseLink, {once:true});
+  else addPurchaseLink();
+})();
+</script>
 <script>(()=>{"use strict";
 const $=(s,p=document)=>p.querySelector(s),$$=(s,p=document)=>[...p.querySelectorAll(s)];
 const store={get(k,d=[]){try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set(k,v){localStorage.setItem(k,JSON.stringify(v))}};
