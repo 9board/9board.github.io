@@ -14,7 +14,32 @@
   };
 
   const FIREBASE_VERSION = '12.19.0';
-  let authInstance = null;
+  let entitlementGeneration = 0;
+  let unsubscribePurchase = null;
+  let purchaseTimer = null;
+  const PAYMENT_LINK = 'https://buy.stripe.com/cNidR3cP862p8Fn4Nnasg00';
+
+  function stopPurchaseCheck() {
+    entitlementGeneration += 1;
+    if (unsubscribePurchase) unsubscribePurchase();
+    unsubscribePurchase = null;
+    clearTimeout(purchaseTimer);
+    purchaseTimer = null;
+  }
+
+  function setEditorLocked(locked) {
+    // Preserve the editor DOM and measurements, but block pointer and keyboard access.
+    for (const child of document.body.children) {
+      if (child.id === 'nineboardLoginGate' || ['SCRIPT', 'STYLE'].includes(child.tagName)) continue;
+      if (locked && !child.hasAttribute('data-nineboard-inert')) {
+        child.setAttribute('data-nineboard-inert', child.inert ? 'true' : 'false');
+        child.inert = true;
+      } else if (!locked && child.hasAttribute('data-nineboard-inert')) {
+        child.inert = child.getAttribute('data-nineboard-inert') === 'true';
+        child.removeAttribute('data-nineboard-inert');
+      }
+    }
+  }
 
   function createLoginGate() {
     if (document.getElementById('nineboardLoginGate')) return document.getElementById('nineboardLoginGate');
@@ -27,8 +52,9 @@
         inset: 0;
         z-index: 2147483647;
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         justify-content: center;
+        overflow: auto;
         padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
         background: #f4f5f7;
         color: #1e2126;
@@ -37,6 +63,8 @@
       #nineboardLoginGate[hidden] { display: none !important; }
       #nineboardLoginCard {
         width: min(100%, 430px);
+        margin: auto;
+        flex-shrink: 0;
         padding: 28px 22px 24px;
         border-radius: 26px;
         background: #fff;
@@ -76,6 +104,14 @@
         box-shadow: 0 3px 10px rgba(20, 28, 38, .06);
         cursor: pointer;
       }
+      #nineboardPurchaseActions[hidden], #nineboardGoogleLogin[hidden] { display: none !important; }
+      #nineboardPurchaseActions a, #nineboardPurchaseActions button {
+        display: block; width: 100%; margin: 10px 0; padding: 12px;
+        border: 1px solid #dfe3e8; border-radius: 12px;
+        background: #fff; color: #25282d; font: inherit; cursor: pointer;
+        text-decoration: none; box-sizing: border-box;
+      }
+      #nineboardPurchaseActions a { background: #07845f; color: #fff; }
       #nineboardGoogleLogin:disabled { opacity: .58; cursor: default; }
       #nineboardGoogleMark {
         width: 22px;
@@ -116,6 +152,11 @@
           <span id="nineboardGoogleMark" aria-hidden="true">G</span>
           <span>Googleでログイン</span>
         </button>
+        <div id="nineboardPurchaseActions" hidden>
+          <a id="nineboardPurchaseLink" href="${PAYMENT_LINK}" target="_blank" rel="noopener noreferrer" hidden>購入手続きへ</a>
+          <button id="nineboardPurchaseRetry" type="button">購入状態を再確認</button>
+          <button id="nineboardAccountSwitch" type="button">別のアカウントでログイン</button>
+        </div>
         <div id="nineboardLoginStatus" aria-live="polite">ログイン状態を確認しています…</div>
         <a id="nineboardLoginBack" href="https://9board.jp/">9BOARDトップへ戻る</a>
       </div>
@@ -140,6 +181,7 @@
     const gate = document.getElementById('nineboardLoginGate');
     if (gate) gate.hidden = true;
     document.documentElement.classList.add('nineboard-authenticated');
+    setEditorLocked(false);
     window.NineBoardAuthUser = user || null;
     window.dispatchEvent(new CustomEvent('9board:authchange', { detail: { user: user || null } }));
   }
@@ -148,23 +190,31 @@
     const gate = createLoginGate();
     gate.hidden = false;
     document.documentElement.classList.remove('nineboard-authenticated');
+    setEditorLocked(true);
+    document.getElementById('nineboardPurchaseActions').hidden = true;
+    document.getElementById('nineboardPurchaseLink').hidden = true;
     window.NineBoardAuthUser = null;
+    document.querySelector('#nineboardLoginCard h1').textContent = '有料版にログイン';
+    document.querySelector('#nineboardLoginCard p').textContent = 'スマホ版を利用するにはGoogleアカウントでログインしてください。';
     showLoginButton();
     window.dispatchEvent(new CustomEvent('9board:authchange', { detail: { user: null } }));
   }
 
   async function startFirebaseAuth() {
-    createLoginGate();
+    lockApp();
+    document.getElementById('nineboardGoogleLogin').hidden = true;
+    showAuthError('ログイン状態を確認しています…');
 
     try {
-      const [appSdk, authSdk] = await Promise.all([
+      const [appSdk, authSdk, firestoreSdk] = await Promise.all([
         import(`https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}/firebase-app.js`),
-        import(`https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}/firebase-auth.js`)
+        import(`https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}/firebase-auth.js`),
+        import(`https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}/firebase-firestore.js`)
       ]);
 
       const app = appSdk.getApps().length ? appSdk.getApp() : appSdk.initializeApp(firebaseConfig);
       const auth = authSdk.getAuth(app);
-      authInstance = auth;
+      const db = firestoreSdk.getFirestore(app);
 
       try {
         await authSdk.setPersistence(auth, authSdk.browserLocalPersistence);
@@ -197,21 +247,95 @@
         });
       }
 
-      authSdk.onAuthStateChanged(auth, user => {
-        if (user) unlockApp(user);
-        else lockApp();
-      }, error => {
+      function watchPurchase(user) {
+        stopPurchaseCheck();
+        lockApp();
+        if (!user) return;
+        const generation = entitlementGeneration;
+        const isCurrent = () => generation === entitlementGeneration &&
+          auth.currentUser?.uid === user.uid;
+        document.getElementById('nineboardGoogleLogin').hidden = true;
+        document.querySelector('#nineboardLoginCard h1').textContent = '購入状態の確認';
+        document.querySelector('#nineboardLoginCard p').textContent = 'ログイン中のアカウントの購入情報を確認しています。';
+        document.getElementById('nineboardPurchaseActions').hidden = false;
+        showAuthError('購入状態を確認しています…');
+        const fail = () => {
+          if (!isCurrent()) return;
+          clearTimeout(purchaseTimer);
+          lockApp();
+          document.getElementById('nineboardGoogleLogin').hidden = true;
+          document.getElementById('nineboardPurchaseActions').hidden = false;
+          showAuthError('購入状態を確認できませんでした。通信状態を確認して再確認してください。');
+        };
+        purchaseTimer = setTimeout(fail, 15000);
+        try {
+          // Read only the signed-in user's document. Never grant from cached data.
+          unsubscribePurchase = firestoreSdk.onSnapshot(
+            firestoreSdk.doc(db, 'users', user.uid),
+            { includeMetadataChanges: true },
+            snapshot => {
+              if (!isCurrent()) return;
+              if (snapshot.metadata.fromCache || snapshot.metadata.hasPendingWrites) {
+                fail();
+                return;
+              }
+              clearTimeout(purchaseTimer);
+              if (snapshot.exists() && snapshot.data()?.paid === true) {
+                unlockApp(user);
+              } else {
+                lockApp();
+                document.getElementById('nineboardGoogleLogin').hidden = true;
+                document.getElementById('nineboardPurchaseActions').hidden = false;
+                document.getElementById('nineboardPurchaseLink').hidden = false;
+                document.querySelector('#nineboardLoginCard h1').textContent = 'スマホ版の購入案内';
+                document.querySelector('#nineboardLoginCard p').textContent = 'スマホ版を利用するには購入が必要です。';
+                showAuthError('スマホ版の購入が確認できません。購入済みの方は購入時のアカウントをご確認ください。決済後の自動反映は準備中です。');
+              }
+            },
+            error => {
+              console.error('9BOARD purchase check:', error);
+              fail();
+            }
+          );
+        } catch (error) {
+          console.error('9BOARD purchase listener:', error);
+          fail();
+        }
+      }
+
+      document.getElementById('nineboardPurchaseRetry').onclick = () => watchPurchase(auth.currentUser);
+      document.getElementById('nineboardAccountSwitch').onclick = async () => {
+        stopPurchaseCheck();
+        lockApp();
+        try {
+          await authSdk.signOut(auth);
+        } catch (error) {
+          console.error('9BOARD account switch:', error);
+          document.getElementById('nineboardGoogleLogin').hidden = true;
+          document.getElementById('nineboardPurchaseActions').hidden = false;
+          showAuthError('ログアウトできませんでした。もう一度お試しください。');
+        }
+      };
+      authSdk.onAuthStateChanged(auth, watchPurchase, error => {
+        stopPurchaseCheck();
+        lockApp();
         console.error('9BOARD auth state:', error);
-        showLoginButton();
+        document.getElementById('nineboardGoogleLogin').disabled = true;
         showAuthError('ログイン状態を確認できませんでした。ページを再読み込みしてください。');
       });
 
       window.NineBoardAuth = Object.freeze({
         getUser: () => auth.currentUser,
-        signOut: () => authSdk.signOut(auth),
+        signOut: () => {
+          stopPurchaseCheck();
+          lockApp();
+          return authSdk.signOut(auth);
+        },
         deleteAccount: async () => {
           const user = auth.currentUser;
           if (!user) return;
+          stopPurchaseCheck();
+          lockApp();
           try {
             await authSdk.deleteUser(user);
           } catch (error) {
@@ -225,8 +349,9 @@
         }
       });
     } catch (error) {
+      stopPurchaseCheck();
+      lockApp();
       console.error('9BOARD Firebase init:', error);
-      showLoginButton();
       const button = document.getElementById('nineboardGoogleLogin');
       if (button) button.disabled = true;
       showAuthError('ログイン機能を読み込めませんでした。通信状態を確認してページを再読み込みしてください。');
@@ -408,3 +533,4 @@
     refresh();
   });
 })();
+
