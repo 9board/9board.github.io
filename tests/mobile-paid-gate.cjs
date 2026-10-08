@@ -7,9 +7,16 @@ const sdk = {
   auth: `export const auth={currentUser:null};
 export const getAuth=()=>auth;
 export const browserLocalPersistence={}; export const setPersistence=async()=>{};
-export class GoogleAuthProvider{}
-export const signInWithPopup=async()=>{};
-export const signOut=async()=>window.testAuth(null);
+export class GoogleAuthProvider{setCustomParameters(p){this.params=p}}
+export const signInWithPopup=async(a,p)=>{
+ window.testLoginParams=p.params||{};
+ if(window.testPopupCancel) throw {code:'auth/popup-closed-by-user'};
+ window.testAuth({uid:'chosen'});
+};
+export const signOut=async()=>{
+ if(window.testSignOutFailure) throw new Error('signout failed');
+ window.testAuth(null);
+};
 export const deleteUser=async()=>window.testAuth(null);
 export const reauthenticateWithPopup=async()=>{};
 export function onAuthStateChanged(a,cb,err){
@@ -57,6 +64,11 @@ export function onSnapshot(ref,options,next,error){
   }));
   const locked=async()=>{const s=await state();assert(s.locked&&s.gate);return s};
   assert((await locked()).login);
+  await p.locator('#nineboardGoogleLogin').click();
+  assert.deepEqual(await p.evaluate(()=>testLoginParams),{},'Normal login has no forced chooser');
+  await p.evaluate(()=>testAuth(null));
+  await p.locator('#nineboardGoogleLogin').click();
+  assert.deepEqual(await p.evaluate(()=>testLoginParams),{},'Automatic signout does not request chooser');
   await p.evaluate(()=>testAuth({uid:'paid-user'}));
   assert(!(await locked()).buy);
   await p.evaluate(()=>testPurchase(true));
@@ -102,10 +114,32 @@ export function onSnapshot(ref,options,next,error){
   assert.equal(await p.locator('#nineboardPurchaseLink').getAttribute('href'),'https://buy.stripe.com/cNidR3cP862p8Fn4Nnasg00');
   await p.locator('#nineboardAccountSwitch').click();
   assert((await locked()).login);
+  await p.evaluate(()=>window.testPopupCancel=true);
+  await p.locator('#nineboardGoogleLogin').click();
+  assert.equal(await p.evaluate(()=>testLoginParams.prompt),'select_account');
+  await p.evaluate(()=>window.testPopupCancel=false);
+  await p.locator('#nineboardGoogleLogin').click();
+  assert.equal(await p.evaluate(()=>testLoginParams.prompt),'select_account','Cancellation preserves chooser');
+  assert.equal(await p.evaluate(()=>sessionStorage.getItem('9board:choose-account-after-logout')),null);
   await p.evaluate(()=>testAuth({uid:'paid-user'}));
   await p.evaluate(()=>testPurchase(true));
   await p.evaluate(()=>NineBoardAuth.signOut());
   assert((await locked()).login);
+  await p.reload({waitUntil:'networkidle'});
+  await p.waitForFunction(()=>typeof testAuth==='function');
+  await p.locator('#nineboardGoogleLogin').click();
+  assert.equal(await p.evaluate(()=>testLoginParams.prompt),'select_account','Explicit logout survives reload');
+  await p.evaluate(()=>testAuth(null));
+  await p.locator('#nineboardGoogleLogin').click();
+  assert.deepEqual(await p.evaluate(()=>testLoginParams),{},'Successful login consumes chooser');
+  await p.evaluate(async()=>{
+    window.testSignOutFailure=true;
+    try {await NineBoardAuth.signOut()} catch {}
+    window.testSignOutFailure=false;
+    testAuth(null);
+  });
+  await p.locator('#nineboardGoogleLogin').click();
+  assert.deepEqual(await p.evaluate(()=>testLoginParams),{},'Failed logout does not request chooser');
   await p.evaluate(()=>testAuth({uid:'paid-user'}));
   await p.evaluate(()=>testPurchase(true));
   await p.evaluate(()=>testAuthError({code:'auth/error'}));
