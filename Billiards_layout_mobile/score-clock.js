@@ -37,15 +37,7 @@
 
     const p1=document.getElementById('p1name');
     const p2=document.getElementById('p2name');
-    if(p1&&!p1.previousElementSibling?.classList?.contains('score-name-label')){
-      const l=document.createElement('label');l.className='score-name-label';l.textContent='自分の名前';p1.parentNode.insertBefore(l,p1);
-      p1.value='自分';p1.placeholder='自分の名前';
-    }
-    if(p2&&!p2.previousElementSibling?.classList?.contains('score-name-label')){
-      const l=document.createElement('label');l.className='score-name-label';l.textContent='相手の名前';p2.parentNode.insertBefore(l,p2);
-      p2.value='相手';p2.placeholder='相手の名前';
-    }
-
+    for(const input of [p1,p2]){if(input){input.value='';input.placeholder='名前';input.setAttribute('aria-label','名前');}}
     const oldRace=scoreCard.querySelector('.race');
     if(oldRace) oldRace.style.display='none';
 
@@ -54,9 +46,10 @@
       extra.id='scoreExtraRow';
       extra.className='score-extra-row';
       extra.innerHTML=`
-        <div class="score-rule-group"><b>何先</b><div class="score-two-cols"><label class="score-extra-field">自分<select id="scoreP1Race"></select><input id="scoreP1RaceFree" placeholder="例：35先・2セット先取" hidden></label><label class="score-extra-field">相手<select id="scoreP2Race"></select><input id="scoreP2RaceFree" placeholder="例：35先・2セット先取" hidden></label></div></div>
-        <label class="score-extra-field">ゲーム形式<select id="scoreGameType"><option>9ボール</option><option>8ボール</option><option>10ボール</option><option>ローテーション</option></select></label>
-        <div class="score-rule-group"><b>JPAルール</b><div class="score-two-cols"><label class="score-extra-field">自分<select id="scoreP1SL"></select></label><label class="score-extra-field">相手<select id="scoreP2SL"></select></label></div></div>
+        <div class="score-rule-group"><b>何先</b><div class="score-two-cols"><label class="score-extra-field"><span data-score-name="1">名前1</span><select id="scoreP1Race"></select><input id="scoreP1RaceFree" placeholder="例：35先・2セット先取" hidden></label><label class="score-extra-field"><span data-score-name="2">名前2</span><select id="scoreP2Race"></select><input id="scoreP2RaceFree" placeholder="例：35先・2セット先取" hidden></label></div></div>
+
+        <div class="score-rule-group"><b>JPAルール</b><div class="score-two-cols"><label class="score-extra-field"><span data-score-name="1">名前1</span><select id="scoreP1SL"></select></label><label class="score-extra-field"><span data-score-name="2">名前2</span><select id="scoreP2SL"></select></label></div></div>
+        <label class="score-extra-field">ゲーム形式<select id="scoreGameType"><option>9ボール</option><option>8ボール</option><option>10ボール</option><option value="free">自由入力</option></select><input id="scoreGameFree" placeholder="ゲーム形式を入力" hidden><button type="button" id="scoreGameSave">保存</button></label>
       `;
       scoreCard.appendChild(extra);
       const originalRace=document.getElementById('raceType');
@@ -67,9 +60,9 @@
 
     if(!document.getElementById('scoreResetOnly')){
       const btn=document.createElement('button');
-      btn.type='button';btn.id='scoreResetOnly';btn.className='score-reset-only';btn.textContent='スコアをリセット';
+      btn.type='button';btn.id='scoreResetOnly';btn.className='score-reset-only';btn.textContent='点数をクリア';
       btn.addEventListener('click',()=>{
-        const reset=document.getElementById('resetCounter');
+        const reset=document.getElementById('clearScorePoints');
         if(reset) reset.click();
       });
       scoreCard.appendChild(btn);
@@ -80,14 +73,14 @@
     const box=document.createElement('section');
     box.id='mobileChessClock';
     box.innerHTML=`
-      <div class="clock-head"><h2>チェスクロック</h2><span>左右の枠をタップして開始・切り替え</span></div>
+      <div class="clock-head"><h2>チェスクロック</h2><span>タップで開始・切替、2回タップで停止</span></div>
       <div class="clock-presets">
-        <div class="clock-preset"><label for="mobileLeftClockSelect">自分の持ち時間</label><select id="mobileLeftClockSelect"></select></div>
-        <div class="clock-preset"><label for="mobileRightClockSelect">相手の持ち時間</label><select id="mobileRightClockSelect"></select></div>
+        <div class="clock-preset"><label for="mobileLeftClockSelect">持ち時間</label><select id="mobileLeftClockSelect"></select></div>
+        <div class="clock-preset"><label for="mobileRightClockSelect">持ち時間</label><select id="mobileRightClockSelect"></select></div>
       </div>
       <div class="clock-faces">
-        <button type="button" class="clock-face" id="mobileLeftClockFace"><b id="mobileLeftClockName">自分</b><strong id="mobileLeftClock">10:00</strong></button>
-        <button type="button" class="clock-face" id="mobileRightClockFace"><b id="mobileRightClockName">相手</b><strong id="mobileRightClock">10:00</strong></button>
+        <button type="button" class="clock-face" id="mobileLeftClockFace"><b id="mobileLeftClockName">名前1</b><strong id="mobileLeftClock">10:00</strong></button>
+        <button type="button" class="clock-face" id="mobileRightClockFace"><b id="mobileRightClockName">名前2</b><strong id="mobileRightClock">10:00</strong></button>
       </div>
       <div class="clock-actions"><button type="button" class="clock-action" id="mobileClockStop">停止</button><button type="button" class="clock-action" id="mobileClockReset">リセット</button></div>
       <div class="clock-note">ここのリセットはチェスクロックだけを初期時間に戻します</div>
@@ -104,14 +97,15 @@
     const stopButton=box.querySelector('#mobileClockStop'),resetButton=box.querySelector('#mobileClockReset');
     let run=null,timer=null,last=0,left=600,right=600;
     const fmt=s=>{s=Math.max(0,Math.floor(Number(s)||0));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
-    const syncNames=()=>{leftName.textContent=p1?.value.trim()||'自分';rightName.textContent=p2?.value.trim()||'相手'};
+    const syncNames=()=>{leftName.textContent=p1?.value.trim()||'名前1';rightName.textContent=p2?.value.trim()||'名前2'};
     function render(){leftValue.textContent=fmt(left);rightValue.textContent=fmt(right);leftFace.classList.toggle('active',run==='left');rightFace.classList.toggle('active',run==='right');syncNames();}
     function tick(){const now=Date.now(),d=(now-last)/1000;last=now;if(run==='left')left=Math.max(0,left-d);if(run==='right')right=Math.max(0,right-d);if(left<=0||right<=0){run=null;clearInterval(timer);timer=null;}render();}
     function start(side){run=side;last=Date.now();if(!timer)timer=setInterval(tick,250);render();}
-    function stop(){run=null;render();}
+    function stop(){run=null;if(timer){clearInterval(timer);timer=null;}render();}
     function reset(){run=null;if(timer){clearInterval(timer);timer=null;}left=Number(leftSelect.value)*60;right=Number(rightSelect.value)*60;render();}
-    leftFace.addEventListener('click',()=>start('left'));rightFace.addEventListener('click',()=>start('right'));
-    stopButton.addEventListener('click',stop);resetButton.addEventListener('click',reset);
+    let lastTapSide=null,lastTapAt=0;function tapFace(side){const now=Date.now();if(lastTapSide===side&&now-lastTapAt<450){stop();lastTapSide=null;lastTapAt=0;return}lastTapSide=side;lastTapAt=now;start(side)}
+    leftFace.addEventListener('click',()=>tapFace('left'));rightFace.addEventListener('click',()=>tapFace('right'));
+    stopButton.addEventListener('click',stop);resetButton.addEventListener('click',()=>window.NineBoardConfirmReset(reset));
     leftSelect.addEventListener('change',()=>{left=Number(leftSelect.value)*60;render();});rightSelect.addEventListener('change',()=>{right=Number(rightSelect.value)*60;render();});
     p1?.addEventListener('input',syncNames);p2?.addEventListener('input',syncNames);
     render();
