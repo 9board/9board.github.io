@@ -493,22 +493,27 @@
     name.style.cssText = 'margin:0;font-size:15px;font-weight:800;color:#1e2126;word-break:break-word';
     settings.append(name);
 
+    const accountLine = document.createElement('div');
+    accountLine.style.cssText = 'display:flex;align-items:center;gap:8px;min-width:0;margin:3px 0 10px';
     if (user.email && user.displayName) {
       const email = document.createElement('p');
       email.textContent = user.email;
-      email.style.cssText = 'margin:3px 0 10px;font-size:11px;color:#7d838b;word-break:break-all';
-      settings.append(email);
+      email.style.cssText = 'margin:0;flex:1 1 auto;min-width:0;font-size:11px;color:#7d838b;word-break:break-all';
+      accountLine.append(email);
     } else {
-      name.style.marginBottom = '10px';
+      name.style.margin = '0';
+      name.style.flex = '1 1 auto';
+      name.style.minWidth = '0';
+      accountLine.append(name);
     }
 
     const actions = document.createElement('div');
-    actions.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap';
+    actions.style.cssText = 'display:flex;align-items:center;gap:6px;flex:0 0 auto;flex-wrap:nowrap';
 
     const logout = document.createElement('button');
     logout.type = 'button';
     logout.textContent = 'ログアウト';
-    logout.style.cssText = 'padding:9px 12px;border:1px solid #d8dde3;border-radius:10px;background:#fff;color:#34404c;font-weight:800';
+    logout.style.cssText = 'padding:7px 8px;border:1px solid #d8dde3;border-radius:10px;background:#fff;color:#34404c;font-size:11px;font-weight:800;white-space:nowrap';
     logout.onclick = async () => {
       logout.disabled = true;
       try {
@@ -524,7 +529,7 @@
     const remove = document.createElement('button');
     remove.type = 'button';
     remove.textContent = 'アカウント削除';
-    remove.style.cssText = 'padding:9px 12px;border:1px solid #efb7b7;border-radius:10px;background:#fff;color:#c23038;font-weight:800';
+    remove.style.cssText = 'padding:7px 8px;border:1px solid #efb7b7;border-radius:10px;background:#fff;color:#c23038;font-size:11px;font-weight:800;white-space:nowrap';
     remove.onclick = async () => {
       if (!confirm('9BOARDのログインアカウントを削除しますか？\nこの操作は取り消せません。')) return;
       remove.disabled = true;
@@ -538,7 +543,8 @@
       }
     };
     actions.append(remove);
-    settings.append(actions);
+    accountLine.append(actions);
+    settings.append(accountLine);
   }
 
   function refresh() {
