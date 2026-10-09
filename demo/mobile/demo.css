@@ -244,3 +244,5 @@ input[type="date"]::-webkit-date-and-time-value{text-align:left;min-width:0}
 
 /* Controls retain the product layout; only their actions are restricted. */
 button:disabled,input:disabled,select:disabled{cursor:default}button:disabled{opacity:1;filter:none} .bottom-nav .nav-btn:disabled{opacity:1} .demo-restriction{font-size:10px;color:#7d838b;margin:8px 0 0;line-height:1.6}
+
+.readonly-screen{display:block;width:100%;height:auto;pointer-events:none;user-select:none}.readonly-note{font-size:10px;color:#7d838b;padding:12px 16px;margin:0}#layoutToolbar{touch-action:pan-y;overscroll-behavior-x:contain}#layoutToolbar button:disabled,#ballbar button:disabled{pointer-events:none}#ballbar{overscroll-behavior-x:contain}

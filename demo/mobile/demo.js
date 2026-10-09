@@ -107,7 +107,12 @@ finally{savedNodes?.remove();button.disabled=false;button.textContent=label}
 }
 $("#exportPng").onclick=()=>exportLayoutImage();
 
-const toolbar=$("#layoutToolbar");let tdrag=null;toolbar.addEventListener("pointerdown",e=>{if(e.target.closest("button"))return;tdrag={x:e.clientX,left:toolbar.scrollLeft}});toolbar.addEventListener("pointermove",e=>{if(tdrag)toolbar.scrollLeft=tdrag.left-(e.clientX-tdrag.x)});toolbar.addEventListener("pointerup",()=>tdrag=null);toolbar.addEventListener("pointercancel",()=>tdrag=null);
+const toolbar=$("#layoutToolbar");
+let toolbarDrag=null,blockToolbarClick=false;
+toolbar.addEventListener('pointerdown',e=>{toolbarDrag={id:e.pointerId,x:e.clientX,y:e.clientY,left:toolbar.scrollLeft,moved:false};blockToolbarClick=false},true);
+toolbar.addEventListener('pointermove',e=>{const d=toolbarDrag;if(!d||d.id!==e.pointerId)return;const dx=e.clientX-d.x,dy=e.clientY-d.y;if(!d.moved&&Math.abs(dx)>6&&Math.abs(dx)>Math.abs(dy)){d.moved=true;toolbar.setPointerCapture(e.pointerId)}if(d.moved){toolbar.scrollLeft=d.left-dx;blockToolbarClick=true;e.preventDefault()}},true);
+const finishToolbarDrag=()=>{toolbarDrag=null};toolbar.addEventListener('pointerup',finishToolbarDrag);toolbar.addEventListener('pointercancel',finishToolbarDrag);toolbar.addEventListener('lostpointercapture',finishToolbarDrag);
+toolbar.addEventListener('click',e=>{if(blockToolbarClick){e.preventDefault();e.stopImmediatePropagation();blockToolbarClick=false}},true);
 
 function renderHome(){}
 function esc(s=""){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
@@ -116,7 +121,7 @@ renderLayout();renderSaved();applyZoom();go("home",false);
 const allowed=new Set(["clearLayout","typeArrow"]);
 document.querySelectorAll('button,input,select,textarea').forEach(b=>{
 const ball=b.closest('#ballbar')&&["1番","2番","3番"].includes(b.title);
-const arrowTool=b.matches('[data-tool="move"],[data-tool="arrow"]');
+const arrowTool=b.matches('[data-tool="move"],[data-tool="arrow"],.bottom-nav .nav-btn');
 if(!allowed.has(b.id)&&!ball&&!arrowTool){b.disabled=true;b.setAttribute('aria-disabled','true');b.title=(b.title?b.title+'：':'')+'体験版では使用できません'}
 });
 document.querySelectorAll('a').forEach(a=>{a.removeAttribute('href');a.removeAttribute('target')});
