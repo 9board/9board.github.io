@@ -10,3 +10,5 @@
 .hero h1 span{display:inline-block}
 
 .stamp-showcase{display:block;width:min(470px,100%);margin-top:24px;text-decoration:none}.stamp-gallery{display:block;position:relative;overflow:hidden;aspect-ratio:900/130;border-radius:12px}.stamp-gallery img{position:absolute;max-width:none;width:124.667%;left:-3.889%;top:-791.54%;height:auto}.stamp-caption{display:block;font-size:11px;font-weight:700;color:#078658;margin-top:8px}@media(max-width:600px){.stamp-showcase{margin-inline:auto}.intro{font-size:13px}}
+
+.hero-line-qr{width:340px;max-width:100%;margin:20px 0 0}.line-text-only{grid-template-columns:1fr;padding-block:55px}.line-text-only>div{max-width:650px}@media(max-width:600px){.hero-line-qr{width:300px;margin-inline:auto}}
