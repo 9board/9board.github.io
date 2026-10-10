@@ -141,8 +141,9 @@
         line-height: 1.5;
         color: #7b838c;
       }
+      .nineboard-brand { font: 900 22px/1.2 system-ui, sans-serif; letter-spacing: .3px; }
       #nineboardLoginBack {
-        display: inline-block;
+        display: inline-flex; align-items: center; gap: 8px; padding: 10px;
         margin-top: 12px;
         color: #65717d;
         font-size: 12px;
@@ -172,7 +173,7 @@
         </div>
 
         <div id="nineboardLoginStatus" aria-live="polite">ログイン状態を確認しています…</div>
-        <a id="nineboardLoginBack" href="https://9board.jp/" aria-label="9BOARDトップへ戻る" title="9BOARDトップへ戻る"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10 12 3l9 7M5 9v12h14V9M9 21v-8h6v8"/></svg></a>
+        <a id="nineboardLoginBack" href="https://9board.jp/" aria-label="9BOARDトップへ戻る" title="9BOARDトップへ戻る"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10 12 3l9 7M5 9v12h14V9M9 21v-8h6v8"/></svg><span class="nineboard-brand" aria-hidden="true"><span style="color:#eab308">9</span><span style="color:#1554ed">B</span><span style="color:#ed263b">O</span><span style="color:#00a966">A</span><span style="color:#7540d9">R</span><span style="color:#ff7900">D</span></span></a>
       </div>
     `;
     document.body.appendChild(gate);
@@ -321,7 +322,7 @@
                 document.getElementById('nineboardPurchaseActions').hidden = false;
                 document.querySelector('#nineboardLoginCard h1').textContent = 'スマホ版ログイン';
                 document.querySelector('#nineboardLoginCard p').textContent = 'Googleアカウントでログインしてください。';
-                showAuthError('このアカウントでは従来版を利用できません。別のアカウントでログインするか、ホームアイコンからスマホ無料版をご利用ください。');
+                showAuthError('このアカウントでは従来版を利用できません。別のアカウントでログインするか、ホームリンクからスマホ版をご利用ください。');
               }
             },
             error => {
