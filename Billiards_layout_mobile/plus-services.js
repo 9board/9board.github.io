@@ -18,7 +18,6 @@
   let entitlementGeneration = 0;
   let unsubscribePurchase = null;
   let purchaseTimer = null;
-  const PAYMENT_LINK = 'https://buy.stripe.com/cNidR3cP862p8Fn4Nnasg00';
   const ACCOUNT_CHOICE_KEY = '9board:choose-account-after-logout';
   let chooseAccount = false;
   try { chooseAccount = sessionStorage.getItem(ACCOUNT_CHOICE_KEY) === '1'; } catch {}
@@ -160,23 +159,20 @@
     gate.innerHTML = `
       <div id="nineboardLoginCard">
         <img id="nineboardLoginLogo" src="/assets/original-logo.png" alt="9BOARD">
-        <h1>スマホ版の購入・ログイン</h1>
-        <p>スマホ版は300円（税込・買い切り）です。購入済みの方はGoogleアカウントでログインしてください。</p>
+        <h1>スマホ版ログイン</h1>
+        <p>Googleアカウントでログインしてください。</p>
         <button id="nineboardGoogleLogin" type="button" hidden>
           <span id="nineboardGoogleMark" aria-hidden="true">G</span>
           <span>Googleでログイン</span>
         </button>
         <div id="nineboardPurchaseActions">
-          <a id="nineboardPurchaseLink" href="${PAYMENT_LINK}" target="_blank" rel="noopener noreferrer">購入手続きへ</a>
-          <button id="nineboardPurchaseRetry" type="button">購入状態を再確認</button>
+          <button id="nineboardPurchaseRetry" type="button">ログイン状態を再確認</button>
           <button id="nineboardAccountSwitch" type="button">別のアカウントでログイン</button>
 
         </div>
 
         <div id="nineboardLoginStatus" aria-live="polite">ログイン状態を確認しています…</div>
-        <a id="nineboardLoginBack" href="https://9board.jp/">9BOARDトップへ戻る</a>
-        <a id="nineboardFreePcLink" href="https://9board.jp/pc/" style="display:block;margin-top:12px;color:#65717d;font-size:14px;text-decoration:none">無料でPC版を使う</a>
-        <a id="nineboardCommerceDisclosure" href="https://9board.jp/legal/" target="_blank" rel="noopener noreferrer" style="display:block;margin:14px 0;color:#65717d;font-size:13px;text-decoration:underline;text-underline-offset:3px">特定商取引法に基づく表記・返金条件</a>
+        <a id="nineboardLoginBack" href="https://9board.jp/" aria-label="9BOARDトップへ戻る" title="9BOARDトップへ戻る"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10 12 3l9 7M5 9v12h14V9M9 21v-8h6v8"/></svg></a>
       </div>
     `;
     document.body.appendChild(gate);
@@ -211,10 +207,9 @@
     document.documentElement.classList.remove('nineboard-authenticated');
     setEditorLocked(true);
     document.getElementById('nineboardPurchaseActions').hidden = false;
-    document.getElementById('nineboardPurchaseLink').hidden = false;
     window.NineBoardAuthUser = null;
-    document.querySelector('#nineboardLoginCard h1').textContent = 'スマホ版の購入・ログイン';
-    document.querySelector('#nineboardLoginCard p').textContent = 'スマホ版は300円（税込・買い切り）です。購入済みの方はGoogleアカウントでログインしてください。';
+    document.querySelector('#nineboardLoginCard h1').textContent = 'スマホ版ログイン';
+    document.querySelector('#nineboardLoginCard p').textContent = 'Googleアカウントでログインしてください。';
     showLoginButton();
     window.dispatchEvent(new CustomEvent('9board:authchange', { detail: { user: null } }));
   }
@@ -293,17 +288,17 @@
         const isCurrent = () => generation === entitlementGeneration &&
           auth.currentUser?.uid === user.uid;
         document.getElementById('nineboardGoogleLogin').hidden = false;
-        document.querySelector('#nineboardLoginCard h1').textContent = 'スマホ版の購入・ログイン';
-        document.querySelector('#nineboardLoginCard p').textContent = 'スマホ版は300円（税込・買い切り）です。購入済みの方はGoogleアカウントでログインしてください。';
+        document.querySelector('#nineboardLoginCard h1').textContent = 'スマホ版ログイン';
+        document.querySelector('#nineboardLoginCard p').textContent = 'Googleアカウントでログインしてください。';
         document.getElementById('nineboardPurchaseActions').hidden = false;
-        showAuthError('購入状態を確認しています…');
+        showAuthError('利用状態を確認しています…');
         const fail = () => {
           if (!isCurrent()) return;
           clearTimeout(purchaseTimer);
           lockApp();
           document.getElementById('nineboardGoogleLogin').hidden = false;
           document.getElementById('nineboardPurchaseActions').hidden = false;
-          showAuthError('購入状態を確認できませんでした。通信状態を確認して再確認してください。');
+          showAuthError('利用状態を確認できませんでした。通信状態を確認して再確認してください。');
         };
         purchaseTimer = setTimeout(fail, 15000);
         try {
@@ -324,10 +319,9 @@
                 lockApp();
                 document.getElementById('nineboardGoogleLogin').hidden = false;
                 document.getElementById('nineboardPurchaseActions').hidden = false;
-                document.getElementById('nineboardPurchaseLink').hidden = false;
-                document.querySelector('#nineboardLoginCard h1').textContent = 'スマホ版の購入・ログイン';
-                document.querySelector('#nineboardLoginCard p').textContent = 'スマホ版は300円（税込・買い切り）です。購入済みの方はGoogleアカウントでログインしてください。';
-                showAuthError('スマホ版の購入が確認できません。購入済みの方は購入時のアカウントをご確認ください。決済後の自動反映は準備中です。');
+                document.querySelector('#nineboardLoginCard h1').textContent = 'スマホ版ログイン';
+                document.querySelector('#nineboardLoginCard p').textContent = 'Googleアカウントでログインしてください。';
+                showAuthError('このアカウントでは従来版を利用できません。別のアカウントでログインするか、ホームアイコンからスマホ無料版をご利用ください。');
               }
             },
             error => {
