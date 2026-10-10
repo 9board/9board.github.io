@@ -4,6 +4,7 @@
  */
 (function () {
   'use strict';
+  const freeEdition = location.pathname === '/mobile/free/app.html';
 
   const PLAN = Object.freeze({
     FREE: 'free',
@@ -40,7 +41,7 @@
 
   function setSession(user, plan) {
     currentUser = user || null;
-    currentPlan = currentUser ? normalizePlan(plan) : PLAN.FREE;
+    currentPlan = freeEdition ? PLAN.PLUS : currentUser ? normalizePlan(plan) : PLAN.FREE;
     window.dispatchEvent(new CustomEvent('9board:planchange', {
       detail: getState()
     }));
@@ -80,6 +81,7 @@
     canAddLocalLayout,
     canAddMatchRecord
   });
+  if (freeEdition) currentPlan = PLAN.PLUS;
 })();
 
 /* Score-screen add-on only: load the chess clock without changing existing layout/editor code. */

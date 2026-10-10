@@ -1,0 +1,25 @@
+name: Keep mobile free edition in sync
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Billiards_layout_mobile/index.html'
+      - 'mobile/index.html'
+      - 'build-free.py'
+      - '.github/workflows/build-mobile-free.yml'
+permissions:
+  contents: write
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 build-free.py
+      - name: Save generated edition
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add mobile/free/
+          git diff --cached --quiet && exit 0
+          git commit -m 'Regenerate shared mobile free edition'
+          git push

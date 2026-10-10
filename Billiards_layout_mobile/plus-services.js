@@ -3,6 +3,7 @@
  */
 (function () {
   'use strict';
+  const freeEdition = location.pathname === '/mobile/free/app.html';
 
   const firebaseConfig = {
     apiKey: 'AIzaSyAVnFfyN--P82r6bsepeQaM5pEUDIbQt0E',
@@ -204,6 +205,7 @@
   }
 
   function lockApp() {
+    if (freeEdition) { unlockApp(null); return; }
     const gate = createLoginGate();
     gate.hidden = false;
     document.documentElement.classList.remove('nineboard-authenticated');
@@ -218,6 +220,7 @@
   }
 
   function awaitAuthCheck() {
+    if (freeEdition) { unlockApp(null); return; }
     const gate = createLoginGate();
     gate.hidden = true;
     document.documentElement.classList.remove('nineboard-authenticated');
@@ -225,6 +228,7 @@
   }
 
   async function startFirebaseAuth() {
+    if (freeEdition) createLoginGate().hidden = true;
     awaitAuthCheck();
     document.getElementById('nineboardGoogleLogin').hidden = false;
     showAuthError('ログイン状態を確認しています…');
@@ -233,12 +237,12 @@
       const [appSdk, authSdk, firestoreSdk] = await Promise.all([
         import(`https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}/firebase-app.js`),
         import(`https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}/firebase-auth.js`),
-        import(`https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}/firebase-firestore.js`)
+        freeEdition ? Promise.resolve(null) : import(`https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}/firebase-firestore.js`)
       ]);
 
       const app = appSdk.getApps().length ? appSdk.getApp() : appSdk.initializeApp(firebaseConfig);
       const auth = authSdk.getAuth(app);
-      const db = firestoreSdk.getFirestore(app);
+      const db = freeEdition ? null : firestoreSdk.getFirestore(app);
 
       try {
         await authSdk.setPersistence(auth, authSdk.browserLocalPersistence);
@@ -282,6 +286,7 @@
 
       function watchPurchase(user) {
         stopPurchaseCheck();
+        if (freeEdition) { unlockApp(user); return; }
         if (!user) { lockApp(); return; }
         awaitAuthCheck();
         const generation = entitlementGeneration;
@@ -357,7 +362,14 @@
 
       window.NineBoardAuth = Object.freeze({
         getUser: () => auth.currentUser,
+        signIn: async () => {
+          const loginProvider = new authSdk.GoogleAuthProvider();
+          if (chooseAccount) loginProvider.setCustomParameters({ prompt: 'select_account' });
+          await authSdk.signInWithPopup(auth, loginProvider);
+          setAccountChoice(false);
+        },
         authorizeCalendar: async () => {
+          if (freeEdition && !auth.currentUser) await window.NineBoardAuth.signIn();
           const user=auth.currentUser;
           if(!user)throw new Error('Googleにログインしてから同期してください');
           const calendarProvider=new authSdk.GoogleAuthProvider();
@@ -477,7 +489,22 @@
 
   function renderAccountControls(settings) {
     const user = window.NineBoardAuth?.getUser?.() || window.NineBoardAuthUser || null;
-    if (!user) return;
+    if (!user) {
+      if (location.pathname === '/mobile/free/app.html') {
+        const login = document.createElement('button');
+        login.textContent = 'Googleでログイン';
+        login.onclick = async () => {
+          login.disabled = true;
+          try {
+            if (!window.NineBoardAuth?.signIn) throw new Error('ログイン機能を準備中です。通信状態を確認して再読み込みしてください。');
+            await window.NineBoardAuth.signIn();
+          } catch (error) { alert(error.message || 'ログインできませんでした。もう一度お試しください。'); }
+          finally { login.disabled = false; }
+        };
+        settings.append(login);
+      }
+      return;
+    }
 
     const divider = document.createElement('div');
     divider.style.cssText = 'height:1px;background:#e5e8eb;margin:14px -16px 12px';
