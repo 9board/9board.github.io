@@ -25,3 +25,9 @@ reads, anonymous/unpaid free access, record save beyond the previous limit,
 ball placement, login/logout and retained paid access/revocation. SDKs are mocked;
 real Google OAuth consent and Google Calendar remote writes require separate
 verification with a willing user's account. No account data was altered.
+
+Production validation on 2026-10-10: GitHub Pages deployment succeeded.
+tests/mobile-free-live.cjs passed at 390px and 1440px using actual deployed
+files and Firebase SDKs. Verified anonymous free editing, ball placement,
+unlimited plan flags, no Firestore requests, updated home links/price,
+paid login gate and PC URL availability. No real login or calendar writes.
