@@ -28,6 +28,7 @@
         #mobileChessClock .clock-face.active{background:#e9f7f1;border-color:#9bcfbd;box-shadow:inset 0 0 0 1px rgba(11,165,119,.08)}
         #mobileChessClock .clock-face b{display:block;font-size:14px;margin-bottom:8px;color:#34404c}
         #mobileChessClock .clock-face strong{display:block;font-size:42px;line-height:1;font-weight:950;color:#1d4e42;font-variant-numeric:tabular-nums}
+        #mobileChessClock .clock-face.shot strong{font-size:28px;line-height:1.2}
         #mobileChessClock .clock-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
         #mobileChessClock .clock-action{min-height:46px;border:1px solid var(--line);border-radius:13px;background:#fff;color:#34404c;font-size:14px;font-weight:900}
         #mobileChessClock .clock-note{margin:8px 2px 0;font-size:10px;color:var(--muted);text-align:center}
@@ -96,7 +97,7 @@
     const leftName=box.querySelector('#mobileLeftClockName'),rightName=box.querySelector('#mobileRightClockName');
     let players={left:C.player(),right:C.player()},run=null,timer=null,last=0,lastSide=null;
     const syncNames=()=>{leftName.textContent=p1?.value.trim()||'名前1';rightName.textContent=p2?.value.trim()||'名前2'};
-    function render(){leftValue.textContent=C.text(players.left);rightValue.textContent=C.text(players.right);leftFace.classList.toggle('active',run==='left');rightFace.classList.toggle('active',run==='right');syncNames()}
+    function render(){leftFace.classList.toggle("shot",players.left.shot);rightFace.classList.toggle("shot",players.right.shot);leftValue.textContent=C.text(players.left);rightValue.textContent=C.text(players.right);leftFace.classList.toggle('active',run==='left');rightFace.classList.toggle('active',run==='right');syncNames()}
     function tick(){const now=Date.now(),d=(now-last)/1000;last=now;if(run)C.advance(players[run],d);render()}
     function start(side){if(run)tick();C.turn(players[side],lastSide!==null&&lastSide!==side);lastSide=side;run=side;last=Date.now();if(!timer)timer=setInterval(tick,100);render()}
     function stop(){if(run)tick();run=null;clearInterval(timer);timer=null;C.silence();render()}
