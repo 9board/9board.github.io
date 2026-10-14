@@ -22,7 +22,7 @@
         #mobileChessClock .clock-head span{font-size:11px;color:var(--muted);font-weight:800;text-align:right}
         #mobileChessClock .clock-presets,#mobileChessClock .clock-faces{display:grid;grid-template-columns:1fr 1fr;gap:10px}
         #mobileChessClock .clock-preset label{display:block;font-size:11px;font-weight:900;color:#59616a;margin-bottom:6px}
-        #mobileChessClock .clock-preset select{width:100%;border:1px solid var(--line);border-radius:12px;background:#fff;color:#34404c;padding:10px 11px;font-weight:900}
+        #mobileChessClock .clock-preset input{width:100%;border:1px solid var(--line);border-radius:12px;background:#fff;color:#34404c;padding:10px 11px;font-weight:900}
         #mobileChessClock .clock-faces{margin-top:10px}
         #mobileChessClock .clock-face{min-height:132px;border:1px solid var(--line);border-radius:18px;padding:14px 6px;background:#f8fbf9;color:#1d4e42;text-align:center;touch-action:manipulation}
         #mobileChessClock .clock-face.active{background:#e9f7f1;border-color:#9bcfbd;box-shadow:inset 0 0 0 1px rgba(11,165,119,.08)}
@@ -87,26 +87,24 @@
     `;
     scoreCard.insertAdjacentElement('afterend',box);
 
-    const leftSelect=box.querySelector('#mobileLeftClockSelect');
-    const rightSelect=box.querySelector('#mobileRightClockSelect');
-    for(let m=10;m<=120;m+=5){leftSelect.add(new Option(m+'分',m));rightSelect.add(new Option(m+'分',m));}
-    leftSelect.value='10'; rightSelect.value='10';
+    const C=window.NineBoardClock;
+    const leftSelect=C.field(box.querySelector('#mobileLeftClockSelect'));
+    const rightSelect=C.field(box.querySelector('#mobileRightClockSelect'));
+    C.toggle(box.querySelector('.clock-head'));
     const leftFace=box.querySelector('#mobileLeftClockFace'),rightFace=box.querySelector('#mobileRightClockFace');
     const leftValue=box.querySelector('#mobileLeftClock'),rightValue=box.querySelector('#mobileRightClock');
     const leftName=box.querySelector('#mobileLeftClockName'),rightName=box.querySelector('#mobileRightClockName');
-    const stopButton=box.querySelector('#mobileClockStop'),resetButton=box.querySelector('#mobileClockReset');
-    let run=null,timer=null,last=0,left=600,right=600;
-    const fmt=s=>{s=Math.max(0,Math.floor(Number(s)||0));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
+    let players={left:C.player(),right:C.player()},run=null,timer=null,last=0,lastSide=null;
     const syncNames=()=>{leftName.textContent=p1?.value.trim()||'名前1';rightName.textContent=p2?.value.trim()||'名前2'};
-    function render(){leftValue.textContent=fmt(left);rightValue.textContent=fmt(right);leftFace.classList.toggle('active',run==='left');rightFace.classList.toggle('active',run==='right');syncNames();}
-    function tick(){const now=Date.now(),d=(now-last)/1000;last=now;if(run==='left')left=Math.max(0,left-d);if(run==='right')right=Math.max(0,right-d);if(left<=0||right<=0){run=null;clearInterval(timer);timer=null;}render();}
-    function start(side){run=side;last=Date.now();if(!timer)timer=setInterval(tick,250);render();}
-    function stop(){run=null;if(timer){clearInterval(timer);timer=null;}render();}
-    function reset(){run=null;if(timer){clearInterval(timer);timer=null;}left=Number(leftSelect.value)*60;right=Number(rightSelect.value)*60;render();}
+    function render(){leftValue.textContent=C.text(players.left);rightValue.textContent=C.text(players.right);leftFace.classList.toggle('active',run==='left');rightFace.classList.toggle('active',run==='right');syncNames()}
+    function tick(){const now=Date.now(),d=(now-last)/1000;last=now;if(run)C.advance(players[run],d);render()}
+    function start(side){if(run)tick();C.turn(players[side],lastSide!==null&&lastSide!==side);lastSide=side;run=side;last=Date.now();if(!timer)timer=setInterval(tick,100);render()}
+    function stop(){if(run)tick();run=null;clearInterval(timer);timer=null;C.silence();render()}
+    function reset(){stop();lastSide=null;players={left:C.player(leftSelect.clockMinutes()*60),right:C.player(rightSelect.clockMinutes()*60)};render()}
     let lastTapSide=null,lastTapAt=0;function tapFace(side){const now=Date.now();if(lastTapSide===side&&now-lastTapAt<450){stop();lastTapSide=null;lastTapAt=0;return}lastTapSide=side;lastTapAt=now;start(side)}
     leftFace.addEventListener('click',()=>tapFace('left'));rightFace.addEventListener('click',()=>tapFace('right'));
-    stopButton.addEventListener('click',stop);resetButton.addEventListener('click',()=>window.NineBoardConfirmReset(reset));
-    leftSelect.addEventListener('change',()=>{left=Number(leftSelect.value)*60;render();});rightSelect.addEventListener('change',()=>{right=Number(rightSelect.value)*60;render();});
+    box.querySelector('#mobileClockStop').addEventListener('click',stop);box.querySelector('#mobileClockReset').addEventListener('click',()=>window.NineBoardConfirmReset(reset));
+    for(const [side,input] of [['left',leftSelect],['right',rightSelect]])input.addEventListener('change',()=>{if(run)tick();players[side]=C.player(input.clockMinutes()*60);render()});
     p1?.addEventListener('input',syncNames);p2?.addEventListener('input',syncNames);
     render();
   }
