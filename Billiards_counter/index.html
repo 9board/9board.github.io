@@ -908,14 +908,14 @@ input,select,textarea{font:inherit}
 </main>
 <div id="toast" class="toast"></div>
 
-<script src="/assets/score-clock-core.js?v=20261014-help1"></script><script>
+<script src="/assets/score-clock-core.js?v=20261014-help1"></script><script src="/assets/score-history-store.js?v=20261015-history1"></script><script defer src="/assets/score-account.js?v=20261015-history1"></script><script>
 const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s),store={draft:'poolMatchDraft',matches:'poolMatchRecords',layouts:'poolNotes'};
 let matchRunning=false,left=0,right=0,recording=true,editingId=null,matchSec=0,timer=null,timeVisible=true,clockRun=null,last=0,clockLeft=600,clockRight=600,clockUsed=false,lastStopTap=0,savePause=false;
 function pad(n){return String(Math.max(0,Math.floor(Number(n)||0))).padStart(2,'0')}
 function fmtSec(s){s=Math.max(0,Math.floor(Number(s)||0));return pad(s/3600|0)+':'+pad((s%3600)/60|0)+':'+pad(s%60)}
 function fmtMin(s){s=Math.max(0,Math.floor(Number(s)||0));return pad(s/60|0)+':'+pad(s%60)}
-function load(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}}
-function save(k,v){localStorage.setItem(k,JSON.stringify(v))}
+function load(k,d){if(k==='poolMatchRecords')return window.NineBoardScoreHistory.readPC();try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}}
+function save(k,v){if(k==='poolMatchRecords')return window.NineBoardScoreHistory.savePC(v);localStorage.setItem(k,JSON.stringify(v))}
 function clone(v){return v==null?v:JSON.parse(JSON.stringify(v))}
 function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
 function toast(t){$('#toast').textContent=t;$('#toast').classList.add('show');setTimeout(()=>$('#toast').classList.remove('show'),1500)}
@@ -996,10 +996,10 @@ function renderRecords(){
   $('#recordsBody').innerHTML=rows.map(r=>'<tr>'+cols.map(c=>'<td>'+c.cell(r)+'</td>').join('')+'</tr>').join('');
 }
 window.editRecord=id=>{const r=load(store.matches,[]).find(x=>String(x.id)===String(id));if(!r)return;apply(r);editingId=r.id;scrollTo({top:0,behavior:'smooth'});toast('編集画面に読み込みました')};
-window.deleteRecord=id=>{if(!confirm('この記録を削除しますか？'))return;save(store.matches,load(store.matches,[]).filter(x=>String(x.id)!==String(id)));renderRecords()};
+window.deleteRecord=id=>{if(!confirm('この記録を削除しますか？'))return;window.NineBoardScoreHistory.remove([id]);save(store.matches,load(store.matches,[]).filter(x=>String(x.id)!==String(id)));renderRecords()};
 $('#saveMatch').onclick=()=>{if(!recording){toast('記録しない設定です');return}const record=formObj(),arr=load(store.matches,[]),i=arr.findIndex(x=>String(x.id)===String(editingId));if(i>=0)arr[i]=record;else arr.unshift(record);save(store.matches,arr);save(store.draft,draftObj());editingId=null;renderRecords();toast('保存しました')};
 document.addEventListener('input',e=>{if(e.target.matches('input,textarea,select')){if(e.target.id==='leftName'||e.target.id==='rightName')updateClock();autoSave()}});$('#layoutSelect').addEventListener('change',()=>{updateLayoutMeta();autoSave()});$('#layoutRefresh').onclick=()=>{refreshLayouts(true);toast('配置図リストを更新しました')};['pointerdown','focus','click'].forEach(t=>$('#layoutSelect').addEventListener(t,()=>refreshLayouts(true)));window.addEventListener('pageshow',()=>refreshLayouts(true));document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshLayouts(true)});window.addEventListener('storage',e=>{if(e.key===store.layouts)refreshLayouts(true)});
-refreshLayouts(false);apply(load(store.draft,null)||{date:new Date().toISOString().slice(0,10),leftName:'自分',rightName:'相手'});renderRecords();
+window.addEventListener('9board:scorehistorychange',renderRecords);refreshLayouts(false);apply(load(store.draft,null)||{date:new Date().toISOString().slice(0,10),leftName:'自分',rightName:'相手'});renderRecords();
 </script>
 </body>
 </html>

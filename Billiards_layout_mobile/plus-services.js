@@ -233,12 +233,12 @@
       const [appSdk, authSdk, firestoreSdk] = await Promise.all([
         import(`https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}/firebase-app.js`),
         import(`https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}/firebase-auth.js`),
-        freeEdition ? Promise.resolve(null) : import(`https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}/firebase-firestore.js`)
+        import(`https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}/firebase-firestore.js`)
       ]);
 
       const app = appSdk.getApps().length ? appSdk.getApp() : appSdk.initializeApp(firebaseConfig);
       const auth = authSdk.getAuth(app);
-      const db = freeEdition ? null : firestoreSdk.getFirestore(app);
+      const db = firestoreSdk.getFirestore(app);
 
       try {
         await authSdk.setPersistence(auth, authSdk.browserLocalPersistence);
@@ -282,6 +282,7 @@
 
       function watchPurchase(user) {
         stopPurchaseCheck();
+        window.NineBoardScoreHistory?.connectCloud(user,firestoreSdk,db);
         if (freeEdition) { unlockApp(user); return; }
         if (!user) { lockApp(); return; }
         awaitAuthCheck();
