@@ -301,7 +301,7 @@ input[type="date"]::-webkit-date-and-time-value{text-align:left;min-width:0}
   else addPurchaseLink();
 })();
 </script>
-<script src="/assets/score-history-store.js?v=20261015-history1"></script><script>(()=>{"use strict";
+<script src="/assets/score-history-store.js?v=20261015-history2"></script><script>(()=>{"use strict";
 const $=(s,p=document)=>p.querySelector(s),$$=(s,p=document)=>[...p.querySelectorAll(s)];
 const store={get(k,d=[]){if(k==='9b_counter')return window.NineBoardScoreHistory.read();try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set(k,v){if(k==='9b_counter')return window.NineBoardScoreHistory.save(v);localStorage.setItem(k,JSON.stringify(v))}};
 const toast=m=>{const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove("show"),1300)};

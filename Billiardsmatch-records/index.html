@@ -167,7 +167,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}a{color:inherit}
 </main>
 <div id="toast" class="toast"></div>
 
-<script src="/assets/score-history-store.js?v=20261015-history1"></script><script defer src="/assets/score-account.js?v=20261015-history1"></script><script>
+<script src="/assets/score-history-store.js?v=20261015-history2"></script><script defer src="/assets/score-account.js?v=20261015-history1"></script><script>
 const $=s=>document.querySelector(s),qa=s=>Array.from(document.querySelectorAll(s)),KEY='poolMatchRecords',LAYOUTS='poolNotes';
 let editingId=null,calDate=new Date();
 function load(k=KEY,d=[]){if(k===KEY)return window.NineBoardScoreHistory.readPC();try{const v=JSON.parse(localStorage.getItem(k));return v??d}catch{return d}}
