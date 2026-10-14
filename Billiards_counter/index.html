@@ -760,6 +760,8 @@ input,select,textarea{font:inherit}
 }
 @media(max-width:620px){.record-panel .record-fields{grid-template-columns:1fr!important}}
 
+
+.score-tools{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.score-settings{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:22px;text-align:left}.score-settings .field:last-child{grid-column:1/-1}.clock-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px}.score-settings input,.score-settings select{min-width:0;width:100%}
 </style>
 <!-- build:2026-09-21-1900-logo-records -->
 
@@ -820,7 +822,7 @@ input,select,textarea{font:inherit}
         <div id="matchTime" class="time">00:00:00</div>
       </section>
 
-      <section class="score-card">
+      <section class="score-card"><div class="score-tools"><strong>スコア</strong><button id="resetScoreOnly" class="btn" type="button" aria-label="スコアのみリセット">↻ スコアのみリセット</button></div>
         <div class="names">
           <input id="leftName" class="name" value="自分" aria-label="自分の名前">
           <span></span>
@@ -840,7 +842,16 @@ input,select,textarea{font:inherit}
             <button class="score-btn minus" data-score="right" data-delta="-1" type="button">−</button>
           </div>
         </div>
-      </section>
+      <div class="score-settings"><label class="field"><span class="label">自分の何先</span>
+            <select id="race"><option value="">未設定</option><option>1先</option><option>2先</option><option>3先</option><option>4先</option><option>5先</option><option>6先</option><option>7先</option><option>8先</option><option>9先</option><option>10先</option><option>自由入力</option></select>
+            <input id="raceFree" class="free" placeholder="例：15先・2セット先取">
+          </label><label class="field"><span class="label">相手の何先</span>
+            <select id="rightRace"><option value="">未設定</option><option>1先</option><option>2先</option><option>3先</option><option>4先</option><option>5先</option><option>6先</option><option>7先</option><option>8先</option><option>9先</option><option>10先</option><option>自由入力</option></select>
+            <input id="rightRaceFree" class="free" placeholder="例：15先・2セット先取">
+          </label><label class="field"><span class="label">ゲーム形式</span>
+            <select id="game"><option value=""></option><option>9ボール</option><option>10ボール</option><option>8ボール</option><option>ローテーション</option><option>自由入力</option></select>
+            <input id="gameFree" class="free" placeholder="ゲーム形式を自由入力">
+          </label></div></section>
 
       <section class="clock">
         <div class="clock-head"><h2>チェスクロック</h2><span>左右の枠をタップして開始・切り替え</span></div>
@@ -852,7 +863,7 @@ input,select,textarea{font:inherit}
           <button id="leftClockFace" class="face" type="button"><b>自分</b><strong id="leftClock">10:00</strong></button>
           <button id="rightClockFace" class="face" type="button"><b>相手</b><strong id="rightClock">10:00</strong></button>
         </div>
-        <button id="clockStopReset" class="stop" type="button">停止 / リセット</button>
+        <div class="clock-actions"><button id="clockStop" class="stop" type="button">停止</button><button id="clockReset" class="stop" type="button">リセット</button></div>
       </section>
 
       <section class="panel record-panel" id="recordPanel">
@@ -867,18 +878,12 @@ input,select,textarea{font:inherit}
           <label class="field"><span class="label">相手の所属店舗</span><input id="opponentShop" placeholder="所属店舗を入力"></label>
           <label class="field"><span class="label">エントリーフィー</span><input id="entryFee" inputmode="numeric" placeholder="例：3000円"></label>
           <label class="field"><span class="label">対戦結果</span><select id="matchResult"><option value=""></option><option>勝ち</option><option>負け</option><option>引き分け</option></select></label>
-          <label class="field"><span class="label">種目</span>
-            <select id="game"><option value=""></option><option>9ボール</option><option>10ボール</option><option>8ボール</option><option>ローテーション</option><option>自由入力</option></select>
-            <input id="gameFree" class="free" placeholder="種目を自由入力">
-          </label>
+          
           <label class="field"><span class="label">形式</span>
             <select id="type"><option value=""></option><option>平場</option><option>セットマッチ</option><option>大会</option><option>練習</option><option>自由入力</option></select>
             <input id="typeFree" class="free" placeholder="形式を自由入力">
           </label>
-          <label class="field"><span class="label">先取</span>
-            <select id="race"><option value=""></option><option>2先</option><option>3先</option><option>4先</option><option>5先</option><option>6先</option><option>自由入力</option></select>
-            <input id="raceFree" class="free" placeholder="例：点数制・10点">
-          </label>
+          
         </div>
       </section>
 
@@ -904,7 +909,7 @@ input,select,textarea{font:inherit}
 
 <script>
 const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s),store={draft:'poolMatchDraft',matches:'poolMatchRecords',layouts:'poolNotes'};
-let left=0,right=0,recording=true,editingId=null,matchSec=0,timer=null,timeVisible=true,clockRun=null,last=0,clockLeft=600,clockRight=600,clockUsed=false,lastStopTap=0,savePause=false;
+let matchRunning=false,left=0,right=0,recording=true,editingId=null,matchSec=0,timer=null,timeVisible=true,clockRun=null,last=0,clockLeft=600,clockRight=600,clockUsed=false,lastStopTap=0,savePause=false;
 function pad(n){return String(Math.max(0,Math.floor(Number(n)||0))).padStart(2,'0')}
 function fmtSec(s){s=Math.max(0,Math.floor(Number(s)||0));return pad(s/3600|0)+':'+pad((s%3600)/60|0)+':'+pad(s%60)}
 function fmtMin(s){s=Math.max(0,Math.floor(Number(s)||0));return pad(s/60|0)+':'+pad(s%60)}
@@ -924,25 +929,29 @@ for(let m=10;m<=120;m+=5){$('#leftClockSelect').add(new Option(m+'分',m));$('#r
 function updateScore(){$('#leftScore').textContent=pad(left);$('#rightScore').textContent=pad(right);autoSave()}
 $$('[data-score]').forEach(b=>b.onclick=()=>{const d=Number(b.dataset.delta);if(b.dataset.score==='left')left=Math.max(0,left+d);else right=Math.max(0,right+d);updateScore()});
 function updateClock(){$('#matchTime').textContent=fmtSec(matchSec);$('#leftClock').textContent=fmtMin(clockLeft);$('#rightClock').textContent=fmtMin(clockRight);$('#leftClockFace').classList.toggle('active',clockRun==='left');$('#rightClockFace').classList.toggle('active',clockRun==='right');$('#leftClockFace b').textContent=$('#leftName').value.trim()||'自分';$('#rightClockFace b').textContent=$('#rightName').value.trim()||'相手'}
-function tick(){const now=Date.now(),d=(now-last)/1000;last=now;matchSec+=d;if(clockRun==='left')clockLeft=Math.max(0,clockLeft-d);if(clockRun==='right')clockRight=Math.max(0,clockRight-d);updateClock();autoSave()}
-function startTimer(){if(timer)return;last=Date.now();timer=setInterval(tick,250)}
-function stopTimer(){clearInterval(timer);timer=null;clockRun=null;updateClock();autoSave()}
-$('#timeStart').onclick=()=>startTimer();$('#timeStop').onclick=()=>stopTimer();$('#toggleTime').onclick=()=>{timeVisible=!timeVisible;$('#matchTime').style.display=timeVisible?'block':'none';$('#toggleTime').textContent=timeVisible?'非表示':'表示';autoSave()};
-$('#leftClockFace').onclick=()=>{clockUsed=true;clockRun='left';last=Date.now();startTimer();updateClock();autoSave()};$('#rightClockFace').onclick=()=>{clockUsed=true;clockRun='right';last=Date.now();startTimer();updateClock();autoSave()};
-$('#clockStopReset').onclick=()=>{const now=Date.now();if(now-lastStopTap<650){clockLeft=Number($('#leftClockSelect').value)*60;clockRight=Number($('#rightClockSelect').value)*60;clockRun=null;toast('チェスクロックをリセット')}else{clockRun=null;toast('停止')}lastStopTap=now;updateClock();autoSave()};
+function tick(){const now=Date.now(),d=(now-last)/1000;last=now;if(matchRunning)matchSec+=d;if(clockRun==='left')clockLeft=Math.max(0,clockLeft-d);if(clockRun==='right')clockRight=Math.max(0,clockRight-d);if((clockRun==='left'&&clockLeft<=0)||(clockRun==='right'&&clockRight<=0))clockRun=null;updateClock();autoSave()}
+function ensureTimer(){if(timer)return;last=Date.now();timer=setInterval(tick,250)}
+function startTimer(){if(timer)tick();matchRunning=true;ensureTimer()}
+function stopTimer(){matchRunning=false;clearInterval(timer);timer=null;clockRun=null;updateClock();autoSave()}
+$('#timeStart').onclick=()=>startTimer();$('#timeStop').onclick=()=>{if(timer)tick();matchRunning=false;updateClock();autoSave()};$('#toggleTime').onclick=()=>{timeVisible=!timeVisible;$('#matchTime').style.display=timeVisible?'block':'none';$('#toggleTime').textContent=timeVisible?'非表示':'表示';autoSave()};
+$('#leftClockFace').onclick=()=>{settleClock();clockUsed=true;clockRun='left';last=Date.now();ensureTimer();updateClock();autoSave()};$('#rightClockFace').onclick=()=>{settleClock();clockUsed=true;clockRun='right';last=Date.now();ensureTimer();updateClock();autoSave()};
+function settleClock(){if(clockRun)tick()}
+$('#clockStop').onclick=()=>{settleClock();clockRun=null;updateClock();autoSave();toast('停止')};
+$('#clockReset').onclick=()=>{if(!confirm('チェスクロックだけをリセットしますか？'))return;settleClock();clockRun=null;clockLeft=Number($('#leftClockSelect').value)*60;clockRight=Number($('#rightClockSelect').value)*60;updateClock();autoSave()};
+$('#resetScoreOnly').onclick=()=>{if(!confirm('スコアだけをリセットしますか？'))return;left=0;right=0;updateScore()};
 ['leftClockSelect','rightClockSelect'].forEach(id=>$('#'+id).onchange=e=>{if(id==='leftClockSelect')clockLeft=Number(e.target.value)*60;else clockRight=Number(e.target.value)*60;updateClock();autoSave()});
 function valueWithFree(id){const sel=$('#'+id),free=$('#'+id+'Free');return sel.value==='自由入力'?free.value.trim():sel.value.trim()}
 function setSelectWithFree(id,value,selValue){const sel=$('#'+id),free=$('#'+id+'Free'),options=[...sel.options].map(o=>o.value);const v=norm(value),sv=norm(selValue);if(sv&&options.includes(sv)){sel.value=sv;free.value=v&&v!==sv?v:''}else if(options.includes(v)){sel.value=v;free.value=''}else if(v){sel.value='自由入力';free.value=v}else{sel.value='';free.value=''}free.style.display=sel.value==='自由入力'?'block':'none'}
-['game','type','race'].forEach(id=>$('#'+id).addEventListener('change',()=>{$('#'+id+'Free').style.display=$('#'+id).value==='自由入力'?'block':'none';autoSave()}));
+['game','type','race','rightRace'].forEach(id=>$('#'+id).addEventListener('change',()=>{$('#'+id+'Free').style.display=$('#'+id).value==='自由入力'?'block':'none';autoSave()}));
 function norm(v){v=String(v??'').trim();return v==='自由入力'?'':v}
-function formObj(){const item=selectedLayout();return{id:editingId||Date.now(),date:$('#date').value,matchName:$('#matchName').value.trim(),shop:$('#shop').value.trim(),opponent:$('#opponent').value.trim(),opponentShop:$('#opponentShop').value.trim(),entryFee:$('#entryFee').value.trim(),leftName:$('#leftName').value.trim()||'自分',rightName:$('#rightName').value.trim()||'相手',game:valueWithFree('game'),gameSel:$('#game').value,gameFree:$('#gameFree').value,type:valueWithFree('type'),typeSel:$('#type').value,typeFree:$('#typeFree').value,race:valueWithFree('race'),raceSel:$('#race').value,raceFree:$('#raceFree').value,left,right,result:$('#matchResult').value||(left>right?'勝ち':left<right?'負け':'引き分け'),matchSec:Math.floor(matchSec),clockLeftStart:Number($('#leftClockSelect').value)*60,clockRightStart:Number($('#rightClockSelect').value)*60,clockLeft:Math.floor(clockLeft),clockRight:Math.floor(clockRight),clockUsed,layoutId:$('#layoutSelect').value,layoutTitle:item?(item.title||'名称なし'):'配置図なし',layoutUpdatedAt:item?(item.updatedAt||item.createdAt||item.date||''):'',layoutSnapshot:item?clone(item):null,memo:$('#memo').value,createdAt:new Date().toISOString()}}
+function formObj(){const item=selectedLayout();return{id:editingId||Date.now(),date:$('#date').value,matchName:$('#matchName').value.trim(),shop:$('#shop').value.trim(),opponent:$('#opponent').value.trim(),opponentShop:$('#opponentShop').value.trim(),entryFee:$('#entryFee').value.trim(),leftName:$('#leftName').value.trim()||'自分',rightName:$('#rightName').value.trim()||'相手',game:valueWithFree('game'),gameSel:$('#game').value,gameFree:$('#gameFree').value,type:valueWithFree('type'),typeSel:$('#type').value,typeFree:$('#typeFree').value,race:valueWithFree('race'),raceSel:$('#race').value,raceFree:$('#raceFree').value,rightRace:valueWithFree('rightRace'),rightRaceSel:$('#rightRace').value,rightRaceFree:$('#rightRaceFree').value,left,right,result:$('#matchResult').value||(left>right?'勝ち':left<right?'負け':'引き分け'),matchSec:Math.floor(matchSec),clockLeftStart:Number($('#leftClockSelect').value)*60,clockRightStart:Number($('#rightClockSelect').value)*60,clockLeft:Math.floor(clockLeft),clockRight:Math.floor(clockRight),clockUsed,layoutId:$('#layoutSelect').value,layoutTitle:item?(item.title||'名称なし'):'配置図なし',layoutUpdatedAt:item?(item.updatedAt||item.createdAt||item.date||''):'',layoutSnapshot:item?clone(item):null,memo:$('#memo').value,createdAt:new Date().toISOString()}}
 function draftObj(){return{...formObj(),recording,timeVisible,clockRun:null,editingId}}
 function autoSave(){if(!savePause)save(store.draft,draftObj())}
-function apply(obj){savePause=true;const o=obj||{},exists=o.id&&load(store.matches,[]).some(r=>String(r.id)===String(o.id));editingId=exists?o.id:(o.editingId||null);$('#date').value=o.date||new Date().toISOString().slice(0,10);$('#matchName').value=o.matchName||'';$('#shop').value=o.shop||'';$('#opponent').value=o.opponent||'';$('#opponentShop').value=o.opponentShop||'';$('#entryFee').value=o.entryFee||'';$('#matchResult').value=o.result||'';$('#leftName').value=o.leftName||'自分';$('#rightName').value=o.rightName||'相手';left=Number(o.left||0);right=Number(o.right||0);matchSec=Number(o.matchSec||0);timeVisible=o.timeVisible!==false;$('#matchTime').style.display=timeVisible?'block':'none';$('#toggleTime').textContent=timeVisible?'非表示':'表示';$('#leftClockSelect').value=String(o.clockLeftStart?o.clockLeftStart/60:10);$('#rightClockSelect').value=String(o.clockRightStart?o.clockRightStart/60:10);clockLeft=o.clockLeft??Number($('#leftClockSelect').value)*60;clockRight=o.clockRight??Number($('#rightClockSelect').value)*60;clockUsed=!!o.clockUsed;refreshLayouts(false);if(o.layoutId)$('#layoutSelect').value=String(o.layoutId);updateLayoutMeta();$('#memo').value=o.memo||'';setSelectWithFree('game',o.game,o.gameSel);setSelectWithFree('type',o.type,o.typeSel);setSelectWithFree('race',o.race,o.raceSel);recording=o.recording!==false;$('#recordOn').classList.toggle('active',recording);$('#recordOff').classList.toggle('active',!recording);savePause=false;updateScore();updateClock()}
+function apply(obj){savePause=true;const o=obj||{},exists=o.id&&load(store.matches,[]).some(r=>String(r.id)===String(o.id));editingId=exists?o.id:(o.editingId||null);$('#date').value=o.date||new Date().toISOString().slice(0,10);$('#matchName').value=o.matchName||'';$('#shop').value=o.shop||'';$('#opponent').value=o.opponent||'';$('#opponentShop').value=o.opponentShop||'';$('#entryFee').value=o.entryFee||'';$('#matchResult').value=o.result||'';$('#leftName').value=o.leftName||'自分';$('#rightName').value=o.rightName||'相手';left=Number(o.left||0);right=Number(o.right||0);matchSec=Number(o.matchSec||0);timeVisible=o.timeVisible!==false;$('#matchTime').style.display=timeVisible?'block':'none';$('#toggleTime').textContent=timeVisible?'非表示':'表示';$('#leftClockSelect').value=String(o.clockLeftStart?o.clockLeftStart/60:10);$('#rightClockSelect').value=String(o.clockRightStart?o.clockRightStart/60:10);clockLeft=o.clockLeft??Number($('#leftClockSelect').value)*60;clockRight=o.clockRight??Number($('#rightClockSelect').value)*60;clockUsed=!!o.clockUsed;refreshLayouts(false);if(o.layoutId)$('#layoutSelect').value=String(o.layoutId);updateLayoutMeta();$('#memo').value=o.memo||'';setSelectWithFree('game',o.game,o.gameSel);setSelectWithFree('type',o.type,o.typeSel);setSelectWithFree('race',o.race,o.raceSel);setSelectWithFree('rightRace',o.rightRace,o.rightRaceSel);recording=o.recording!==false;$('#recordOn').classList.toggle('active',recording);$('#recordOff').classList.toggle('active',!recording);savePause=false;updateScore();updateClock()}
 function resetDraft(){localStorage.removeItem(store.draft);stopTimer();clockUsed=false;apply({date:new Date().toISOString().slice(0,10),leftName:'自分',rightName:'相手'})}
 $('#recordOn').onclick=()=>{recording=true;$('#recordOn').classList.add('active');$('#recordOff').classList.remove('active');autoSave()};$('#recordOff').onclick=()=>{recording=false;$('#recordOff').classList.add('active');$('#recordOn').classList.remove('active');autoSave()};$('#resetAll').onclick=()=>{if(confirm('入力中の内容をリセットしますか？'))resetDraft()};
 function resultClass(r){return r==='勝ち'?'win':r==='負け'?'lose':'draw'}
-function displayMeta(r){return[norm(r.game),norm(r.type),norm(r.race)].filter(Boolean).map(esc).join('<br>')}
+function displayMeta(r){return[norm(r.game),norm(r.type),norm(r.race),r.rightRace?'相手 '+norm(r.rightRace):''].filter(Boolean).map(esc).join('<br>')}
 function clockRecordText(r){if(!r.clockUsed)return'';const ln=norm(r.leftName)||'自分',rn=norm(r.rightName)||'相手';return `${esc(ln)} ${fmtMin(r.clockLeft??0)} / ${esc(rn)} ${fmtMin(r.clockRight??0)}`}
 function renderRecords(){
   if(!$('#recordsBody')||!$('#recordsHead')) return;
@@ -958,7 +967,7 @@ function renderRecords(){
   const hasRight=rows.some(r=>norm(r.rightName)||norm(r.opponent));
   const hasTime=rows.some(r=>Number(r.matchSec||0)>0);
   const hasClock=rows.some(r=>!!r.clockUsed);
-  const hasMeta=rows.some(r=>[norm(r.game),norm(r.type),norm(r.race)].some(Boolean));
+  const hasMeta=rows.some(r=>[norm(r.game),norm(r.type),norm(r.race),norm(r.rightRace)].some(Boolean));
   const hasLayoutMemo=rows.some(r=>(norm(r.layoutTitle)&&norm(r.layoutTitle)!=='配置図なし')||norm(r.memo));
   const cols=[
     {show:true,label:'日付',cell:r=>esc(r.date)},
