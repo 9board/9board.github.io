@@ -1,20 +1,20 @@
-/* Shared chess/shot clock. Voice files must be licensed before configuring clips. */
+/* Shared chess/shot clock with original notification sound files. */
 (function(){
  'use strict';
- const clips={}; // Licensed Marisa recordings pending; never substitute browser TTS.
- let clipBytes={};
- fetch('/assets/clock-audio/manifest.json').then(r=>r.ok?r.json():{}).then(async manifest=>{
-  for(const key of ['15','10','5','4','3','2','1'])if(manifest[key]){
-   const url=new URL(manifest[key],location.origin);if(url.origin!==location.origin)continue;
-   const r=await fetch(url);if(r.ok){clipBytes[key]=await r.arrayBuffer();if(context)clips[key]=await context.decodeAudioData(clipBytes[key].slice(0));}
-  }
- }).catch(()=>{});
- let context, current;
- let enabled=true;try{enabled=localStorage.getItem('9boardClockAudio')!=='off'}catch(e){}
- function unlock(){try{if(!context){context=new (window.AudioContext||window.webkitAudioContext)();for(const key of Object.keys(clipBytes))context.decodeAudioData(clipBytes[key].slice(0)).then(b=>clips[key]=b).catch(()=>{});}context.resume().catch(()=>{});}catch(e){}}
- function silence(){if(current){try{current.stop()}catch(e){} current=null}}
- function play(key){if(!enabled)return;unlock();silence();if(key==='alarm'&&context){const o=context.createOscillator(),g=context.createGain();o.frequency.value=880;o.connect(g);g.connect(context.destination);g.gain.setValueAtTime(.16,context.currentTime);g.gain.exponentialRampToValueAtTime(.001,context.currentTime+.65);o.start();o.stop(context.currentTime+.65);current=o;}else if(clips[key]&&context){const s=context.createBufferSource();s.buffer=clips[key];s.connect(context.destination);s.start();current=s;}}
- function toggle(head){const label=document.createElement('label');label.style.cssText='font-size:12px;white-space:nowrap';const input=document.createElement('input');input.type='checkbox';input.checked=enabled;input.setAttribute('aria-label','音声ON/OFF');input.onchange=()=>{enabled=input.checked;silence();unlock();try{localStorage.setItem('9boardClockAudio',enabled?'on':'off')}catch(e){}};label.append(input,document.createTextNode(' 音声ON/OFF'));label.title='アラーム音。魔理沙の読み上げは素材・許諾の確認待ち';head.append(label);}
+ let context,master,current,sequence=0;
+ let enabled=true,volume=.8;
+ try{enabled=localStorage.getItem('9boardClockAudio')!=='off';const v=localStorage.getItem('9boardClockVolume');if(v!==null&&Number.isFinite(Number(v)))volume=Math.max(0,Math.min(1,Number(v)))}catch(e){}
+ const bytes={};for(const key of ['alarm','warning','countdown'])bytes[key]=fetch('/assets/clock-audio/'+key+'.wav?v=20261014-sound1').then(r=>{if(!r.ok)throw Error('Audio unavailable');return r.arrayBuffer()}).catch(()=>null);
+ const buffers={};
+ function unlock(){try{if(!context){context=new (window.AudioContext||window.webkitAudioContext)();master=context.createGain();master.gain.value=volume;master.connect(context.destination);for(const key of Object.keys(bytes))buffers[key]=bytes[key].then(b=>b?context.decodeAudioData(b):null).catch(()=>null);}context.resume().catch(()=>{});}catch(e){}}
+ function silence(){sequence++;if(current){try{current.stop()}catch(e){}current=null}}
+ function play(key,after){if(!enabled||volume===0)return;unlock();if(!context)return;silence();const token=sequence;buffers[key]?.then(buffer=>{if(!buffer||token!==sequence||!enabled||volume===0)return;const source=context.createBufferSource();source.buffer=buffer;source.connect(master);source.onended=()=>{if(token===sequence){current=null;if(after)play(after)}};current=source;source.start();});}
+ function toggle(head){
+  const row=document.createElement('div');row.style.cssText='display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin:0 0 12px;font-size:12px;color:inherit';
+  const label=document.createElement('label');label.style.whiteSpace='nowrap';const input=document.createElement('input');input.type='checkbox';input.checked=enabled;input.setAttribute('aria-label','音声ON/OFF');input.onchange=()=>{enabled=input.checked;silence();unlock();try{localStorage.setItem('9boardClockAudio',enabled?'on':'off')}catch(e){}};label.append(input,document.createTextNode(' 通知音ON/OFF'));
+  const volumeLabel=document.createElement('label');volumeLabel.style.cssText='display:flex;align-items:center;gap:6px';const value=document.createElement('span');const slider=document.createElement('input');slider.type='range';slider.min='0';slider.max='100';slider.step='1';slider.value=String(Math.round(volume*100));slider.setAttribute('aria-label','通知音の音量');slider.style.cssText='width:100px;min-width:0;padding:0';const show=()=>value.textContent='音量 '+Math.round(volume*100)+'%';show();slider.oninput=()=>{volume=Number(slider.value)/100;unlock();if(master)master.gain.setValueAtTime(volume,context.currentTime);show();try{localStorage.setItem('9boardClockVolume',String(volume))}catch(e){}};
+  volumeLabel.append(value,slider);const preview=document.createElement('button');preview.type='button';preview.textContent='音を確認';preview.style.cssText='border:1px solid #dfe7e2;border-radius:8px;background:#fff;color:inherit;padding:6px 10px;font:inherit;min-height:30px';preview.onclick=()=>play('alarm');row.append(label,volumeLabel,preview);head.after(row);
+ }
  function field(select){
   const wrap=document.createElement('div');wrap.style.cssText='position:relative;width:100%;min-width:0';
   const input=document.createElement('input');input.id=select.id;input.type='text';input.inputMode='decimal';input.value='10';input.autocomplete='off';
@@ -36,8 +36,8 @@
   return input;
  }
  function player(seconds=600,shot=false){return{remaining:Math.max(0,Number(seconds)||0),shot:!!shot,expired:!!shot&&Number(seconds)<=0}}
- function advance(p,d){const before=p.remaining;p.remaining=Math.max(0,before-d);if(!p.shot&&p.remaining===0){p.shot=true;p.remaining=30;p.expired=false;play('alarm');return}if(p.shot){const crossed=[15,10,5,4,3,2,1].filter(n=>before>n&&p.remaining<=n);if(p.remaining===0){if(!p.expired){p.expired=true;play('alarm')}}else if(crossed.length){play(String(crossed[crossed.length-1]))}}}
- function turn(p,changed){unlock();silence();if(p.shot&&(changed||p.expired)){p.remaining=30;p.expired=false}}
+ function advance(p,d){const before=p.remaining;p.remaining=Math.max(0,before-d);if(!p.shot&&p.remaining===0){p.shot=true;p.remaining=30;p.expired=false;play('alarm','warning');return}{const crossed=[30,15,10,5,4,3,2,1].filter(n=>before>n&&p.remaining<=n);if(p.remaining===0){if(!p.expired){p.expired=true;play('alarm')}}else if(crossed.length){play(crossed[crossed.length-1]>=10?'warning':'countdown')}}}
+ function turn(p,changed){unlock();silence();if(p.shot&&(changed||p.expired)){p.remaining=30;p.expired=false;play('warning')}}
  function text(p){const n=Math.ceil(Math.max(0,p.remaining-1e-7));return(p.shot?'SHOT ':'')+String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0')}
  window.NineBoardClock={field,toggle,player,advance,turn,text,silence};
 })();
